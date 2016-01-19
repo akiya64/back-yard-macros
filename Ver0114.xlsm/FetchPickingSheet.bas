@@ -1,0 +1,203 @@
+Attribute VB_Name = "FetchPickingSheet"
+Option Explicit
+
+'他のモジュールから開いたピッキングシートファイルをクローズするのに必要なパブリック変数
+'
+Public IsFileNewOpen As Boolean
+Public PickingFileName As String
+
+Function CheckPickingProducts(Optional IsMsgBox As Boolean = True)
+
+'マクロの一覧に出したくないのでFunction定義にしています。
+'ヤフースカイプ分日付ファイルで、緑に塗られていない=ピッキングできなかった商品を、
+'注残シート、センター在庫列に「なし」転記、本日日付で手配かかったとみなして日付入れます。
+
+'本日注文を取り込んでいるかチェック
+Application.ScreenUpdating = False
+Application.DisplayAlerts = False
+
+If LogSheet.Range("LastFetchNewOrder") <> Date Then
+    
+    Call fetchOrderCsv.梱包室受注ファイル読込
+    LogSheet.Range("B7").Value = Date
+
+End If
+
+Application.DisplayAlerts = True
+
+'「ヤフースカイプ分xx.xlsx」を開く＝梱包室からのチェック済みの商品リストのエクセルファイル開く
+'PickingFileName = Range("PickingSheetBaseName") & Format(Date, "mmdd") & ".xlsx"
+
+'フォームのTextBox4が
+PickingFileName = OpPanel.TextBox4
+
+
+Dim PickingFilePath As String
+
+PickingFilePath = Range("PickingSheetFolder").Value
+
+If Right(PickingFilePath, 1) <> "\" Then PickingFilePath = PickingFilePath & "\" '末尾\マークでないとき補完
+
+PickingFilePath = PickingFilePath & PickingFileName
+
+
+''「ファイルを開く」のフォームでファイルを指定 一応残します
+'PickingFilePath = Application.GetOpenFilename("エクセルファイル,*.xls?", , "ヤフーピッキングリストを指定")
+
+Dim WsPicking As Worksheet
+Dim wb As Workbook
+
+'ピッキングシートが開いていればそのまま利用する、
+'Todo:定型処理で切り出してしまった方がいい、Invoicesクラスにも似たような処理がある
+For Each wb In Workbooks
+    If wb.Name = PickingFileName Then
+        Set WsPicking = wb.Sheets(1)
+    End If
+Next wb
+
+'ワークブックを開いてセット
+If WsPicking Is Nothing Then
+
+    'ネット販売関連の所定のフォルダにピッキングシートがない場合、Exit
+    If Not Dir(PickingFilePath) Like "*.xlsx" Then
+        
+        MsgBox "ピッキングシートの転記ができませんでした。" & vbLf & _
+                "ピッキングシートファイルなし。ヤフーピッキングシートのファイル有無、ファイル名を確認" & vbLf & _
+                "他の処理は継続して可能です。"
+
+        Exit Function
+    
+    End If
+
+    Set wb = Workbooks.Open(PickingFilePath)
+    Set WsPicking = wb.Sheets(1)
+    
+    IsFileNewOpen = True
+        
+End If
+
+'ピッキング対象の商品コードレンジ
+Dim MaxRow As Integer
+MaxRow = WsPicking.Range("B1").SpecialCells(xlCellTypeLastCell).Row
+
+'----ピッキングシートのオープン処理完了-----
+
+Dim TodaysOrders As Dictionary
+Set TodaysOrders = OrderSheet.getTodaysOrders '本日受注のOrderListを生成
+
+
+'一旦、全てのアイテムのIsPickingDoneをFalseにセット、OrderObject生成の度にセルを読んで空ならTrueなので"
+Dim v As Variant
+Dim w As Variant
+For Each v In TodaysOrders
+    For Each w In TodaysOrders(v).Products
+        TodaysOrders(v).Products(w).IsPickingDone = False
+    Next
+Next
+
+'ピッキングシートから注文者名・商品コードを取得して、TodaysOrderと突き合わせる
+Dim i As Integer
+For i = 2 To MaxRow
+    
+    Dim CurrentBuyerName As String
+    CurrentBuyerName = WsPicking.Cells(i, 1).Value
+    
+    Dim CurrentCode As String
+    CurrentCode = WsPicking.Cells(i, 2).Value
+        
+    Dim CurrentNote As String
+    CurrentNote = WsPicking.Cells(i, 8).Value
+        
+    'コードをヤフーの形式に変換 012345->12345
+    If CurrentCode Like "0#####" Then CurrentCode = Right(CurrentCode, 5)
+    
+    Dim o As order
+    
+    '背景色が白ではない商品=センター在庫有り、ピッキング可能
+    If Not WsPicking.Cells(i, 1).Interior.Color = 16777215 Then
+        
+        '注文者名から、どの注文の商品か特定
+        Set o = FindByBuyerName(CurrentBuyerName, CurrentCode, TodaysOrders)
+        
+        'その注文の商品オブジェクトにピッキング可のフラグを登録
+        o.Products(CurrentCode).IsPickingDone = True
+    
+    End If
+    
+    'H列に何か書いてる＝梱包室で把握している在庫状況
+    If WsPicking.Cells(i, 8).Value <> "" Then
+                '注文者名から、どの注文の商品か特定
+                
+        Set o = FindByBuyerName(CurrentBuyerName, CurrentCode, TodaysOrders)
+        
+        'その注文の商品オブジェクトにピッキング可のフラグを登録
+        o.Products(CurrentCode).CenterStockState = WsPicking.Cells(i, 8).Value
+
+    End If
+    
+Next i
+
+'TodaysOrderの各注文の各商品のIsPickingDoneをチェックする
+
+
+'Dim w As Variant
+'Dim v As Variant
+
+For Each v In TodaysOrders
+    For Each w In TodaysOrders(v).Products
+        If TodaysOrders(v).Products(w).IsPickingDone = False Then
+            
+            'ピッキングステータスをシートに転記、Falseだと「なし」＋本日手配扱い
+            'Todo:OrderかProductオブジェクトを渡す
+            Call OrderSheet.writePickingStatus(CStr(v), CStr(w), TodaysOrders(v).Products(w).CenterStockState)
+        
+        End If
+    
+    Next
+Next
+
+'チェック日をLogSheetに書きこむ
+LogSheet.Range("LastUpdatePickingSheet") = Date
+
+ThisWorkbook.Save
+
+Application.ScreenUpdating = False
+
+If IsMsgBox Then
+    
+    MsgBox prompt:="ピッキングファイルの転記完了", Buttons:=vbInformation
+
+End If
+
+End Function
+
+Private Function FindByBuyerName(Name As String, Code As String, OrderList As Dictionary) As order
+'注文リスト配列と注文者名を受け取って、Orderオブジェクトを返す。
+'注文者名で注文を探して、その受注アイテムProductsに該当コードがあるか判定、
+'Orderオブジェクトを返す
+
+'Orderの配列をまず名前で調べて、該当すればProducts内のコードを調べる
+Dim v As Variant
+For Each v In OrderList
+
+    If OrderList(v).BuyerName = Name Then
+        
+        Dim w As Variant
+        
+        For Each w In OrderList(v).Products
+            
+            If OrderList(v).Products.Exists(Code) Then
+            
+                Set FindByBuyerName = OrderList(v)
+            
+                Exit Function
+            
+            End If
+        
+        Next w
+    
+    End If
+
+Next v
+
+End Function

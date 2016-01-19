@@ -1,0 +1,456 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "OrderSheet"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Option Explicit
+
+'受注商品を一覧した表
+'受注商品ごとに、センター在庫、手配状況、メーカー状況、連絡状況を記入
+
+Public Function getCurrentPurchase() As Dictionary
+
+'Productだけの注残ディクショナリーを作ります。
+
+'注残一覧はOrderSheet
+OrderSheet.Activate
+
+'オートフィルターがセットされていなければ、9列目「180番手配日」、15列目の「発送」空欄のみ表示で設定
+If Not OrderSheet.AutoFilterMode Then
+    
+    Range("A1").AutoFilter Field:=9, Criteria1:="<>"
+    Range("A1").AutoFilter Field:=15, Criteria1:="="
+
+Else
+    'フィルターがセットされていれば、セットし直す設定
+    Dim i As Integer
+    For i = 1 To 17
+        
+        If i = 9 Then
+           Range("A1").AutoFilter i, Criteria1:="<>"
+        
+        ElseIf i = 15 Then
+           Range("A1").AutoFilter i, ""
+        
+        Else
+           Range("A1").AutoFilter i  '他はフィルター解除、Criteria指定を省略で「全て」表示
+        
+        End If
+    
+    Next
+
+End If
+
+'ABの交差レンジをOrderIdレンジとしてセット=未発送の注残だけの範囲を取得できる。
+Dim RngPurchaseProducts As Range
+Set RngPurchaseProducts = getFilteredRange()
+
+'2.OrderList配列に入れる
+Dim d As Dictionary
+Set d = New Dictionary
+
+Dim p As Product
+
+Dim r As Range
+
+For Each r In RngPurchaseProducts
+
+    Set p = New Product
+    
+    p.Code = Range("E" & r.Row).Value
+    
+    On Error GoTo TypeError
+    
+    p.PurchaseDate = Range("I" & r.Row).Value
+    
+    On Error GoTo 0
+    
+    p.OrderId = Range("B" & r.Row).Value
+
+    Dim key As String
+    key = p.OrderId & "Y" & p.Code
+
+    d.Add key, p
+
+Next r
+
+Set getCurrentPurchase = d
+
+Call 未発送のみ表示 '180番手配日のフィルター解除
+
+'For Each v In d
+'    Debug.Print d(v).Code
+'Next v
+
+Exit Function
+
+TypeError:
+MsgBox "値が日付ではないため、処理を中止しました。 " & r.Row & "行目" & vbLf & _
+        "180番発注、入荷予定日、連絡日、発送日の列は日付を入力してください。"
+
+End
+
+End Function
+
+Public Sub WriteEstimatedArrivalDate(PuchaseProduct As Object)
+    
+'Productオブジェクトを受け取って、FAX返信状況を転記
+
+'注文番号をMatch関数で探す＝一番上の注文番号がヒット
+'そこから、セルをオフセットしながら商品コードを調べる
+'セルに注文番号の名前を振って範囲を指定するとかアリかもしれん
+
+Dim p As Product
+Set p = PuchaseProduct
+
+With OrderSheet
+    
+    Dim MaxRow As Long
+    MaxRow = .UsedRange.Rows.Count
+
+    Dim OrderIdRange As Range
+    Set OrderIdRange = .Range("B1").Resize(MaxRow, 1)
+
+    Dim MatchRow As Long
+    MatchRow = WorksheetFunction.Match(CLng(p.OrderId), OrderIdRange, 0)
+    
+    Dim CurrentIdRange As Range
+    Dim i As Long
+    
+    i = 0
+    
+    Do
+    
+        Set CurrentIdRange = .Range("B" & MatchRow).Offset(i, 0)
+        
+        If .Range("E" & CurrentIdRange.Row).Value = p.Code Then
+            
+            If IsEmpty(.Range("J" & CurrentIdRange.Row).Value) Then
+                .Range("J" & CurrentIdRange.Row).Value = p.VenderStatus
+            End If
+            
+            If p.EstimatedArrivalDate <> #12:00:00 AM# Then
+                .Range("K" & CurrentIdRange.Row).NumberFormatLocal = "m月d日"
+                .Range("K" & CurrentIdRange.Row).Value = p.EstimatedArrivalDate
+            End If
+            
+            Exit Do
+            
+        End If
+        
+        i = i + 1
+        
+    Loop While CurrentIdRange.Value = p.OrderId
+
+End With
+
+End Sub
+
+Public Sub writeExceptShippingNotification(Id As String)
+
+'不可だったりキャンセルだったりがシートに記入されているのに、
+'出荷詳細で送り状番号が存在した場合に、O列「発送」に「出荷通知除外」を記入
+
+'OrderクラスではIDはSTR型、ワークシートではDouble型,
+'Match関数で一致する型はLong型、戻り値はDouble型
+
+With OrderSheet
+    
+    Dim MaxRow As Long
+    MaxRow = .UsedRange.Rows.Count
+
+    Dim OrderIdRange As Range
+    Set OrderIdRange = .Range("B1").Resize(MaxRow, 1)
+
+    Dim MatchRow As Long
+    MatchRow = WorksheetFunction.Match(CLng(Id), OrderIdRange, 0)
+    
+    On Error Resume Next
+    .Range("O" & MatchRow).Value = "出荷通知除外"
+    On Error GoTo 0
+
+End With
+
+End Sub
+
+Public Sub writePickingStatus(Id As String, Code As String, Optional state As String)
+'注文番号とコードを受けて、ピッキング状況を転記
+
+'注文番号をMatch関数で探す＝一番上の注文番号がヒット
+'そこから、セルをオフセットしながら商品コードを調べる
+'セルに注文番号の名前を振って範囲を指定するとか、もう少しスマートな読み方にしたい
+
+With OrderSheet
+    
+    Dim MaxRow As Long
+    MaxRow = .UsedRange.Rows.Count
+
+    Dim OrderIdRange As Range
+    Set OrderIdRange = .Range("B1").Resize(MaxRow, 1)
+
+    Dim MatchRow As Long
+    MatchRow = WorksheetFunction.Match(CLng(Id), OrderIdRange, 0)
+    
+    Dim CurrentIdRange As Range
+    
+    Dim i As Long
+    i = 0
+        
+    Do
+        Set CurrentIdRange = .Range("B" & MatchRow).Offset(i, 0)
+        
+        If CurrentIdRange.Offset(0, 3).Value = Code Then 'コードが一致したらセンター在庫状況を転記
+            
+            If CurrentIdRange.Offset(0, 6).Value = "" Then
+                
+                If state = "" Then
+                               
+                    CurrentIdRange.Offset(0, 6).Value = "なし"
+
+                    CurrentIdRange.Offset(0, 7).NumberFormatLocal = "m月d日"
+                    CurrentIdRange.Offset(0, 7).Value = Date
+                
+                Else
+               
+                    CurrentIdRange.Offset(0, 6).Value = state
+                
+                End If
+                
+            End If
+
+            Exit Do
+        
+        End If
+        
+        i = i + 1  'offsetを1行進める
+        
+    Loop While CurrentIdRange.Value = Id    '同一IDならループ続行　While判定はこの位置でいいのだろうか
+    
+End With
+
+
+End Sub
+
+
+Function createOrderList(OrderRange As Range) As Dictionary
+
+'主にオートフィルターで絞り込んだシートからOrderオブジェクトの配列を作ります。
+
+'OrderList配列に入れる
+Dim OrderList As Dictionary
+Set OrderList = New Dictionary
+
+Dim r As Range
+
+For Each r In OrderRange
+    
+    'シートから値を取得
+    Dim CurrentId As String, CurrentBuyerName As String
+    CurrentId = r.Value
+    CurrentBuyerName = r.Offset(0, 1)
+    
+    'OrderList配列に重複のないようOrderを格納して値をセット
+
+    Dim order As order
+    Set order = New order
+    
+    order.Id = CurrentId
+    order.OrderDate = r.Offset(0, -1) 'Date型へ格納しますが、セルへ自動で入る部分なのでエラーキャプチャしなくていいでしょう
+    
+    'Debug.Assert order.Id <> "10004665"
+    
+    On Error Resume Next
+    
+        OrderList.Add CurrentId, order
+    
+    On Error GoTo 0
+
+    'OrderListの各々のオーダーに注文者名を入れる
+    If CurrentBuyerName <> "" Then
+        OrderList(CurrentId).BuyerName = CurrentBuyerName
+    End If
+    
+    'キャンセルフラグをセット
+    If InStr(r.Offset(0, 6).Value & r.Offset(0, 13).Value & r.Offset(0, 16).Value & r.Offset(0, 17).Value, "キャンセル") > 0 Then
+        OrderList(CurrentId).IsCancel = True
+    End If
+
+    '振込待ちフラグをセット
+    If InStr(r.Offset(0, 17).Value, "振込") > 0 Or InStr(r.Offset(0, 17).Value, "入金待ち") > 0 Then
+        OrderList(CurrentId).IsWaitingPayment = True
+    End If
+
+    
+    'Date型に入れる際、セル内容によっては実行時エラーが起きる->エラーをキャプチャする
+    On Error GoTo TypeError
+    
+    '納期連絡日をセット
+    If OrderList(CurrentId).SendMailDate = #12:00:00 AM# Then '値が初期値=#00:00:00#の場合だけ、セルの値で上書きする
+        OrderList(CurrentId).SendMailDate = r.Offset(0, 11)
+    End If
+    
+    On Error GoTo 0
+
+Next
+
+'作成したオーダーリストに商品=Productを入れる
+'下準備、OrderListのProductsを初期化
+Dim v As Variant
+For Each v In OrderList
+    Set OrderList(v).Products = New Dictionary
+Next
+
+'再度OrderRangeをイテレートして、Productオブジェクトにコード を格納します
+For Each r In OrderRange
+    
+    Dim p As Product
+    Set p = New Product
+    
+    'シートの値を、個々のProductのフィールドにセット
+    With p
+        
+        .OrderId = r.Value
+        .Code = r.Offset(0, 3).Value
+
+        'Date型に入れる際、セル内容によっては実行時エラーが起きる->エラーをキャプチャする
+        On Error GoTo TypeError
+        
+        .CenterStockState = r.Offset(0, 6).Value
+        .PurchaseDate = r.Offset(0, 7).Value
+        .VenderStatus = r.Offset(0, 8).Value
+        .EstimatedArrivalDate = r.Offset(0, 9)
+       
+        On Error GoTo 0
+        
+        .setIsPickingDone
+        .setIsUnavailable
+        
+    End With
+    
+    '該当注文番号のProducts配列に加える
+    OrderList(p.OrderId).Products.Add p.Code, p
+    
+Next
+
+'Productの状況から、注文オブジェクトのフィールドをセット
+
+For Each v In OrderList
+    Dim o As order
+    
+    
+    Set o = OrderList(v)
+    
+    'Debug.Assert o.Id <> "10004665"
+    
+    o.setCanNotShipping
+
+Next
+
+'戻り値をセット
+Set createOrderList = OrderList
+
+Exit Function
+
+TypeError:
+MsgBox "値が日付ではないため、処理を中止しました。 " & r.Row & "行目" & vbLf & _
+        "180番発注、入荷予定日、連絡日、発送日の列は日付を入力してください。"
+
+End
+
+End Function
+
+Function getUndispatchOrders() As Dictionary
+
+    Call 未発送のみ表示
+    
+    Dim UndispatchOrdersRange As Range
+    Set UndispatchOrdersRange = getFilteredRange()
+    
+    Set getUndispatchOrders = createOrderList(UndispatchOrdersRange)
+    
+End Function
+
+Function getTodaysOrders() As Dictionary
+
+'オーダーシートを参照して、本日受注の注文オブジェクトの配列を返す
+
+'受注商品＝Product入りの本日注文リストを作ります
+'Sheet1の受注日が今日の日付レンジを抽出
+'末尾行から1行ずつ上がりながら、日付をチェック、本日ならレンジを結合
+
+OrderSheet.Activate
+
+With OrderSheet
+    
+    '行ポインタiの初期値はA列の末尾行
+    Dim i As Long
+    i = .Range("A1").End(xlDown).Row
+    
+    Dim rng As Range
+    
+    '末端行が今日の日付か確認して、レンジをセット
+    If .Cells(i, 1).Value = Date Then
+        Set rng = .Cells(i, 2)
+        i = i - 1
+        
+    Else
+        MsgBox Date & " 本日の注文がみつかりません" & vbLf & "処理を終了します。"
+        End
+    
+    End If
+    
+    '末端行から上へ1行上がって、今日の日付である限りレンジに追加
+    Do While .Cells(i, 1) = Date
+        
+        Set rng = Union(rng, .Cells(i, 2))
+        i = i - 1
+    
+    Loop
+    'rngに日付行の本日受注のセル範囲をセット完了
+
+End With
+
+Set getTodaysOrders = OrderSheet.createOrderList(rng)
+
+End Function
+
+Private Function getFilteredRange() As Range
+
+'フィルターした表示領域
+Dim A As Range
+Set A = OrderSheet.Range("A1").CurrentRegion.SpecialCells(xlCellTypeVisible)
+
+'注文番号列のレンジ
+Dim B As Range
+Set B = OrderSheet.Range("B2").Resize(Range("B1").SpecialCells(xlCellTypeLastCell).Row, 1)
+
+'ABの交差レンジをOrderIdレンジとしてセット=未発送の注残だけの範囲を取得できる。
+Set getFilteredRange = Application.Intersect(A, B)
+
+End Function
+
+Function setProtect() As Boolean
+
+    OrderSheet.Protect _
+        UserInterfaceOnly:=True, _
+        AllowFormattingCells:=True, _
+        AllowFormattingColumns:=True, _
+        AllowFormattingRows:=True, _
+        AllowSorting:=True, _
+        AllowFiltering:=True
+
+End Function
+
+Function setUnprotect() As Boolean
+
+    OrderSheet.Unprotect
+    Application.OnTime Now + TimeSerial(0, 0, 20), "Ordersheet.setProtect"
+
+End Function
+
+
+
