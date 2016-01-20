@@ -1,79 +1,80 @@
 Attribute VB_Name = "Module1"
-'ƒ„ƒt[ƒVƒ‡ƒbƒsƒ“ƒOWebAPI‚ğg‚Á‚ÄAJAN‚ÅŒŸõ‚µ‚Ä‰¿Ši‚ÆƒVƒ‡ƒbƒv–¼‚ğ”²‚«o‚·
-'GETƒƒ\ƒbƒh‚Å“Á’èJAN‚Ì‰¿Ši‡‚È‚ÇAŒŸõŒ‹‰Ê‚ğXML‚ğæ“¾‚Å‚«‚é‚Ì‚ÅA‚»‚ê‚ğƒp[ƒX‚µ‚ÄƒZƒ‹‚É“]‹L‚·‚é
+'ãƒ¤ãƒ•ãƒ¼ã‚·ãƒ§ãƒƒãƒ”ãƒ³ã‚°WebAPIã‚’ä½¿ã£ã¦ã€JANã§æ¤œç´¢ã—ã¦ä¾¡æ ¼ã¨ã‚·ãƒ§ãƒƒãƒ—åã‚’æŠœãå‡ºã™
+'GETãƒ¡ã‚½ãƒƒãƒ‰ã§ç‰¹å®šJANã®ä¾¡æ ¼é †ãªã©ã€æ¤œç´¢çµæœã‚’XMLã‚’å–å¾—ã§ãã‚‹ã®ã§ã€ãã‚Œã‚’ãƒ‘ãƒ¼ã‚¹ã—ã¦ã‚»ãƒ«ã«è»¢è¨˜ã™ã‚‹
 
-'QÆİ’è‚ÅAMicroSoft XML,V6.0@ƒ‰ƒCƒuƒ‰ƒŠ‚Éƒ`ƒFƒbƒN‚ğ“ü‚ê‚é‚±‚Æ
-'ƒGƒNƒZƒ‹‚ÅMXL‚ğˆµ‚¤‚½‚ß‚Ìƒ‰ƒCƒuƒ‰ƒŠAMSXML2ƒIƒuƒWƒFƒNƒg‚Ì¶¬‚É•K—v
+'å‚ç…§è¨­å®šã§ã€MicroSoft XML,V6.0ã€€ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã«ãƒã‚§ãƒƒã‚¯ã‚’å…¥ã‚Œã‚‹ã“ã¨
+'ã‚¨ã‚¯ã‚»ãƒ«ã§MXLã‚’æ‰±ã†ãŸã‚ã®ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã€MSXML2ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆã«å¿…è¦
+'å®Ÿè¡Œæ™‚ãƒã‚¤ãƒ³ãƒ‡ã‚£ãƒ³ã‚°ã«ã—ãŸãŸã‚ã€å‚ç…§è¨­å®šã¯ä¸è¦ 2016-01-06
 
-'ƒ„ƒt[ƒVƒ‡ƒbƒsƒ“ƒOWebAPIƒŠƒtƒ@ƒŒƒ“ƒX@WebAPI‚ğŒÄ‚Ño‚·‚É‚Í—vƒAƒvƒŠƒP[ƒVƒ‡ƒ“ƒR[ƒh
+'ãƒ¤ãƒ•ãƒ¼ã‚·ãƒ§ãƒƒãƒ”ãƒ³ã‚°WebAPIãƒªãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹ã€€WebAPIã‚’å‘¼ã³å‡ºã™ã«ã¯è¦ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚³ãƒ¼ãƒ‰
 'http://developer.yahoo.co.jp/webapi/shopping/shopping/v1/itemsearch.html
 
-'MSDN MSXML2.XMLHTTPƒIƒuƒWƒFƒNƒg‚ÌŒö®ƒŠƒtƒ@ƒŒƒ“ƒX‚Í‰º‹L
+'MSDN MSXML2.XMLHTTPã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å…¬å¼ãƒªãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹ã¯ä¸‹è¨˜
 'http://msdn.microsoft.com/en-us/library/ms759148%28v=vs.85%29.aspx
 
-'MSDN ‰SÒ‚Ì‚½‚ß‚Ì XML DOM ƒKƒCƒh@XV“ú‚ªŒÃ‚¢‚¯‚ÇŠî–{‚Í•Ï‚í‚ç‚È‚¢‚Í‚¸
+'MSDN åˆå¿ƒè€…ã®ãŸã‚ã® XML DOM ã‚¬ã‚¤ãƒ‰ã€€æ›´æ–°æ—¥æ™‚ãŒå¤ã„ã‘ã©åŸºæœ¬ã¯å¤‰ã‚ã‚‰ãªã„ã¯ãš
 'http://msdn.microsoft.com/ja-jp/library/aa468547.aspx
 
 
-'éŒ¾ƒZƒNƒVƒ‡ƒ“
+'å®£è¨€ã‚»ã‚¯ã‚·ãƒ§ãƒ³
 
-'sleep‚ğg‚¤‚½‚ß‚ÌéŒ¾
+'sleepã‚’ä½¿ã†ãŸã‚ã®å®£è¨€
 Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 
-'‘SƒvƒƒV[ƒWƒƒ‚Å‹¤—L‚·‚é•Ï”
-'ƒVƒ‡ƒbƒv/‰¿ŠiƒŠƒXƒg‚ğ‹L“ü‚·‚éŠJn—ñ
+'å…¨ãƒ—ãƒ­ã‚·ãƒ¼ã‚¸ãƒ£ã§å…±æœ‰ã™ã‚‹å¤‰æ•°
+'ã‚·ãƒ§ãƒƒãƒ—/ä¾¡æ ¼ãƒªã‚¹ãƒˆã‚’è¨˜å…¥ã™ã‚‹é–‹å§‹åˆ—
 Dim startcolumn_price As Integer
 
-'Yahoo APIŒÄ‚Ño‚µ‚Ég‚¤ ƒAƒvƒŠƒP[ƒVƒ‡ƒ“ID
+'Yahoo APIå‘¼ã³å‡ºã—ã«ä½¿ã† ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ID
 Const APP_ID = ""
 
-'jan‚Ì“ü‚Á‚Ä‚¢‚éƒZƒ‹
+'janã®å…¥ã£ã¦ã„ã‚‹ã‚»ãƒ«
 Dim c As Range
 
-Sub ‰¿Ši’²¸()
+Sub ä¾¡æ ¼èª¿æŸ»()
 
-'“X•Ü–¼E‰¿Ši‚ğ‘‚«o‚·Å‰‚Ì—ñ‚ğw’è
+'åº—èˆ—åãƒ»ä¾¡æ ¼ã‚’æ›¸ãå‡ºã™æœ€åˆã®åˆ—ã‚’æŒ‡å®š
 startcolumn_price = ActiveSheet.UsedRange.Columns.Count + 1
 
-'Jan‚Ì—ñ‚ğ“Á’è‚µ‚Ü‚·B
-'Ğ“àƒVƒXƒeƒ€‚Å‚ÍuJANƒR[ƒhvYahooCsv‚Å‚Íujanv‚È‚Ì‚Å‚Ç‚¿‚ç‚©‚ğ’²‚×‚é
+'Janã®åˆ—ã‚’ç‰¹å®šã—ã¾ã™ã€‚
+'ç¤¾å†…ã‚·ã‚¹ãƒ†ãƒ ã§ã¯ã€ŒJANã‚³ãƒ¼ãƒ‰ã€YahooCsvã§ã¯ã€Œjanã€ãªã®ã§ã©ã¡ã‚‰ã‹ã‚’èª¿ã¹ã‚‹
 Dim jan_col As Range
 
 If Not Range("1:1").Find("jan") Is Nothing Then
     
     Set jan_col = Range("1:1").Find("jan")
 
-ElseIf Not Range("1:1").Find("JANƒR[ƒh") Is Nothing Then
+ElseIf Not Range("1:1").Find("JANã‚³ãƒ¼ãƒ‰") Is Nothing Then
 
-    Set jan_col = Range("1:1").Find("JANƒR[ƒh")
+    Set jan_col = Range("1:1").Find("JANã‚³ãƒ¼ãƒ‰")
 
 Else
     
-    MsgBox "Jan‚ÌŒ©o‚µ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB" & vbLf & _
-           "1s–Ú‚Ìƒwƒbƒ_[‚Éujanv‚©uJANƒR[ƒhv‚ğw’è"
+    MsgBox "Janã®è¦‹å‡ºã—ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚" & vbLf & _
+           "1è¡Œç›®ã®ãƒ˜ãƒƒãƒ€ãƒ¼ã«ã€Œjanã€ã‹ã€ŒJANã‚³ãƒ¼ãƒ‰ã€ã‚’æŒ‡å®š"
     
     Exit Sub
 
 End If
 
-'JAN‚ÌƒŠƒXƒg‚ğƒŒƒ“ƒW‚Åæ“¾‚µ‚Ü‚·
+'JANã®ãƒªã‚¹ãƒˆã‚’ãƒ¬ãƒ³ã‚¸ã§å–å¾—ã—ã¾ã™
 
 Dim rng_jan As Range
 
-'rng_jan‚ÉJANƒR[ƒh‚ÌƒŒƒ“ƒW‚ğƒZƒbƒg
+'rng_janã«JANã‚³ãƒ¼ãƒ‰ã®ãƒ¬ãƒ³ã‚¸ã‚’ã‚»ãƒƒãƒˆ
 Set rng_jan = jan_col.Offset(1, 0).Resize(ActiveSheet.UsedRange.Rows.Count - 1, 1)
 
 For Each c In rng_jan
        
-    'ƒT[ƒo[ƒAƒNƒZƒX‚Æ‚©Aƒ‚ƒWƒ…[ƒ‹‰»orƒIƒuƒWƒFƒNƒg‰»‚µ‚Ä•À—ñˆ—‚Å‚«‚é‚Æ‘¬‚¢‚ñ‚Å‚ÍH
-    '‚±‚ÌƒR[ƒh‚Å‚à\•ª‘¬‚¢‚¯‚Çcƒ„ƒt[ƒT[ƒo[‚ÌƒŒƒXƒ|ƒ“ƒX‚ª‘¬‚¢A•…‚Á‚Ä‚àWEBƒ|[ƒ^ƒ‹
+    'ã‚µãƒ¼ãƒãƒ¼ã‚¢ã‚¯ã‚»ã‚¹ã¨ã‹ã€ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åŒ–orã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆåŒ–ã—ã¦ä¸¦åˆ—å‡¦ç†ã§ãã‚‹ã¨é€Ÿã„ã‚“ã§ã¯ï¼Ÿ
+    'ã“ã®ã‚³ãƒ¼ãƒ‰ã§ã‚‚ååˆ†é€Ÿã„ã‘ã©â€¦ãƒ¤ãƒ•ãƒ¼ã‚µãƒ¼ãƒãƒ¼ã®ãƒ¬ã‚¹ãƒãƒ³ã‚¹ãŒé€Ÿã„ã€è…ã£ã¦ã‚‚WEBãƒãƒ¼ã‚¿ãƒ«
     
     Dim jan As String
     jan = c.Value
     
-    'ƒZƒ‹‚©‚çæ“¾‚µ‚½jan‚ª”š13ƒPƒ^‚©ƒ`ƒFƒbƒN
+    'ã‚»ãƒ«ã‹ã‚‰å–å¾—ã—ãŸjanãŒæ•°å­—13ã‚±ã‚¿ã‹ãƒã‚§ãƒƒã‚¯
     If Not jan Like "#############" Then
-        Call writeError("³‚µ‚­‚È‚¢JAN")
+        Call writeError("æ­£ã—ããªã„JAN")
         GoTo continue:
     End If
 
@@ -87,56 +88,56 @@ End Sub
 
 Private Sub loadXml(jan As String)
 
- 'xmlƒIƒuƒWƒFƒNƒg‚ÌƒCƒ“ƒXƒ^ƒ“ƒX¶¬
+ 'xmlã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ç”Ÿæˆ
  Dim xml As MSXML2.DOMDocument
  Set xml = New MSXML2.DOMDocument
  
- 'ƒT[ƒo[‚©‚çXML‚ğ“Ç‚Ş‚½‚ß‚ÌMSXML2ƒIƒuƒWƒFƒNƒg‚Ìİ’è
+ 'ã‚µãƒ¼ãƒãƒ¼ã‹ã‚‰XMLã‚’èª­ã‚€ãŸã‚ã®MSXML2ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®è¨­å®š
  xml.async = False
  xml.setProperty "ServerHTTPRequest", True
  
- 'GET‚·‚é‚½‚ß‚Ìurl‚ğ¶¬‚µ‚Ü‚·
+ 'GETã™ã‚‹ãŸã‚ã®urlã‚’ç”Ÿæˆã—ã¾ã™
  Dim url As String
  url = makeUrl(jan)
  
- 'ƒT[ƒo[‚ÉGETƒƒ\ƒbƒh‚ÅƒAƒhƒŒƒX‚ğ“Š‚°‚ÄAXML‚ğæ“¾‚µ‚Ü‚·
+ 'ã‚µãƒ¼ãƒãƒ¼ã«GETãƒ¡ã‚½ãƒƒãƒ‰ã§ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’æŠ•ã’ã¦ã€XMLã‚’å–å¾—ã—ã¾ã™
  xml.Load (url)
 
- 'ƒXƒŠ[ƒvƒ^ƒCƒ€‚ÌƒJƒEƒ“ƒ^j‚ğ‰Šú‰»
+ 'ã‚¹ãƒªãƒ¼ãƒ—ã‚¿ã‚¤ãƒ ã®ã‚«ã‚¦ãƒ³ã‚¿jã‚’åˆæœŸåŒ–
  j = 0
  
- 'ƒT[ƒo[‚©‚ç‚ÌƒŒƒXƒ|ƒ“ƒX‘Ò‚¿@Sleep100‚µ‚È‚ª‚ç‘Ò‹@@ƒrƒW[ƒEƒFƒCƒg
+ 'ã‚µãƒ¼ãƒãƒ¼ã‹ã‚‰ã®ãƒ¬ã‚¹ãƒãƒ³ã‚¹å¾…ã¡ã€€Sleep100ã—ãªãŒã‚‰å¾…æ©Ÿã€€ãƒ“ã‚¸ãƒ¼ã‚¦ã‚§ã‚¤ãƒˆ
  Do
      DoEvents
      Sleep 10
      j = j + 1
      
-     If j > 100 Then  '10msec*100=1•b‰“š‚ª‚È‚¯‚ê‚Îƒ‹[ƒvƒAƒEƒg
-         Cells(c.Row, startcolumn_price).Value = "ƒT[ƒo[‰“š‚È‚µ"
+     If j > 100 Then  '10msec*100=1ç§’å¿œç­”ãŒãªã‘ã‚Œã°ãƒ«ãƒ¼ãƒ—ã‚¢ã‚¦ãƒˆ
+         Cells(c.Row, startcolumn_price).Value = "ã‚µãƒ¼ãƒãƒ¼å¿œç­”ãªã—"
          Exit Do
      End If
          
  Loop While xml.readyState <> 4
          
- 'xmlƒIƒuƒWƒFƒNƒg‚ªXML‚ğæ“¾‚Å‚«‚Ä‚È‚¯‚ê‚ÎAContinue
+ 'xmlã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒXMLã‚’å–å¾—ã§ãã¦ãªã‘ã‚Œã°ã€Continue
  
  If Not xml.HasChildNodes Then
-     Call writeError("Œ‹‰Ê‚ª³‚µ‚­æ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½")
+     Call writeError("çµæœãŒæ­£ã—ãå–å¾—ã§ãã¾ã›ã‚“ã§ã—ãŸ")
      Exit Sub
  End If
 
     
-'xml‚ÌResultSet‚©‚çHit‚ğæ‚èo‚·AŠÈ’P‚ÈƒcƒŠ[\‘¢
+'xmlã®ResultSetã‹ã‚‰Hitã‚’å–ã‚Šå‡ºã™ã€ç°¡å˜ãªãƒ„ãƒªãƒ¼æ§‹é€ 
 'ResultSet>Result>Hit>Store>Name
 '                    >Price
 
-'janˆø”‚ªw’è‚È‚µ‚¾‚Æ<Error><Message>BadRequest‚ª•Ô‚Á‚Ä‚­‚é‚Ì‚ÅAResultset‚ª‚ ‚é‚©ƒ`ƒFƒbƒN
+'janå¼•æ•°ãŒæŒ‡å®šãªã—ã ã¨<Error><Message>BadRequestãŒè¿”ã£ã¦ãã‚‹ã®ã§ã€ResultsetãŒã‚ã‚‹ã‹ãƒã‚§ãƒƒã‚¯
 If xml.getElementsByTagName("ResultSet").Length > 0 Then
     
-    'ResultSet‚ÌTotalResultAvailable/TotalResult‘®«
-    'Œ»ó‚Å‚Í“Á‚ÉƒZƒ‹‚É‘‚«–ß‚³‚È‚¢‚ªA—LŒø‚ÈHit—v‘f”‚Ìƒ`ƒFƒbƒN‚ÆA
-    '’•¶‰Â”\‚È“X•Ü”EŒfÚ“X•Ü”‚ª”cˆ¬‚Å‚«‚é‚Ì‚Å•Ï”‚ÉŠi”[‚·‚é
-    'TotalResultsReturned=0‚¾‚Æ‹ó‚ÌHit—v‘f‚ª1ŒÂ•Ô‚Á‚Ä‚­‚é
+    'ResultSetã®TotalResultAvailable/TotalResultå±æ€§
+    'ç¾çŠ¶ã§ã¯ç‰¹ã«ã‚»ãƒ«ã«æ›¸ãæˆ»ã•ãªã„ãŒã€æœ‰åŠ¹ãªHitè¦ç´ æ•°ã®ãƒã‚§ãƒƒã‚¯ã¨ã€
+    'æ³¨æ–‡å¯èƒ½ãªåº—èˆ—æ•°ãƒ»æ²è¼‰åº—èˆ—æ•°ãŒæŠŠæ¡ã§ãã‚‹ã®ã§å¤‰æ•°ã«æ ¼ç´ã™ã‚‹
+    'TotalResultsReturned=0ã ã¨ç©ºã®Hitè¦ç´ ãŒ1å€‹è¿”ã£ã¦ãã‚‹
     
     Dim total_results_counts As Integer
     total_results_counts = xml.SelectSingleNode("ResultSet").Attributes.getNamedItem("totalResultsReturned").Text
@@ -149,16 +150,16 @@ If xml.getElementsByTagName("ResultSet").Length > 0 Then
         Call parseWriteRanking(xml.SelectNodes("ResultSet/Result/Hit"))
     
     Else
-        'totalRsultsAvailable‚ª0
-        Call writeError("ŒfÚƒVƒ‡ƒbƒv‚È‚µ")
+        'totalRsultsAvailableãŒ0
+        Call writeError("æ²è¼‰ã‚·ãƒ§ãƒƒãƒ—ãªã—")
         Exit Sub
     
     End If
     
 Else
 
-    'Resultset‚ª‚È‚¢
-    Call writeError("ŠY“–JAN‚ªƒ„ƒt[‚É“o˜^‚È‚µ")
+    'ResultsetãŒãªã„
+    Call writeError("è©²å½“JANãŒãƒ¤ãƒ•ãƒ¼ã«ç™»éŒ²ãªã—")
     Exit Sub
     
 End If
@@ -166,43 +167,43 @@ End If
 End Sub
 
 Private Function makeUrl(jan As String)
-'jan‚ğ“n‚µ‚Ä‚à‚ç‚Á‚ÄAGETƒƒ\ƒbƒh‚Å“Š‚°‚éURL‚ğ¶¬
+'janã‚’æ¸¡ã—ã¦ã‚‚ã‚‰ã£ã¦ã€GETãƒ¡ã‚½ãƒƒãƒ‰ã§æŠ•ã’ã‚‹URLã‚’ç”Ÿæˆ
 
-Dim base_url As String 'WEB API‚ğGET‚ÅŒÄ‚Ño‚·ƒx[ƒXURL
+Dim base_url As String 'WEB APIã‚’GETã§å‘¼ã³å‡ºã™ãƒ™ãƒ¼ã‚¹URL
 base_url = "http://shopping.yahooapis.jp/ShoppingWebService/V1/itemSearch"
 
 Dim sort As String
-sort = "%2Bprice" '‰¿Ši‡A{|‚Å~‡E¸‡w’è‚Å‚«‚éAURLƒGƒ“ƒeƒBƒeƒB‚É•ÏŠ·‚ª•K—v
+sort = "%2Bprice" 'ä¾¡æ ¼é †ã€ï¼‹ï¼ã§é™é †ãƒ»æ˜‡é †æŒ‡å®šã§ãã‚‹ã€URLã‚¨ãƒ³ãƒ†ã‚£ãƒ†ã‚£ã«å¤‰æ›ãŒå¿…è¦
 
 get_url = base_url
-get_url = get_url & "?appid=" & APP_ID 'ƒAƒvƒŠƒP[ƒVƒ‡ƒ“ID
-get_url = get_url & "&sort=" & sort                                                   'ƒ\[ƒgí•Ê
-get_url = get_url & "&hits=5"                                                         'Å‘å”5AÅˆÀ5Œ‚Å
-get_url = get_url & "&jan=" & jan                                                     'JAN‚ğƒZƒbƒg
+get_url = get_url & "?appid=" & APP_ID 'ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ID
+get_url = get_url & "&sort=" & sort                                                   'ã‚½ãƒ¼ãƒˆç¨®åˆ¥
+get_url = get_url & "&hits=5"                                                         'æœ€å¤§æ•°5ã€æœ€å®‰5ä»¶ã§
+get_url = get_url & "&jan=" & jan                                                     'JANã‚’ã‚»ãƒƒãƒˆ
     
 makeUrl = get_url
 
 End Function
 
 Private Sub parseWriteRanking(hits As MSXML2.IXMLDOMNodeList)
-'<Hit>ƒm[ƒhƒŠƒXƒghits‚ğƒCƒeƒŒ[ƒg‚µ‚Â‚ÂƒZƒ‹‚É‘‚«‚İ
+'<Hit>ãƒãƒ¼ãƒ‰ãƒªã‚¹ãƒˆhitsã‚’ã‚¤ãƒ†ãƒ¬ãƒ¼ãƒˆã—ã¤ã¤ã‚»ãƒ«ã«æ›¸ãè¾¼ã¿
 
-'h‚ğ‘‚«Š·‚¦‚È‚ª‚çƒCƒeƒŒ[ƒg‚·‚é‚Ì‚ÅAhitƒm[ƒh‚ğŠi”[‚Å‚«‚é•Ï”h‚ğƒZƒbƒgA
-'h‚ÍXML DOM Element‚©NodeƒNƒ‰ƒXANodeList‚Í•¡”ƒm[ƒh‚ğŠi”[‚·‚éƒNƒ‰ƒX
+'hã‚’æ›¸ãæ›ãˆãªãŒã‚‰ã‚¤ãƒ†ãƒ¬ãƒ¼ãƒˆã™ã‚‹ã®ã§ã€hitãƒãƒ¼ãƒ‰ã‚’æ ¼ç´ã§ãã‚‹å¤‰æ•°hã‚’ã‚»ãƒƒãƒˆã€
+'hã¯XML DOM Elementã‹Nodeã‚¯ãƒ©ã‚¹ã€NodeListã¯è¤‡æ•°ãƒãƒ¼ãƒ‰ã‚’æ ¼ç´ã™ã‚‹ã‚¯ãƒ©ã‚¹
 Dim h As MSXML2.IXMLDOMNode
 
-'‘‚«–ß‚µƒZƒ‹‚Ì—ñƒJƒEƒ“ƒ^[k‚ğİ’è
+'æ›¸ãæˆ»ã—ã‚»ãƒ«ã®åˆ—ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼kã‚’è¨­å®š
 Dim k As Integer
 k = 0
 
 For Each h In hits
 
-    store_name = h.SelectSingleNode("Store/Name").Text              'ŠeHitƒm[ƒh‚ÌStore>NameƒVƒ‡ƒbƒv–¼
+    store_name = h.SelectSingleNode("Store/Name").Text              'å„Hitãƒãƒ¼ãƒ‰ã®Store>Nameï¼ã‚·ãƒ§ãƒƒãƒ—å
     
-    Cells(c.Row, startcolumn_price + k).Value = store_name          '—ñ‚ğ+1‚µ‚È‚ª‚çƒVƒ‡ƒbƒvE‰¿ŠiEƒVƒ‡ƒbƒvE‰¿Ši‚Ì‡‚ÅCell‚É‹L“ü
+    Cells(c.Row, startcolumn_price + k).Value = store_name          'åˆ—ã‚’+1ã—ãªãŒã‚‰ã‚·ãƒ§ãƒƒãƒ—ãƒ»ä¾¡æ ¼ãƒ»ã‚·ãƒ§ãƒƒãƒ—ãƒ»ä¾¡æ ¼ã®é †ã§Cellã«è¨˜å…¥
     k = k + 1
             
-    sale_price = h.SelectSingleNode("Price").Text                   'ŠeHitƒm[ƒh‚ÌPrice”Ì”„‰¿Ši
+    sale_price = h.SelectSingleNode("Price").Text                   'å„Hitãƒãƒ¼ãƒ‰ã®Priceï¼è²©å£²ä¾¡æ ¼
     Cells(c.Row, startcolumn_price + k).Value = sale_price
     k = k + 1
     
@@ -211,7 +212,7 @@ Next h
 End Sub
 
 Private Sub writeError(s As String)
-'ƒGƒ‰[ƒƒbƒZ[ƒW‚ğƒZƒ‹‚É•Ô‚·
+'ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’ã‚»ãƒ«ã«è¿”ã™
 
 Cells(c.Row, startcolumn_price).Value = s
 
