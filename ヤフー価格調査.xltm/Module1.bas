@@ -88,8 +88,8 @@ End Sub
 Private Sub loadXml(jan As String)
 
  'xmlオブジェクトのインスタンス生成
- Dim xml As MSXML2.DOMDocument
- Set xml = New MSXML2.DOMDocument
+ Dim xml As Object
+ Set xml = CreateObject("MSXML2.DOMDocument")
  
  'サーバーからXMLを読むためのMSXML2オブジェクトの設定
  xml.async = False
@@ -176,20 +176,20 @@ sort = "%2Bprice" '価格順、＋－で降順・昇順指定できる、URLエンティティに変換が必
 
 get_url = base_url
 get_url = get_url & "?appid=" & APP_ID 'アプリケーションID
-get_url = get_url & "&sort=" & sort                                                   'ソート種別
-get_url = get_url & "&hits=5"                                                         '最大数5、最安5件で
-get_url = get_url & "&jan=" & jan                                                     'JANをセット
+get_url = get_url & "&sort=" & sort    'ソート種別
+get_url = get_url & "&hits=5"          '最大数5、最安5件で
+get_url = get_url & "&jan=" & jan      'JANをセット
     
 makeUrl = get_url
 
 End Function
 
-Private Sub parseWriteRanking(hits As MSXML2.IXMLDOMNodeList)
+Private Sub parseWriteRanking(hits As Object)
 '<Hit>ノードリストhitsをイテレートしつつセルに書き込み
 
 'hを書き換えながらイテレートするので、hitノードを格納できる変数hをセット、
 'hはXML DOM ElementかNodeクラス、NodeListは複数ノードを格納するクラス
-Dim h As MSXML2.IXMLDOMNode
+Dim h As Object
 
 '書き戻しセルの列カウンターkを設定
 Dim k As Integer
@@ -200,6 +200,7 @@ For Each h In hits
     store_name = h.SelectSingleNode("Store/Name").Text              '各HitノードのStore>Name＝ショップ名
     
     Cells(c.Row, startcolumn_price + k).Value = store_name          '列を+1しながらショップ・価格・ショップ・価格の順でCellに記入
+    
     k = k + 1
             
     sale_price = h.SelectSingleNode("Price").Text                   '各HitノードのPrice＝販売価格
