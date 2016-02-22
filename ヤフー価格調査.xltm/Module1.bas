@@ -16,16 +16,21 @@ Attribute VB_Name = "Module1"
 
 
 '宣言セクション
+'定数
+
+'Yahoo API呼び出しに使う アプリケーションID
+Const APP_ID As String = ""
+
+'マークしたいストア名。検索に表示される名称。
+Const MY_STORE_NAME As String = ""
 
 'sleepを使うための宣言
 Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 
 '全プロシージャで共有する変数
+
 'ショップ/価格リストを記入する開始列
 Dim startcolumn_price As Integer
-
-'Yahoo API呼び出しに使う アプリケーションID
-Const APP_ID = ""
 
 'janの入っているセル
 Dim c As Range
@@ -198,13 +203,27 @@ k = 0
 For Each h In hits
 
     store_name = h.SelectSingleNode("Store/Name").Text              '各HitノードのStore>Name＝ショップ名
-    
     Cells(c.Row, startcolumn_price + k).Value = store_name          '列を+1しながらショップ・価格・ショップ・価格の順でCellに記入
     
+    If Cells(c.Row, startcolumn_price + k).Value = MY_STORE_NAME Then
+        
+        With Cells(c.Row, startcolumn_price + k).Resize(1, 2).Interior
+            
+            .Pattern = xlSolid
+            .PatternColorIndex = xlAutomatic
+            .ThemeColor = xlThemeColorAccent3
+            .TintAndShade = 0.399975585192419
+            .PatternTintAndShade = 0
+        
+        End With
+    
+    End If
+
     k = k + 1
             
     sale_price = h.SelectSingleNode("Price").Text                   '各HitノードのPrice＝販売価格
     Cells(c.Row, startcolumn_price + k).Value = sale_price
+    
     k = k + 1
     
 Next h
