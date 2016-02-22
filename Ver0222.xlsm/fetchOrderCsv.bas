@@ -194,7 +194,7 @@ Call sortOrderId
 
 'ユーザーフォーム呼び出しボタンの位置調整
 OrderSheet.Shapes("ShowFormButton").Top = OrderSheet.Range("A1").SpecialCells(xlCellTypeLastCell).Offset(2, 1).Top
-OrderSheet.Shapes("hideWishCol").Top = OrderSheet.Range("A1").SpecialCells(xlCellTypeLastCell).Offset(2, 1).Top
+'OrderSheet.Shapes("hideWishCol").Top = OrderSheet.Range("A1").SpecialCells(xlCellTypeLastCell).Offset(2, 1).Top
 
 ' TextStreamを切断
 TS.Close
@@ -265,7 +265,7 @@ Set FSO = Nothing
 
 End Sub
 
-Sub sortOrderId()
+Private Sub sortOrderId()
 
 'OrderIDの列を探す B2決め打ちでもよくないかな？
 Dim col_orderID As Range

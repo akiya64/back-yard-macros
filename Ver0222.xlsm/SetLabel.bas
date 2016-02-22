@@ -1,6 +1,6 @@
 Attribute VB_Name = "SetLabel"
 Private Sub Labeling()
-
+'使ってません  注文番号の「名前」をシートに振れると検索が便利かなと
 Dim rng As Range
 
 r = 317

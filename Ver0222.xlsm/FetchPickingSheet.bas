@@ -1,14 +1,27 @@
 Attribute VB_Name = "FetchPickingSheet"
 Option Explicit
 
+'注文番号、注文者名など、見出し名と列番号を格納するHead型を定義
+'作成者や作成日によって、列の位置が変わることがあるので、毎回特定する
+'基本的には、マニュアルとテンプレートでデータをやりとりすれば不要ではあるが、
+'列番号のハードコーディングはしないほうがいい
+
+Private Type Head
+    
+    Caption As String
+    Columns As Long
+
+End Type
+
 '他のモジュールから開いたピッキングシートファイルをクローズするのに必要なパブリック変数
-'
 Public IsFileNewOpen As Boolean
 Public PickingFileName As String
 
 Function CheckPickingProducts(Optional IsMsgBox As Boolean = True)
 
-'マクロの一覧に出したくないのでFunction定義にしています。
+'テスト用
+'Sub CheckPickingProducts()
+
 'ヤフースカイプ分日付ファイルで、緑に塗られていない=ピッキングできなかった商品を、
 '注残シート、センター在庫列に「なし」転記、本日日付で手配かかったとみなして日付入れます。
 
@@ -43,6 +56,7 @@ PickingFilePath = PickingFilePath & PickingFileName
 
 ''「ファイルを開く」のフォームでファイルを指定 一応残します
 'PickingFilePath = Application.GetOpenFilename("エクセルファイル,*.xls?", , "ヤフーピッキングリストを指定")
+
 
 Dim WsPicking As Worksheet
 Dim wb As Workbook
@@ -95,18 +109,39 @@ For Each v In TodaysOrders
     Next
 Next
 
-'ピッキングシートから注文者名・商品コードを取得して、TodaysOrderと突き合わせる
+
+'ピッキングシートの注文番号列、注文者名列、商品コード列、備考列を特定する
+'ヘッダー配列を用意
+Dim Header(3) As Head
+Header(0).Caption = "注文番号"
+Header(1).Caption = "届け先名"
+Header(2).Caption = "商品コード"
+Header(3).Caption = "ロケーション" '欠品商品の状況
+
+Dim h As Integer
+For h = 0 To 3
+    Header(h).Columns = WsPicking.Rows(1).Find(Header(h).Caption).Column
+Next
+
+'検索フォームを戻すために空検索
+WsPicking.Rows(1).Find ("")
+
+'ピッキングシートの注文者名は「発送先名」、注残管理は注文者名
+'注残管理の名前で探して、なければ「ピッキングシート該当無し」
 Dim i As Integer
 For i = 2 To MaxRow
     
+    Dim CurrentId As String
+    CurrentId = WsPicking.Cells(i, Header(0).Columns).Value
+    
     Dim CurrentBuyerName As String
-    CurrentBuyerName = WsPicking.Cells(i, 1).Value
+    CurrentBuyerName = WsPicking.Cells(i, Header(1).Columns).Value
     
     Dim CurrentCode As String
-    CurrentCode = WsPicking.Cells(i, 2).Value
+    CurrentCode = WsPicking.Cells(i, Header(2).Columns).Value
         
     Dim CurrentNote As String
-    CurrentNote = WsPicking.Cells(i, 8).Value
+    CurrentNote = WsPicking.Cells(i, Header(3).Columns + 1).Value
         
     'コードをヤフーの形式に変換 012345->12345
     If CurrentCode Like "0#####" Then CurrentCode = Right(CurrentCode, 5)
@@ -119,15 +154,21 @@ For i = 2 To MaxRow
         '注文者名から、どの注文の商品か特定
         Set o = FindByBuyerName(CurrentBuyerName, CurrentCode, TodaysOrders)
         
-        'その注文の商品オブジェクトにピッキング可のフラグを登録
-        o.Products(CurrentCode).IsPickingDone = True
+        '注残管理シートは注文者名、ピッキングシートは宛先氏名のため、
+        'FindByBuyerNameメソッドで注文の一致がとれず､戻り値が空の場合がある｡
+        
+        If Not o Is Nothing Then
+
+            o.Products(CurrentCode).IsPickingDone = True
+                   
+        End If
     
     End If
     
     'H列に何か書いてる＝梱包室で把握している在庫状況
     If WsPicking.Cells(i, 8).Value <> "" Then
-                '注文者名から、どの注文の商品か特定
-                
+ 
+       '注文者名から、どの注文の商品か特定
         Set o = FindByBuyerName(CurrentBuyerName, CurrentCode, TodaysOrders)
         
         'その注文の商品オブジェクトにピッキング可のフラグを登録
@@ -145,6 +186,7 @@ Next i
 
 For Each v In TodaysOrders
     For Each w In TodaysOrders(v).Products
+
         If TodaysOrders(v).Products(w).IsPickingDone = False Then
             
             'ピッキングステータスをシートに転記、Falseだと「なし」＋本日手配扱い
@@ -164,7 +206,7 @@ ThisWorkbook.Save
 Application.ScreenUpdating = False
 
 If IsMsgBox Then
-    
+
     MsgBox prompt:="ピッキングファイルの転記完了", Buttons:=vbInformation
 
 End If
@@ -199,5 +241,11 @@ For Each v In OrderList
     End If
 
 Next v
+
+End Function
+
+Private Function FindCol(Caption As String, PickingWorkSheet As Worksheet) As Integer
+
+
 
 End Function

@@ -214,6 +214,10 @@ With OrderSheet
                     CurrentIdRange.Offset(0, 7).NumberFormatLocal = "mŒd“ú"
                     CurrentIdRange.Offset(0, 7).Value = Date
                 
+                ElseIf state = "ŠY“–‚È‚µ" Then
+                
+                    CurrentIdRange.Offset(0, 6).Value = "ŠY“–’•¶Ò‚È‚µ"
+                    
                 Else
                
                     CurrentIdRange.Offset(0, 6).Value = state

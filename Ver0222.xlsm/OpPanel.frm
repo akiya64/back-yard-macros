@@ -150,8 +150,6 @@ If Format(Now(), "hh") > 15 Then '15時過ぎてのフォームオープンなら、出荷一覧詳細
     
 End If
 
-
-
 End Sub
 
 Private Sub checkMesaiFileExistance()
@@ -334,7 +332,7 @@ OrderSheet.Activate
 
 'ボタンを再配置
 OrderSheet.Shapes("ShowFormButton").Top = OrderSheet.Range("A1").End(xlDown).Offset(2, 1).Top
-OrderSheet.Shapes("hideWishCol").Top = OrderSheet.Range("A1").End(xlDown).Offset(2, 1).Top
+OrderSheet.Shapes("ButtonHideWish").Top = OrderSheet.Range("A1").End(xlDown).Offset(2, 1).Top
 
 End Sub
 

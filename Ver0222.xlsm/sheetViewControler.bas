@@ -64,6 +64,7 @@ Else
            Range("A1").AutoFilter Field:=i, Criteria1:="=出荷通知除外", Operator:=xlOr, Criteria2:="="
 
         Else
+        
            Range("A1").AutoFilter i  '他はフィルター解除、Criteria指定を省略で「全て」表示
         
         End If

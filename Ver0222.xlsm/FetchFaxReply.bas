@@ -8,8 +8,8 @@ Const REPLY_SHEET_NAME As String = "納期リスト"
 
 Dim RangeFaxReplyCode As Range
 
-Sub FetchFaxReply() '単体テストのためのSub切り替えコメントアウト、Functionにしてるとマクロに表示しないので
-'Function FetchFaxReply(Optional arg As Variant = "")
+'Sub FetchFaxReply() '単体テストのためのSub切り替えコメントアウト、Functionにしてるとマクロに表示しないので
+Function FetchFaxReply(Optional arg As Variant = "")
 
 '注残「アイテム」リストを作る、注文番号・コード・発注日
 '返信FAXのファイルを開く
@@ -95,7 +95,7 @@ MsgBox prompt:="返信リスト読込完了"
 
 End
 
-End Sub
+End Function
 
 Private Sub FindArrivalDate(Product As Product, FoundCell As Range)
 '単体Finder

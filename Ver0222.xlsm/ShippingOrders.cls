@@ -15,7 +15,7 @@ Const CSV_BASE_NAME As String = "ヤフー送り状番号一括"
 Public Orders As Dictionary
 
 Public Sub createShippingList(UndispatchOrders As Dictionary, Invoices As Invoices)
-'Orderの入っているDictionaryとInvoiceListオブジェクトを受け取って、
+'Orderの入っているDictionaryとInvoicesオブジェクトを受け取って、
 'InvoiceListの注文ID1件ずつについて、対応する注文番号が未発送リストにあるか調べる
 'あれば、発送リストに加えて、送り状番号、発送日を代入
 

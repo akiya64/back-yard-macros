@@ -59,7 +59,7 @@ If BelateList.Count > 0 Then
             Buttons:=vbExclamation, _
             Title:="チェック結果"
 
-ElseIf TypeName(Application.Caller) <> "String" Then 'ボタンから呼び出された場合は、Caller="ボタン 1"
+Else
 
     MsgBox "未発送/未連絡で3日経過している注文はありません。", _
             Buttons:=vbInformation, _
@@ -74,6 +74,14 @@ Private Function checkBelateDispatch(order As order) As Boolean
 
 '単体の未発送チェッカー
 
+    '振込の場合は入金連絡済で、7日を超えていれば遅延。ヤフーの自動処理で注文日より14日後にポイント自動確定するので
+    If order.IsWaitingPayment And DateDiff("d", order.AlertPiriod, Date) > 7 Then
+        TmpBl = True
+        GoTo re
+    Else
+        TmpBl = False
+    End If
+
     'Orderオブジェクトのアラート起算日と本日の差が2を超える＝三日以上でTrue
 
     If DateDiff("d", order.AlertPiriod, Date) > 2 Then
@@ -82,11 +90,7 @@ Private Function checkBelateDispatch(order As order) As Boolean
         TmpBl = False
     End If
 
-    '振込の場合は入金連絡済で、7日を超えていれば遅延。ヤフーの自動処理で注文日より14日後にポイント自動確定するので
-    If order.IsWaitingPayment And DateDiff("d", order.AlertPiriod, Date) > 7 Then
-        TmpBl = True
-    End If
-
+re:
 checkBelateDispatch = TmpBl
 
 End Function

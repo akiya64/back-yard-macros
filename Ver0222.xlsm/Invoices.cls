@@ -9,7 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-'送り状の集合クラス、Dictionaryの拡張とかできるといいのだが。
+'送り状の集合クラス、配列の中身はOrderオブジェクトを前提として処理している。
+'トリッキーになるがVBAでもタイプセーフな配列が作れるらしい。
 
 'fetchReportXlsx() 定数宣言しているパスの出荷一覧詳細.xlsxを読み込んで送り状Dictionalyを作成
 'fetchReportCsv()　定数宣言しているパスの出荷一覧詳細.csvを読み込んで送り状Dictionalyを作成
