@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-'送り状の集合クラス、配列の中身はOrderオブジェクトを前提として処理している。
+'送り状の集合クラス、InvoiceNumberListの中身はOrderオブジェクトを前提として処理している。
 'トリッキーになるがVBAでもタイプセーフな配列が作れるらしい。
 
 'fetchReportXlsx() 定数宣言しているパスの出荷一覧詳細.xlsxを読み込んで送り状Dictionalyを作成
@@ -35,12 +35,12 @@ Dim FileName As String
 FileName = REPORT_XLSX_BASENAME & "_" & Format(Date, "yymmdd") & ".xlsx"
 
 'テスト用のパス
-'FileName = REPORT_XLSX_BASENAME & "_" & "151006" & ".xlsx"
+'FileName = REPORT_XLSX_BASENAME & "_" & "160311" & ".xlsx"
 
 Dim Path As String
 Path = REPORT_XLSX_FOLDER & FileName
 
-findReportFile (Path)
+Call findReportFile(Path)
 
 'ブックを開く処理、送り状レポートワークブックを取得
 Dim InvoiceReportWb As Workbook
@@ -74,16 +74,16 @@ ShippingFileProgress.ShowCurrentProcess.Caption = "出荷一覧詳細 読み込み中"
 '昇順ソートでヤフーの注文番号フォーマット100######が上に来るはずだが、
 '自信がないので、実行時間が遅くなっても全行調べます。－＞CSV読込よりずっと速かった。
 
-'Invoceオブジェクトを入れるDictionaryを初期化
+'Invoceオブジェクトを入れるDictionary
 Set InvoiceNumberList = New Dictionary
 
-Dim MaxRow As Long
-MaxRow = InvoiceReportWb.Sheets(1).Range("AE1").SpecialCells(xlCellTypeLastCell).Row
+Dim LastRow As Long
+LastRow = InvoiceReportWb.Sheets(1).Range("AE1").SpecialCells(xlCellTypeLastCell).Row
 
 Dim i As Long
 
 '全ての行を調べる
-For i = 2 To MaxRow
+For i = 2 To LastRow
     
     '発送日C列、送り状番号E列、注文番号AE列
     

@@ -10,11 +10,13 @@ Sub 送り状番号一括ファイル作成()
 '2015/10/22 進捗表示を付けました。型チェックもします。
 '2015/12/02 出荷通知除外機能はなくてもいいかもしれない。商魂在庫を判定して、佐川の送り状システムへの送り込みデータ作成してるらしいので。
             '現状､間違って送り状作成したとかが､どこでもチェックされていないので､出荷通知除外は引き続き機能させます｡
-'2016/1/6 ↑この商魂在庫がなければ送り状起票しないマクロ、ヤフーに付いては機能してないっぽい。
+'2016/1/6 ↑この商魂在庫がなければ送り状起票しないマクロ機能してない時がある。
             
 '-------------------------------------切り取り線-----------------------------------------------
 
 OpPanel.Hide
+
+Application.ScreenUpdating = False
 
 'プログレスバーの準備 表示方法はこのサイトがよくまとまってる http://hideprogram.web.fc2.com/vba/vba_ProgressBarForm.html
 ShippingFileProgress.ProgressBar.Min = 1
@@ -84,6 +86,8 @@ ShippingFileProgress.Hide
 ThisWorkbook.Save
 
 Call 発送列の空欄のみ表示
+
+Application.ScreenUpdating = True
 
 MsgBox prompt:="ヤフー送り状番号一括" & Format(Date, "mmdd") & "   保存しました。" & vbLf _
                 & "ゆうパケット発送分は手動で入力をお願いします。" _

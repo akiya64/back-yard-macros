@@ -34,13 +34,11 @@ OpPanel.Show
 
 End Sub
 
-
-Sub hideWishCol()
+Sub 要望列を非表示()
     
     OrderSheet.Outline.ShowLevels ColumnLevels:=1
     
 End Sub
-
 
 Sub 未発送のみ表示()
 Attribute 未発送のみ表示.VB_Description = "発送列 空欄 と 「出荷通知除外」を表示"

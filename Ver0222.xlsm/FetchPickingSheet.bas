@@ -91,8 +91,8 @@ If WsPicking Is Nothing Then
 End If
 
 'ピッキング対象の商品コードレンジ
-Dim MaxRow As Integer
-MaxRow = WsPicking.Range("B1").SpecialCells(xlCellTypeLastCell).Row
+Dim LastRow As Integer
+LastRow = WsPicking.Range("B1").SpecialCells(xlCellTypeLastCell).Row
 
 '----ピッキングシートのオープン処理完了-----
 
@@ -116,7 +116,7 @@ Dim Header(3) As Head
 Header(0).Caption = "注文番号"
 Header(1).Caption = "届け先名"
 Header(2).Caption = "商品コード"
-Header(3).Caption = "ロケーション" '欠品商品の状況
+Header(3).Caption = "ロケーション" '備考の取得に使う
 
 Dim h As Integer
 For h = 0 To 3
@@ -129,7 +129,7 @@ WsPicking.Rows(1).Find ("")
 'ピッキングシートの注文者名は「発送先名」、注残管理は注文者名
 '注残管理の名前で探して、なければ「ピッキングシート該当無し」
 Dim i As Integer
-For i = 2 To MaxRow
+For i = 2 To LastRow
     
     Dim CurrentId As String
     CurrentId = WsPicking.Cells(i, Header(0).Columns).Value
@@ -166,20 +166,19 @@ For i = 2 To MaxRow
     End If
     
     'H列に何か書いてる＝梱包室で把握している在庫状況
-    If WsPicking.Cells(i, 8).Value <> "" Then
+    If CurrentNote <> "" Then
  
        '注文者名から、どの注文の商品か特定
         Set o = FindByBuyerName(CurrentBuyerName, CurrentCode, TodaysOrders)
         
         'その注文の商品オブジェクトにピッキング可のフラグを登録
-        o.Products(CurrentCode).CenterStockState = WsPicking.Cells(i, 8).Value
+        o.Products(CurrentCode).CenterStockState = CurrentNote
 
     End If
     
 Next i
 
-'TodaysOrderの各注文の各商品のIsPickingDoneをチェックする
-
+'TodaysOrderの各注文の各商品のIsPickingDoneを転記
 
 'Dim w As Variant
 'Dim v As Variant
@@ -190,7 +189,7 @@ For Each v In TodaysOrders
         If TodaysOrders(v).Products(w).IsPickingDone = False Then
             
             'ピッキングステータスをシートに転記、Falseだと「なし」＋本日手配扱い
-            'Todo:OrderかProductオブジェクトを渡す
+            'Todo:OrderかProductオブジェクトを渡して、OrderSheetに判定して転記させる
             Call OrderSheet.writePickingStatus(CStr(v), CStr(w), TodaysOrders(v).Products(w).CenterStockState)
         
         End If

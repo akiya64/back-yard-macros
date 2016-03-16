@@ -137,7 +137,7 @@ For Each v In Orders
     '発送不可フラグが真なのに、送り状番号があった場合は注残シートに「発送除外」を書き戻し
     If Orders(v).CanNotShipping Then
         
-        OrderSheet.writeExceptShippingNotification (Orders(v).Id)
+        Call OrderSheet.writeExceptShippingNotification(Orders(v))
     
     Else
         

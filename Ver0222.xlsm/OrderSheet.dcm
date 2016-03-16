@@ -109,11 +109,11 @@ Set p = PuchaseProduct
 
 With OrderSheet
     
-    Dim MaxRow As Long
-    MaxRow = .UsedRange.Rows.Count
+    Dim LastRow As Long
+    LastRow = .UsedRange.Rows.Count
 
     Dim OrderIdRange As Range
-    Set OrderIdRange = .Range("B1").Resize(MaxRow, 1)
+    Set OrderIdRange = .Range("B1").Resize(LastRow, 1)
 
     Dim MatchRow As Long
     MatchRow = WorksheetFunction.Match(CLng(p.OrderId), OrderIdRange, 0)
@@ -150,28 +150,33 @@ End With
 
 End Sub
 
-Public Sub writeExceptShippingNotification(Id As String)
+Public Sub writeExceptShippingNotification(o As Object)
 
 '不可だったりキャンセルだったりがシートに記入されているのに、
 '出荷詳細で送り状番号が存在した場合に、O列「発送」に「出荷通知除外」を記入
+'備考に送り状番号を返しておくと、佐川の追跡サイトで調べるのが楽
 
 'OrderクラスではIDはSTR型、ワークシートではDouble型,
 'Match関数で一致する型はLong型、戻り値はDouble型
+'OrderクラスはWorkSheetからは呼べないかも
+
+Dim Id As String
+Id = o.Id
 
 With OrderSheet
     
-    Dim MaxRow As Long
-    MaxRow = .UsedRange.Rows.Count
+    Dim LastRow As Long
+    LastRow = .UsedRange.Rows.Count
 
     Dim OrderIdRange As Range
-    Set OrderIdRange = .Range("B1").Resize(MaxRow, 1)
+    Set OrderIdRange = .Range("B1").Resize(LastRow, 1)
 
     Dim MatchRow As Long
     MatchRow = WorksheetFunction.Match(CLng(Id), OrderIdRange, 0)
     
-    On Error Resume Next
     .Range("O" & MatchRow).Value = "出荷通知除外"
-    On Error GoTo 0
+    .Range("S" & MatchRow).NumberFormatLocal = "@"
+    .Range("S" & MatchRow).Value = o.InvoiceNumber & .Range("S" & MatchRow).Value
 
 End With
 
@@ -186,11 +191,11 @@ Public Sub writePickingStatus(Id As String, Code As String, Optional state As St
 
 With OrderSheet
     
-    Dim MaxRow As Long
-    MaxRow = .UsedRange.Rows.Count
+    Dim LastRow As Long
+    LastRow = .UsedRange.Rows.Count
 
     Dim OrderIdRange As Range
-    Set OrderIdRange = .Range("B1").Resize(MaxRow, 1)
+    Set OrderIdRange = .Range("B1").Resize(LastRow, 1)
 
     Dim MatchRow As Long
     MatchRow = WorksheetFunction.Match(CLng(Id), OrderIdRange, 0)
