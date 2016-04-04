@@ -1,0 +1,28 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "ThisWorkbook"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Option Explicit
+Private Sub Workbook_AddinInstall()
+  Dim SubMenu As Object
+  
+  '一つの機能を登録するごとに、Controls.addすること
+  Set SubMenu = Application.CommandBars("Cell").Controls.Add()
+  With SubMenu
+    .BeginGroup = True   'グループ開始で上に区切り線が出る
+    .Caption = "セット分解"
+    .OnAction = "ParseItems"
+    .FaceId = 222
+  End With
+
+End Sub
+
+Private Sub Workbook_AddinUninstall()
+  On Error Resume Next
+  Application.CommandBars("Cell").Controls("セット分解").Delete
+End Sub
