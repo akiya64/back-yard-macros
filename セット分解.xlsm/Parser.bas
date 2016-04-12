@@ -156,7 +156,7 @@ Set ComponetItems = New Collection
 
 '列カウンタ
 Dim i As Integer
-i = 5
+i = TiedCodeList.Rows(1).Find("商品情報1").Column
 
 'IsEmptyだと空白セル拾う場合がある
 Do Until TiedCodeList.Cells(HitRow, i) = ""
