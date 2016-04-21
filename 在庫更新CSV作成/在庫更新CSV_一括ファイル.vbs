@@ -31,7 +31,7 @@ For i =0 to 2
 
 	Dim wb
 	set wb = exApp.Workbooks.Open (Fso & "\" & QtyBooks(i))
-	exApp.Run ("CSV�݌ɒǋL")
+	exApp.Run ("AppendQtyCsv")
 
 	wb.Close True
 
