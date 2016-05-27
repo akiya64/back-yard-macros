@@ -1,9 +1,88 @@
 Attribute VB_Name = "CheckBelate"
 Public Sub 遅延チェック()
+
+Dim BelateList As Dictionary
+Set BelateList = MakeBelateList()
+
+For Each v In BelateList  '遅延リストをMsgBoxで表示するためStringで出力して連結。
+    
+Dim IdList As String
+    
+    IdList = IdList & vbLf & Format(BelateList(v).OrderDate, "MM/dd") & "  No." & BelateList(v).Id
+
+Next
+
+Application.ScreenUpdating = True
+
+If BelateList.Count > 0 Then
+
+    MsgBox prompt:="未発送/未連絡で3日以上経過している注文" & vbLf _
+            & IdList & vbLf _
+            & vbLf _
+            & BelateList.Count & "件あります。", _
+            Buttons:=vbExclamation, _
+            Title:="チェック結果"
+
+Else
+
+    MsgBox "未発送/未連絡で3日経過している注文はありません。", _
+            Buttons:=vbInformation, _
+            Title:="チェック結果"
+
+End If
+
+End Sub
+
+Public Sub 遅延リスト出力()
+
+Dim BelateList As Dictionary
+Set BelateList = MakeBelateList()
+
+Workbooks.Add
+
+'新規追加ファイルにヘッダー作成
+With ActiveSheet
+    
+    .Range("A1").Value = "出荷状況確認 " & Format(Date, "m月d日")
+    .Range("A2:I2") = Array("受注日", "注文番号", "注文者名", "Line", "商品コード", "商品名", "数量", "出荷状況", "出荷日", "送り状番号")
+
+End With
+
+Dim i As Integer
+i = 3
+
+
+For Each v In BelateList
+  
+    Id = BelateList(v).Id
+    
+    '注文番号から、注残一覧シートの行番号を特定、注文情報を配列に格納
+    With ThisWorkbook.Worksheets("注残一覧")
+        Dim r As Long, rng As Range
+        r = .Range("B:B").Find(Id).Row
+        Dim arr
+        arr = .Range("A" & r & ":" & "G" & r)
+    
+    End With
+    
+    '作成した新規ブックに貼り付けて行く
+    ActiveSheet.Range(Cells(i, 1), Cells(i, 7)) = arr
+    
+    i = i + 1
+
+Next
+
+Debug.Print i
+'Line番号列を削除
+ActiveSheet.Columns("d:d").Delete
+
+ActiveSheet.Range(Cells(3, 1), Cells(1, 1).End(xlDown)).NumberFormatLocal = "m""月""d""日"";@"
+
+End Sub
+
+Private Function MakeBelateList() As Dictionary
 'belated arrivalで延着のこと､遅延はBelateで統一します。
 'OrderListを作成して、Belate=遅延チェックをして、該当注文をBelateListに追加します。
-'最後にリストをMsgBoxでポップアップ
-'アラートの表示方法はまた何かいい方法があれば変えます。
 
 '注残一覧はOrderSheet
 
@@ -31,8 +110,7 @@ For Each v In UndispatchList 'OrderListの個々のOrderについて、チェック
         'Dayでしか判定をしないので、1ヶ月を超えるとアラート上がらないが、入荷予定から三日経過とかのスパンでの発送漏れ、連絡漏れを把握したいので構わない。
                   
         If DateDiff("d", o.AlertPiriod, o.SendMailDate) < 0 Then
-        
-            BelateList.Add o.Id, o
+                    BelateList.Add o.Id, o
         
         End If
     
@@ -40,35 +118,9 @@ For Each v In UndispatchList 'OrderListの個々のOrderについて、チェック
     
 Next
 
-Dim IdList As String
+Set MakeBelateList = BelateList
 
-For Each v In BelateList  '遅延リストをMsgBoxで表示するためStringで出力して連結。
-    
-    IdList = IdList & vbLf & Format(BelateList(v).OrderDate, "MM/dd") & "  No." & BelateList(v).Id
-
-Next
-
-Application.ScreenUpdating = True
-
-If BelateList.Count > 0 Then
-
-    MsgBox prompt:="未発送/未連絡で3日以上経過している注文" & vbLf _
-            & IdList & vbLf _
-            & vbLf _
-            & BelateList.Count & "件あります。", _
-            Buttons:=vbExclamation, _
-            Title:="チェック結果"
-
-Else
-
-    MsgBox "未発送/未連絡で3日経過している注文はありません。", _
-            Buttons:=vbInformation, _
-            Title:="チェック結果"
-   
-
-End If
-
-End Sub
+End Function
 
 Private Function checkBelateDispatch(order As order) As Boolean
 
