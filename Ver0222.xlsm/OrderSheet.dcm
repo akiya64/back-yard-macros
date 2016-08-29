@@ -150,7 +150,7 @@ End With
 
 End Sub
 
-Public Sub writeExceptShippingNotification(o As Object)
+Public Sub writeAssertIvoiceNumber(o As Object)
 
 '不可だったりキャンセルだったりがシートに記入されているのに、
 '出荷詳細で送り状番号が存在した場合に、O列「発送」に「出荷通知除外」を記入
@@ -174,9 +174,8 @@ With OrderSheet
     Dim MatchRow As Long
     MatchRow = WorksheetFunction.Match(CLng(Id), OrderIdRange, 0)
     
-    .Range("O" & MatchRow).Value = "出荷通知除外"
     .Range("S" & MatchRow).NumberFormatLocal = "@"
-    .Range("S" & MatchRow).Value = o.InvoiceNumber & .Range("S" & MatchRow).Value
+    .Range("S" & MatchRow).Value = "送り状番号 チェック" & o.InvoiceNumber & .Range("S" & MatchRow).Value
 
 End With
 
@@ -245,8 +244,13 @@ End With
 End Sub
 
 
-Function createOrderList(OrderRange As Range) As Dictionary
+Function getOrderList(Optional OrderRange As Range) As Dictionary
 
+If OrderRange Is Nothing Then
+    
+    Set OrderRange = getFilteredRange()
+
+End If
 '主にオートフィルターで絞り込んだシートからOrderオブジェクトの配列を作ります。
 
 'OrderList配列に入れる
@@ -324,7 +328,9 @@ For Each r In OrderRange
         
         .OrderId = r.Value
         .Code = r.Offset(0, 3).Value
-
+        
+        'Debug.Print .OrderId & ":" & .Code
+        
         'Date型に入れる際、セル内容によっては実行時エラーが起きる->エラーをキャプチャする
         On Error GoTo TypeError
         
@@ -360,7 +366,7 @@ For Each v In OrderList
 Next
 
 '戻り値をセット
-Set createOrderList = OrderList
+Set getOrderList = OrderList
 
 Exit Function
 
@@ -379,7 +385,7 @@ Function getUndispatchOrders() As Dictionary
     Dim UndispatchOrdersRange As Range
     Set UndispatchOrdersRange = getFilteredRange()
     
-    Set getUndispatchOrders = createOrderList(UndispatchOrdersRange)
+    Set getUndispatchOrders = getOrderList(UndispatchOrdersRange)
     
 End Function
 
@@ -423,7 +429,7 @@ With OrderSheet
 
 End With
 
-Set getTodaysOrders = OrderSheet.createOrderList(rng)
+Set getTodaysOrders = OrderSheet.getOrderList(rng)
 
 End Function
 

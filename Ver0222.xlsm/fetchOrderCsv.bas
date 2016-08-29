@@ -4,6 +4,9 @@ Option Explicit
 '明細と注文ヘッダーのあるフォルダを指定、最後必ず\マーク
 Const CSV_PATH As String = "\\MOS10\Users\mos10\Desktop\ヤフー\"
 
+'注文件数カウンタ
+Dim OrderCount As Long
+
 Sub 梱包室受注ファイル読込()
 
 Dim LineBuf As Variant
@@ -67,7 +70,8 @@ ThisWorkbook.Save
 '要望列を展開します。
 OrderSheet.Outline.ShowLevels ColumnLevels:=2
 
-MsgBox prompt:=Format(Date, "m月d日") & "受注分  読込完了しました", Buttons:=vbInformation
+MsgBox Prompt:=Format(Date, "m月d日") & " 受注分  " & OrderCount & "件" & vbLf & " 読込完了しました。" _
+    , Buttons:=vbInformation
 
 End Sub
 
@@ -148,6 +152,9 @@ Set TS = FSO.OpenTextFile(Path, ForReading)
 Dim i As Long
 i = LastRow '項目行は出力しないので、iは終端行から開始
     
+Dim OrderCount As Long
+OrderCount = 0
+    
 Do Until TS.AtEndOfStream
     
 ' 行を取り出して必要な項目のみを配列に入れ直す
@@ -157,7 +164,7 @@ Do Until TS.AtEndOfStream
     Dim OrderDetail As Variant
     
     '0=1列目=注文番号、1=2列目=1注文内で何アイテム目か、2=3列目=個数、4=5列目=コード 5=6列目=商品名
-    'ハードコーディングされているので、注文管理画面から出力項目を変更したら、読み取れなくなります。
+    'ハードコーディングしているので、注文管理画面から出力項目を変更したら、読み取れなくなります。
 
     OrderDetail = Array(LineBuf(0), LineBuf(1), LineBuf(2), LineBuf(3), LineBuf(4))
     
@@ -222,7 +229,7 @@ Do Until TS.AtEndOfStream
     
     '0=1列目=注文番号、注文者名、要望、決済方法、クーポン値引き
     Dim order As Variant
-    order = Array(LineBuf(0), LineBuf(5), LineBuf(36), LineBuf(35), LineBuf(43))
+    order = Array(LineBuf(0), LineBuf(5), LineBuf(36), LineBuf(34), LineBuf(43))
         
     Dim j As Integer
     For j = 0 To UBound(order)
@@ -247,12 +254,17 @@ Do Until TS.AtEndOfStream
     Dim tmp As String
     tmp = Range("S" & FindRow).Value
     
-    If order(4) < 0 Then tmp = tmp & "クーポン利用 " & order(3)
-    If order(3) = "銀行振込（前払い）" Then tmp = tmp & "振込 口座案内 未"
+    'クーポン利用かつ代引き・銀行振込・ヤフーマネー決済 確認して備考欄へ追記
+    If order(3) = "payment_d1" And order(4) < 0 Then tmp = "代引き クーポン利用 "
+    If order(3) = "payment_b1" Then tmp = tmp & "振込 口座案内 未"
+    If order(3) = "payment_a16" Then tmp = tmp & "Yahoo!マネー払い"
     
     Range("S" & FindRow).Value = tmp 'tmpをセルに書き戻す
     
     If order(2) <> "" Then Range("Q" & FindRow).Value = order(2) '要望を転記
+    
+        
+    OrderCount = OrderCount + 1
     
 continue:
     
@@ -264,6 +276,109 @@ Set TS = Nothing
 Set FSO = Nothing
 
 End Sub
+
+Sub 注文ステータスCSV読込()
+
+Dim LineBuf As Variant
+Dim order As Variant
+
+'連絡状況シート＝OrderSheetの注文番号のレンジ
+Dim IdRange As Range
+Set IdRange = OrderSheet.Cells(2, 2).Resize(OrderSheet.Cells(2, 2).SpecialCells(xlCellTypeLastCell).Row, 1)
+
+'ループ内で使うFind関係のレンジ
+Dim firstCell As Range
+Dim FoundCell As Range
+
+' ファイルダイアログからパスを指定して、FSOで開く
+Dim Path As String
+Path = fetchOrderCsv.setCsvPath("order_process_status.csv")
+
+If Path = "" Then
+    MsgBox "ファイル指定がキャンセルされました。"
+    Exit Sub
+
+End If
+
+Dim FSO As Object
+Set FSO = New FileSystemObject
+
+' CSVをテキストストリームとして処理する
+Dim TS As Textstream
+Set TS = FSO.OpenTextFile(Path, ForReading)
+       
+'ヘッダーをチェック
+LineBuf = Split(TS.ReadLine, ",")
+
+If Trim(Replace(LineBuf(1), Chr(34), "")) <> "OrderStatus" Then
+    MsgBox "CSVファイルが処理ステータス一覧ではありません。処理を中止します"
+    Exit Sub
+End If
+
+'
+Call 全ての発送状況を表示
+ 
+Do Until TS.AtEndOfStream
+    
+    '注文番号、送り先氏名、（処理）状況、問い合わせ番号を配列tmpに入れる
+
+    LineBuf = Split(TS.ReadLine, ",")
+    
+    'tmp[0]=OrderID=Column"B"
+    'tmp[1]=
+    
+    Dim tmp As Variant
+    tmp = Array(LineBuf(0), LineBuf(1), LineBuf(2), LineBuf(3))
+    
+    Dim j As Long
+    For j = 0 To UBound(tmp)
+        tmp(j) = Trim(Replace(tmp(j), Chr(34), "")) 'chr(34)で " [半角二重引用符]
+    
+    Next
+
+    '注残一覧シートの該当する注文番号に読み取った情報を入れる
+                
+    Set FoundCell = IdRange.Find(what:=tmp(0))
+    
+    If Not FoundCell Is Nothing Then
+           
+        Dim FirstCellAddress As String
+        FirstCellAddress = FoundCell.Address
+        
+
+                       
+        Do
+            '処理状況はFindして見つかった注文番号すべてに入れる、上書きでよい。
+            
+            OrderSheet.Cells(FoundCell.Row, 18) = tmp(1)
+            
+            Set FoundCell = Cells.FindNext(FoundCell)
+            
+            If FoundCell Is Nothing Or FoundCell.Address = FirstCellAddress Then Exit Do
+        
+         Loop
+
+    End If
+
+Loop
+
+
+' 指定ファイルをCLOSE
+TS.Close
+Set TS = Nothing
+Set FSO = Nothing
+
+'未発送のみ表示に変更
+Call 未発送のみ表示
+
+OpPanel.Hide
+
+ThisWorkbook.Save
+
+End
+
+End Sub
+
 
 Private Sub sortOrderId()
 

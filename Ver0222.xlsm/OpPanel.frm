@@ -45,7 +45,7 @@ End Sub
 
 Private Sub CommandButton15_Click()
     
-    遅延チェック
+    遅延リスト出力
     
 End Sub
 
@@ -81,6 +81,13 @@ Private Sub CommandButton2_Click()
     Meisai個別読込
 
 End Sub
+
+Private Sub CommandButton20_Click()
+    
+    注文ステータスCSV読込
+    
+End Sub
+
 Private Sub CommandButton3_Click()
 
     tyumon_H個別読込
@@ -273,8 +280,6 @@ Set FSO = Nothing
 
 OpPanel.Hide
 
-Call CheckBelate.遅延チェック
-
 ThisWorkbook.Save
 
 End Sub
@@ -307,12 +312,12 @@ Do Until DateDiff("d", LastDay, .Cells(i, 1)) > 1
     
     If .Cells(i, "O").Value = "済" Then
 
-        .Rows(i).Cut Destination:=Sheets("完了").Rows(Sheets("完了").UsedRange.Rows.Count + 1)
+        .Rows(i).Cut Destination:=Sheets("前々月発送済み").Rows(Sheets("前々月発送済み").UsedRange.Rows.Count + 1)
         .Rows(i).Delete
         
     ElseIf OrderSheet.Cells(i, "O").Value = "キャンセル" Then
     
-        .Rows(i).Cut Destination:=Sheets("キャンセル").Rows(Sheets("キャンセル").UsedRange.Rows.Count + 1)
+        .Rows(i).Cut Destination:=Sheets("前々月キャンセル").Rows(Sheets("前々月キャンセル").UsedRange.Rows.Count + 1)
         .Rows(i).Delete
     
     Else

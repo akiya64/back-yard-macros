@@ -1,0 +1,59 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "SyokonMaster"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Function GetSyokonQtyKubun(Code As String) As Syokon
+    
+    'Codeの長さが…5の時のみ
+    If Len(Code) = 5 Then Code = "0" & Code
+        
+    Dim sy As Syokon
+    
+    Dim Row As Double 'match関数が返すのはDouble型
+    
+    On Error Resume Next
+        
+        Row = WorksheetFunction.Match(Code, SyokonMaster.Range("SyokonCodeRange"), 0)
+           
+        If Err Then 'match関数がエラー時
+        
+            sy.Quantity = 0
+            sy.Status = "登録なし"
+            
+            GetSyokonQtyKubun = sy
+            
+            Exit Function
+            
+        End If
+        
+    On Error GoTo 0
+    
+    'TODO:列番号は項目名を調べてセットした方がいいが…
+    
+    sy.Quantity = Range("M" & Row).Value
+    sy.Status = Trim(Range("P" & Row).Value)
+    sy.VenderCode = Range("G" & Row).Value
+
+    GetSyokonQtyKubun = sy
+
+End Function
+
+Function getQuantity(Code As String) As Long
+    
+    getQuantity = WorksheetFunction.VLookup(Code, SyokonMaster.Range("SyokonRange"), 8, 0)
+
+End Function
+
+Function getStatus(Code As String) As String
+
+    Code = "0" & Code
+    
+    getStatus = Trim(WorksheetFunction.VLookup(Code, SyokonMaster.Range("SyokonRange"), 10, 0))
+
+
+End Function

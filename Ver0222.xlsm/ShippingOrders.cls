@@ -62,7 +62,7 @@ Next
 '発送リストが出来ているかチェック
 If Orders.Count = 0 Then
     
-    MsgBox prompt:="本日の出荷はありません。" & vbLf & "注残管理シート、出荷詳細ファイルを確認してください。" _
+    MsgBox Prompt:="本日の出荷はありません。" & vbLf & "注残管理シート、出荷詳細ファイルを確認してください。" _
     , Buttons:=vbExclamation
     
     End
@@ -79,7 +79,7 @@ Public Sub putCsv()
 '参考：http://www.asahi-net.or.jp/~ef2o-inue/vba_o/sub05_110_050.html
 
 Dim day As String
-day = Format(Date, "mm") & Format(Date, "dd")
+day = Format(Date, "mmdd")
 
 Dim DefaultOutputDir As String
 DefaultOutputDir = Environ("HOMEDRIVE") & Environ("HOMEPATH") & "\Desktop\ヤフー"
@@ -114,7 +114,7 @@ If FSO.FileExists(OutputPath) Then
     
     If res <> 6 Then
 
-        MsgBox prompt:="処理を中止しました。", Buttons:=vbInformation
+        MsgBox Prompt:="処理を中止しました。", Buttons:=vbInformation
         End
 
     End If
@@ -133,27 +133,26 @@ TS.WriteLine Header
 'disableFlgをチェックしつつCSVへ出力
 Dim v As Variant
 For Each v In Orders
-       
+    
     '発送不可フラグが真なのに、送り状番号があった場合は注残シートに「発送除外」を書き戻し
     If Orders(v).CanNotShipping Then
         
-        Call OrderSheet.writeExceptShippingNotification(Orders(v))
-    
-    Else
-        
-        '1行分の文字列を作る
-        Dim RowText As String
-        
-        RowText = Orders(v).Id
-        RowText = RowText & "," & "postage1"
-        RowText = RowText & "," & Orders(v).InvoiceNumber
-        RowText = RowText & "," & Format(Orders(v).ShippingDate, "yyyy/mm/dd")
-        RowText = RowText & "," & "2"
-        
-        'CSVへ追記
-        TS.WriteLine RowText
+        Call OrderSheet.writeAssertIvoiceNumber(Orders(v))
     
     End If
+        
+    '1行分の文字列を作る
+    Dim RowText As String
+    
+    RowText = Orders(v).Id
+    RowText = RowText & "," & "postage1"
+    RowText = RowText & "," & Orders(v).InvoiceNumber
+    RowText = RowText & "," & Format(Orders(v).ShippingDate, "yyyy/mm/dd")
+    RowText = RowText & "," & "2"
+    
+    'CSVへ追記
+    TS.WriteLine RowText
+    
 Next
 
 TS.Close

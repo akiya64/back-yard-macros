@@ -16,7 +16,7 @@ Application.ScreenUpdating = True
 
 If BelateList.Count > 0 Then
 
-    MsgBox prompt:="未発送/未連絡で3日以上経過している注文" & vbLf _
+    MsgBox Prompt:="未発送/未連絡で3日以上経過している注文" & vbLf _
             & IdList & vbLf _
             & vbLf _
             & BelateList.Count & "件あります。", _
@@ -40,17 +40,8 @@ Set BelateList = MakeBelateList()
 
 Workbooks.Add
 
-'新規追加ファイルにヘッダー作成
-With ActiveSheet
-    
-    .Range("A1").Value = "出荷状況確認 " & Format(Date, "m月d日")
-    .Range("A2:I2") = Array("受注日", "注文番号", "注文者名", "Line", "商品コード", "商品名", "数量", "出荷状況", "出荷日", "送り状番号")
-
-End With
-
 Dim i As Integer
 i = 3
-
 
 For Each v In BelateList
   
@@ -66,17 +57,43 @@ For Each v In BelateList
     End With
     
     '作成した新規ブックに貼り付けて行く
-    ActiveSheet.Range(Cells(i, 1), Cells(i, 7)) = arr
+    Range(Cells(i, 1), Cells(i, 7)) = arr
     
     i = i + 1
 
 Next
 
-Debug.Print i
 'Line番号列を削除
-ActiveSheet.Columns("d:d").Delete
 
-ActiveSheet.Range(Cells(3, 1), Cells(1, 1).End(xlDown)).NumberFormatLocal = "m""月""d""日"";@"
+Range("A1").Value = "出荷状況確認 " & Format(Date, "m月d日")
+Range("A2:K2") = Array("受注日", "注文番号", "注文者名", "Line", "商品コード", "商品名", "数量", "在庫・入荷", "出荷状況", "出荷日", "送り状番号")
+   
+Dim LastRow As Long
+LastRow = Cells(3, 1).End(xlDown).Row
+
+Dim RecordRangeRows As String
+RecordRangeRows = "3:" & LastRow
+
+Rows(RecordRangeRows).RowHeight = 24.75
+ 
+'日付表示を 月 日に
+Range(Cells(3, 1), Cells(3, 1).End(xlDown)).NumberFormatLocal = "m""月""d""日"";@"
+
+'商品コード、数値表示
+Range(Cells(3, 4), Cells(3, 4).End(xlDown)).NumberFormatLocal = 0
+
+'列幅、行高さ設定
+Columns("d:d").Delete
+Columns("B:F").AutoFit
+Columns("I:J").ColumnWidth = 15.25
+
+'罫線
+Dim RecordRange As String
+RecordRange = "A2:J" & LastRow
+
+Range(RecordRange).Borders.LineStyle = True
+
+End
 
 End Sub
 

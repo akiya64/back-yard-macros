@@ -9,7 +9,7 @@ Const REPLY_SHEET_NAME As String = "納期リスト"
 Dim RangeFaxReplyCode As Range
 
 'Sub FetchFaxReply() '単体テストのためのSub切り替えコメントアウト、Functionにしてるとマクロに表示しないので
-Function FetchFaxReply(Optional arg As Variant = "")
+Function FetchFaxReply(Optional IsNotMsgBox As Boolean)
 
 '注残「アイテム」リストを作る、注文番号・コード・発注日
 '返信FAXのファイルを開く
@@ -91,9 +91,14 @@ ThisWorkbook.Save
 
 Application.ScreenUpdating = True
 
-MsgBox prompt:="返信リスト読込完了"
+Worksheets("LastUpdate").Range("FetchFaxReplyDate").Value = Date
 
-End
+If Not IsNotMsgBox Then
+    
+    MsgBox Prompt:="返信リスト読込完了"
+    End
+    
+End If
 
 End Function
 
@@ -144,7 +149,5 @@ Do
     If FoundCell Is Nothing Then Exit Do
     
 Loop Until FirstFoundCellAddress = FoundCell.Address
-
-'参照渡しでオブジェクトもらってるので、値の返却は不要
 
 End Sub

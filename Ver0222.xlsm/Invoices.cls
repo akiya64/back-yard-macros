@@ -25,14 +25,11 @@ Const REPORT_XLSX_BASENAME As String = "出荷一覧詳細"
 '注文番号をキーとした、Invoiceオブジェクトの辞書配列
 Public InvoiceNumberList As Dictionary
 
-Public Sub fetchReportXlsx()
-'出荷詳細一覧エクセルファイルの方からInvoiceListを生成
-
-Application.ScreenUpdating = False
+Sub fetchInvoiceNumber()
 
 'ファイル名は出荷一覧詳細_150603.xlsxの形
 Dim FileName As String
-FileName = REPORT_XLSX_BASENAME & "_" & Format(Date, "yymmdd") & ".xlsx"
+FileName = REPORT_XLSX_BASENAME & "_" & Format(Date, "mmdd") & ".xlsx"
 
 'テスト用のパス
 'FileName = REPORT_XLSX_BASENAME & "_" & "160311" & ".xlsx"
@@ -40,7 +37,24 @@ FileName = REPORT_XLSX_BASENAME & "_" & Format(Date, "yymmdd") & ".xlsx"
 Dim Path As String
 Path = REPORT_XLSX_FOLDER & FileName
 
-Call findReportFile(Path)
+'エクセルファイルが生成されていなければCSVを読みに行く
+If findReportFile(Path) = "" Then
+
+    Call fetchReportCsv
+
+Else
+
+    Call fetchReportXlsx(Path)
+
+End If
+
+End Sub
+
+Public Sub fetchReportXlsx(Path As String)
+'出荷詳細一覧エクセルファイルの方からInvoiceListを生成\
+
+Dim FileName As String
+FileName = Dir(Path)
 
 'ブックを開く処理、送り状レポートワークブックを取得
 Dim InvoiceReportWb As Workbook
@@ -64,10 +78,8 @@ If InvoiceReportWb Is Nothing Then
         
 End If
 
-
-ShippingFileProgress.ProgressBar.Value = 2
+ShippingFileProgress.ProgressBar.Value = 3
 ShippingFileProgress.ShowCurrentProcess.Caption = "出荷一覧詳細 読み込み中"
-
 
 '出荷一覧詳細で注文番号はAE1列
 'ちょいちょい見出しがない列がある。
@@ -129,60 +141,8 @@ Application.ScreenUpdating = True
 
 End Sub
 
-Private Function findReportFile(Path As String) As String
-'出荷詳細のパスを返します。
-
-Dim FSO As FileSystemObject
-Set FSO = New FileSystemObject
-
-Dim res As Long 'MsgBoxからの返り値を受ける
-
-If FSO.FileExists(Path) Then '出荷詳細一覧ファイルの存在チェック
-    
-    Dim dtc As Date
-    
-    dtc = FSO.GetFile(Path).DateLastModified
-
-    res = MsgBox(FSO.GetFileName(Path) & vbLf _
-                & "最終更新：" & Format(dtc, "mm月dd日 hh:mm") & vbLf _
-                & "このファイルから生成しますか？" _
-                , vbYesNo + vbQuestion)
-                
-    If res <> 6 Then
-
-        MsgBox prompt:="出荷一覧ファイルの読込がキャンセルされました。", Buttons:=vbInformation
-        End
-
-    End If
-
-    findReportFile = Path
-
-Else
-
-    MsgBox prompt:="本日の出荷一覧ファイルがありません。", Buttons:=vbCritical
-    End
-
-End If
-
-End Function
-
-Private Sub checkInvoiceList()
-'送り状リストの件数をチェックして0件ならマクロ終了
-
-If InvoiceNumberList.Count = 0 Then
-
-    MsgBox prompt:="本日の出荷はありません。", Buttons:=vbCritical
-    End
-
-End If
-
-End Sub
-
 Public Sub fetchReportCsv()
  '出荷詳細CSVを読み込んでInvoiceListを作ります。
- 
-Dim Path As String
-Path = findReportFile(REPORT_CSV_PATH)
 
 Set InvoiceNumberList = New Dictionary
 
@@ -190,7 +150,7 @@ Dim FSO As FileSystemObject
 Set FSO = New FileSystemObject
 
 Dim TS As Textstream
-Set TS = FSO.OpenTextFile(Path, ForReading)
+Set TS = FSO.OpenTextFile(REPORT_CSV_PATH, ForReading)
 
 Dim LineBuf() As String
 
@@ -231,5 +191,49 @@ Do Until TS.AtEndOfStream
 Loop
 
 checkInvoiceList
+
+End Sub
+
+Private Function findReportFile(Path As String) As String
+'出荷詳細のパスを返します。
+
+Dim FSO As FileSystemObject
+Set FSO = New FileSystemObject
+
+Dim res As Long 'MsgBoxからの返り値を受ける
+
+If FSO.FileExists(Path) Then '出荷詳細一覧ファイルの存在チェック
+    
+    Dim dtc As Date
+    
+    dtc = FSO.GetFile(Path).DateLastModified
+
+    res = MsgBox(FSO.GetFileName(Path) & vbLf _
+                & "最終更新：" & Format(dtc, "mm月dd日 hh:mm") & vbLf _
+                & "このファイルから生成しますか？" _
+                , vbYesNo + vbQuestion)
+                
+    If res <> 6 Then
+
+        MsgBox Prompt:="出荷一覧ファイルの読込がキャンセルされました。", Buttons:=vbInformation
+
+    End If
+
+    findReportFile = Path
+
+End If
+
+End Function
+
+
+Private Sub checkInvoiceList()
+'送り状リストの件数をチェックして0件ならマクロ終了
+
+If InvoiceNumberList.Count = 0 Then
+
+    MsgBox Prompt:="本日の出荷はありません。", Buttons:=vbCritical
+    End
+
+End If
 
 End Sub

@@ -39,7 +39,7 @@ End If
 Application.DisplayAlerts = True
 
 '「ヤフースカイプ分xx.xlsx」を開く＝梱包室からのチェック済みの商品リストのエクセルファイル開く
-'PickingFileName = Range("PickingSheetBaseName") & Format(Date, "mmdd") & ".xlsx"
+PickingFileName = Range("PickingSheetBaseName") & Format(Date, "mmdd") & ".xlsx"
 
 'フォームのTextBox4が
 PickingFileName = OpPanel.TextBox4
@@ -54,7 +54,7 @@ If Right(PickingFilePath, 1) <> "\" Then PickingFilePath = PickingFilePath & "\"
 PickingFilePath = PickingFilePath & PickingFileName
 
 
-''「ファイルを開く」のフォームでファイルを指定 一応残します
+'「ファイルを開く」のフォームでファイルを指定 一応残します
 'PickingFilePath = Application.GetOpenFilename("エクセルファイル,*.xls?", , "ヤフーピッキングリストを指定")
 
 
@@ -206,7 +206,7 @@ Application.ScreenUpdating = False
 
 If IsMsgBox Then
 
-    MsgBox prompt:="ピッキングファイルの転記完了", Buttons:=vbInformation
+    MsgBox Prompt:="ピッキングファイルの転記完了", Buttons:=vbInformation
 
 End If
 
