@@ -1,20 +1,20 @@
 Attribute VB_Name = "FetchOrder"
 Option Explicit
 
-'–¾×‚Æ’•¶ƒwƒbƒ_[‚Ì‚ ‚éƒtƒHƒ‹ƒ_‚ğw’èAÅŒã•K‚¸\ƒ}[ƒN
-Const CSV_PATH As String = "C:\Users\mos10\Desktop\ƒ„ƒt[\"
-Const ALTER_CSV_PATH As String = "\\MOS10\Users\mos10\Desktop\ƒ„ƒt[\"
+'æ˜ç´°ã¨æ³¨æ–‡ãƒ˜ãƒƒãƒ€ãƒ¼ã®ã‚ã‚‹ãƒ•ã‚©ãƒ«ãƒ€ã‚’æŒ‡å®šã€æœ€å¾Œå¿…ãš\ãƒãƒ¼ã‚¯
+Const CSV_PATH As String = "C:\Users\yahoo_operator\Desktop\ãƒ¤ãƒ•ãƒ¼\"
+Const ALTER_CSV_PATH As String = "\\shiperPC\Users\shipper\Desktop\ãƒ¤ãƒ•ãƒ¼\"
 
-Sub ó’ƒtƒ@ƒCƒ‹“Ç()
+Sub å—æ³¨ãƒ•ã‚¡ã‚¤ãƒ«èª­è¾¼()
 
 OrderSheet.Activate
 
 Dim LineBuf As Variant
 
-'ƒtƒ@ƒCƒ‹‘€ìƒIƒuƒWƒFƒNƒg¶¬
+'ãƒ•ã‚¡ã‚¤ãƒ«æ“ä½œã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç”Ÿæˆ
 Dim FSO As New FileSystemObject
 
-' Meisai.csv‚Ætyumon_H.csv‚ÌCSVƒtƒ@ƒCƒ‹‚ÌƒpƒX‚ğƒZƒbƒg
+' Meisai.csvã¨tyumon_H.csvã®CSVãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹ã‚’ã‚»ãƒƒãƒˆ
 Dim MeisaiPath As String, TyumonhPath As String
 
 If FSO.FileExists(CSV_PATH & "Meisai.csv") Then
@@ -29,7 +29,7 @@ ElseIf FSO.FileExists(ALTER_CSV_PATH & "Meisai.csv") Then
 
 Else
     
-    MsgBox "meisai.csv ƒtƒ@ƒCƒ‹‚È‚µ"
+    MsgBox "meisai.csv ãƒ•ã‚¡ã‚¤ãƒ«ãªã—"
     End
 
 End If
@@ -41,17 +41,17 @@ Call ReadTyumonH(TyumonhPath)
 Dim LastRow As Long
 LastRow = Range("D1").SpecialCells(xlCellTypeLastCell).Row
 
-'ƒAƒhƒCƒ“—p‚ÌsE—ñ w’è
-Range("L1").Value = "ƒAƒhƒCƒ“w’è ‘ä’ F9998"
+'ã‚¢ãƒ‰ã‚¤ãƒ³ç”¨ã®è¡Œãƒ»åˆ— æŒ‡å®š
+Range("L1").Value = "ã‚¢ãƒ‰ã‚¤ãƒ³æŒ‡å®š å°å¸³ï¼š9998"
 Range("L2:O2") = Array(2, 4, LastRow, 12)
 
-MsgBox "ƒAƒhƒCƒ“‚ğÀs‚µ‚Ä‰º‚³‚¢B"
+MsgBox "ã‚¢ãƒ‰ã‚¤ãƒ³ã‚’å®Ÿè¡Œã—ã¦ä¸‹ã•ã„ã€‚"
 
 End Sub
 
 Private Sub ReadMeisai(Path As String)
 
-'Meisai.CSV‚ğOrderSheet=’•¶ˆê——‚É’Ç‹L‚·‚é
+'Meisai.CSVã‚’OrderSheet=æ³¨æ–‡ä¸€è¦§ã«è¿½è¨˜ã™ã‚‹
 
 Dim FSO As Object
 Set FSO = New FileSystemObject
@@ -60,26 +60,26 @@ Dim TS As Textstream
 Set TS = FSO.OpenTextFile(Path, ForReading)
 
 Dim i As Long
-i = 1 '€–Ús‚Ío—Í‚µ‚È‚¢‚Ì‚ÅAi‚Í1s–Ú‚©‚çŠJn
+i = 1 'é …ç›®è¡Œã¯å‡ºåŠ›ã—ãªã„ã®ã§ã€iã¯1è¡Œç›®ã‹ã‚‰é–‹å§‹
     
 Do Until TS.AtEndOfStream
     
-' s‚ğæ‚èo‚µ‚Ä•K—v‚È€–Ú‚Ì‚İ‚ğ”z—ñ‚É“ü‚ê’¼‚·
+' è¡Œã‚’å–ã‚Šå‡ºã—ã¦å¿…è¦ãªé …ç›®ã®ã¿ã‚’é…åˆ—ã«å…¥ã‚Œç›´ã™
     Dim LineBuf As Variant
     LineBuf = Split(TS.ReadLine, ",")
        
     Dim j As Integer
     For j = 0 To UBound(LineBuf)
-        LineBuf(j) = Trim(Replace(LineBuf(j), Chr(34), "")) 'chr(34)‚Å " [”¼Šp“ñdˆø—p•„]
+        LineBuf(j) = Trim(Replace(LineBuf(j), Chr(34), "")) 'chr(34)ã§ " [åŠè§’äºŒé‡å¼•ç”¨ç¬¦]
     
     Next
     
-    'ƒ‹[ƒvˆê‰ñ–Ú‚Å‚Íƒwƒbƒ_[‚È‚Ì‚ÅAƒCƒ“ƒNƒŠƒƒ“ƒg‚Ö”ò‚Ô
+    'ãƒ«ãƒ¼ãƒ—ä¸€å›ç›®ã§ã¯ãƒ˜ãƒƒãƒ€ãƒ¼ãªã®ã§ã€ã‚¤ãƒ³ã‚¯ãƒªãƒ¡ãƒ³ãƒˆã¸é£›ã¶
     If LineBuf(0) = "Order ID" Then GoTo increment
     
-    'CSV‘¤ƒwƒbƒ_[ 0:Order ID/1:Line ID/2:Quantity/3:Product Code/4:Description/5:Option Name/6:Option Value/7:Unit Price/
+    'CSVå´ãƒ˜ãƒƒãƒ€ãƒ¼ 0:Order ID/1:Line ID/2:Quantity/3:Product Code/4:Description/5:Option Name/6:Option Value/7:Unit Price/
     
-    With Worksheets("ó’ƒf[ƒ^ƒV[ƒg")
+    With Worksheets("å—æ³¨ãƒ‡ãƒ¼ã‚¿ã‚·ãƒ¼ãƒˆ")
         .Range("A" & i).Value = LineBuf(0)
         .Range("C" & i).Value = LineBuf(1)
         
@@ -93,7 +93,7 @@ Do Until TS.AtEndOfStream
         .Range("F" & i).Value = LineBuf(2)
         .Range("G" & i).Value = LineBuf(7)
         
-        'E—ñ‚ğƒAƒhƒCƒ“—p‚É6ƒPƒ^‚Ö•ÏŠ·
+        'Eåˆ—ã‚’ã‚¢ãƒ‰ã‚¤ãƒ³ç”¨ã«ç¤¾å†…ã‚³ãƒ¼ãƒ‰ã¸å¤‰æ›
         Dim ycode As String
         ycode = .Range("D" & i).Value
         
@@ -103,14 +103,14 @@ Do Until TS.AtEndOfStream
         
         End If
         
-        'ƒZƒbƒg•ª‰ğ 7777n‚Ü‚è
+        'ã‚»ãƒƒãƒˆåˆ†è§£
         If ycode Like "7777*" Then
             
             Call SetParser.ParseItems(.Range("D" & i))
         
         End If
     
-        '’P‘ÌƒZƒbƒg•ª‰ğ
+        'å˜ä½“ã‚»ãƒƒãƒˆåˆ†è§£
     
     End With
     
@@ -131,28 +131,28 @@ Set FSO = New FileSystemObject
 Dim TS As Textstream
 Set TS = FSO.OpenTextFile(Path, ForReading)
 
-'“ÇÏ’•¶”Ô†‚ÌƒŒƒ“ƒW‚ğƒZƒbƒgAA1‚©‚çA—ñ‚Ì”Ô†“ü‚èÅIƒZƒ‹‚Ü‚Å
+'èª­è¾¼æ¸ˆæ³¨æ–‡ç•ªå·ã®ãƒ¬ãƒ³ã‚¸ã‚’ã‚»ãƒƒãƒˆã€A1ã‹ã‚‰Aåˆ—ã®ç•ªå·å…¥ã‚Šæœ€çµ‚ã‚»ãƒ«ã¾ã§
 Dim LoadedOrderRange As Range
 Set LoadedOrderRange = OrderSheet.Cells(1, 1).Resize(OrderSheet.Cells(1, 1).SpecialCells(xlCellTypeLastCell).Row, 1)
 
 Do Until TS.AtEndOfStream
     
-' s‚ğæ‚èo‚µ‚Ä•K—v‚È€–Ú‚Ì‚İ‚ğ”z—ñ‚É“ü‚ê’¼‚·
+' è¡Œã‚’å–ã‚Šå‡ºã—ã¦å¿…è¦ãªé …ç›®ã®ã¿ã‚’é…åˆ—ã«å…¥ã‚Œç›´ã™
     Dim LineBuf As Variant
     LineBuf = Split(TS.ReadLine, """,""")
     
-    '0=1—ñ–Ú=’•¶”Ô†A’•¶Ò–¼A—v–]AŒˆÏ•û–@AƒN[ƒ|ƒ“’lˆø‚«
+    '0=1åˆ—ç›®=æ³¨æ–‡ç•ªå·ã€æ³¨æ–‡è€…åã€è¦æœ›ã€æ±ºæ¸ˆæ–¹æ³•ã€ã‚¯ãƒ¼ãƒãƒ³å€¤å¼•ã
     Dim Order As Variant
     Order = Array(LineBuf(0), LineBuf(5), LineBuf(36), LineBuf(34), LineBuf(43))
         
     Dim j As Integer
     For j = 0 To UBound(Order)
-        Order(j) = Trim(Replace(Order(j), Chr(34), "")) 'chr(34)‚Å " [”¼Šp“ñdˆø—p•„]
+        Order(j) = Trim(Replace(Order(j), Chr(34), "")) 'chr(34)ã§ " [åŠè§’äºŒé‡å¼•ç”¨ç¬¦]
     
     Next
 
-    '’•¶”Ô†‚Ìs‚ğ’²‚×‚éA’•¶”Ô†‚ÍDobuleŒ^‚Å“ü‚Á‚Ä‚¢‚éBCSV‚ÍStringŒ^B
-    'MatchŠÖ”‚Ì•Ô’l‚ÍDoubleŒ^
+    'æ³¨æ–‡ç•ªå·ã®è¡Œã‚’èª¿ã¹ã‚‹ã€æ³¨æ–‡ç•ªå·ã¯Dobuleå‹ã§å…¥ã£ã¦ã„ã‚‹ã€‚CSVã¯Stringå‹ã€‚
+    'Matché–¢æ•°ã®è¿”å€¤ã¯Doubleå‹
     
     Dim FindRow As Double
     
@@ -170,7 +170,7 @@ Do Until TS.AtEndOfStream
     Dim i As Long
     i = 0
     
-    '’•¶Ò–¼‚ğ‹L“ü ƒIƒtƒZƒbƒg‚µ‚Â‚ÂA‘S‚Ä‚Ìs‚Ö‹L“ü
+    'æ³¨æ–‡è€…åã‚’è¨˜å…¥ ã‚ªãƒ•ã‚»ãƒƒãƒˆã—ã¤ã¤ã€å…¨ã¦ã®è¡Œã¸è¨˜å…¥
     Do While Range("A" & FindRow).Offset(i, 0).Value = CDbl(Order(0))
         
         Range("A" & FindRow).Offset(i, 1).Value = LineBuf(5)
@@ -178,21 +178,21 @@ Do Until TS.AtEndOfStream
     
     Loop
     
-    '”õl—“‚Ö’Ç‹L ƒN[ƒ|ƒ“—˜—p‚©‚Â‘ãˆø‚«E‹âsUEƒ„ƒt[ƒ}ƒl[ŒˆÏ Šm”F‚µ‚Ä
+    'å‚™è€ƒæ¬„ã¸è¿½è¨˜ ã‚¯ãƒ¼ãƒãƒ³åˆ©ç”¨ã‹ã¤ä»£å¼•ããƒ»éŠ€è¡ŒæŒ¯è¾¼ãƒ»ãƒ¤ãƒ•ãƒ¼ãƒãƒãƒ¼æ±ºæ¸ˆ ç¢ºèª
     Dim tmp As String
     tmp = ""
     
-    If Order(3) = "payment_d1" And Order(4) < 0 Then tmp = "‘ãˆø‚« ƒN[ƒ|ƒ“—˜—p "
-    If Order(3) = "payment_b1" Then tmp = tmp & "U ŒûÀˆÄ“à –¢"
-    If Order(3) = "payment_a16" Then tmp = tmp & "Yahoo!ƒ}ƒl[•¥‚¢"
+    If Order(3) = "payment_d1" And Order(4) < 0 Then tmp = "ä»£å¼•ã ã‚¯ãƒ¼ãƒãƒ³åˆ©ç”¨ "
+    If Order(3) = "payment_b1" Then tmp = tmp & "æŒ¯è¾¼ å£åº§æ¡ˆå†… æœª"
+    If Order(3) = "payment_a16" Then tmp = tmp & "Yahoo!ãƒãƒãƒ¼æ‰•ã„"
     
-    Range("K" & FindRow).Value = tmp 'tmp‚ğƒZƒ‹‚É‘‚«–ß‚·
+    Range("K" & FindRow).Value = tmp 'tmpã‚’ã‚»ãƒ«ã«æ›¸ãæˆ»ã™
         
 Continue:
     
 Loop
 
-' ƒIƒuƒWƒFƒNƒg‚ğ”jŠü
+' ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç ´æ£„
 TS.Close
 Set TS = Nothing
 Set FSO = Nothing
