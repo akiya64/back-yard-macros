@@ -7,17 +7,17 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
-Sub overWriteQty(Code As Variant, Qty As Long)
+Sub OverWriteQty(Code As Variant, Qty As Long)
        
     'Match関数で一致させるためにDouble型にキャスト
-    Code = CDbl(Code)
+    If Code Like "#####" Then Code = CDbl(Code)
     
     Dim MatchRow As Double
     
     On Error Resume Next 'ヤフー登録無しコードなら飛ばす
         MatchRow = WorksheetFunction.Match(Code, yahoo6digit.Range("YahooCodeRange"), 0)
     On Error GoTo 0
-    
+
     'quantity,allow-overdraft列を探す
     '毎回Findするのもパフォーマンスが落ちるが、今のところ後から上書きは20アイテムもないので
     
@@ -27,7 +27,7 @@ Sub overWriteQty(Code As Variant, Qty As Long)
     'allow-overdraftは0＝不可
     yahoo6digit.Cells(MatchRow, colAllow).Value = 0
 
-    '社内データQTYか上書きQTYか少ない方を入れる、上書き前は社内データ在庫数に基づく算出数
+    '商魂QTYか上書きQTYか少ない方を入れる、上書き前は商魂在庫数に基づく算出数
     Dim QtyBySyokon As Integer
     QtyBySyokon = yahoo6digit.Cells(MatchRow, colQuantity).Value
     

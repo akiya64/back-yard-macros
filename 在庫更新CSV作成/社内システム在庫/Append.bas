@@ -1,5 +1,5 @@
-Attribute VB_Name = "AppendList"
-Sub addCode(Code As String, RangeName As String)
+Attribute VB_Name = "Append"
+Sub AppendCode(Code As String, RangeName As String)
 'リストにコードを加える
 
 '既にリストアップ済みのコードでないかチェック
@@ -33,25 +33,3 @@ With ThisWorkbook.Worksheets(SheetName)
 End With
 
 End Sub
-
-
-
-Sub PostByList()
-
-
-
-Dim Code As String
-
-i = 2
-
-Do
-    Code = Range("F" & i).Value
-    
-    Call addCode(Code, "EolCodeRange")
-    
-    i = i + 1
-
-Loop Until IsEmpty(Range("F" & i).Value)
-
-End Sub
-

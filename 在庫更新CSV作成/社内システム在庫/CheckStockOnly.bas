@@ -1,6 +1,6 @@
 Attribute VB_Name = "CheckStockOnly"
 Sub CheckEolInStockOnly()
-'発注不可、在庫のみシートの商品コードについて、
+'手配不可、在庫のみシートの商品コードについて、
 '区分をチェック、区分がメ廃番、販売中止->廃番・終了にコピー、すでにリストアップ済なら行削除
 '区分が処分・在廃で在庫数が0->廃番・終了にコピー、すでにリストアップ済なら行削除
 
@@ -43,12 +43,12 @@ sy = SyokonMaster.GetSyokonQtyKubun(Code)
 
 '廃番・販売終了リストへの転記条件に一致するか？
 
-If InStr(sy.Status, "廃番") > 0 Or InStr(sy.Status, "販売中止") > 0 Then
+If InStr(sy.status, "廃番") > 0 Or InStr(sy.status, "販売中止") > 0 Then
 
         Call PostEol(i)
         Exit Sub
 
-ElseIf InStr(sy.Status, "在廃") > 0 Or InStr(sy.Status, "処分品") > 0 Then
+ElseIf InStr(sy.status, "在廃") > 0 Or InStr(sy.status, "処分品") > 0 Then
     
     If sy.Quantity <= 0 Then
         

@@ -19,7 +19,7 @@ Do Until IsEmpty(halt.Cells(i, 3))
     Dim Qty As Long
     Qty = halt.Cells(i, 7).Value
     
-    Call yahoo6digit.overWriteQty(Code, Qty)
+    Call yahoo6digit.OverWriteQty(Code, Qty)
     
     i = i + 1
     

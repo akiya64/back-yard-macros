@@ -7,7 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
-Function GetSyokonQtyKubun(Code As String) As Syokon
+Function GetSyokonQtyKubun(ByVal Code As String) As Syokon
+'必ず値渡し、Code変数はあちこちのメソッドで使用している。
     
     'Codeの長さが…5の時のみ
     If Len(Code) = 5 Then Code = "0" & Code
@@ -23,7 +24,7 @@ Function GetSyokonQtyKubun(Code As String) As Syokon
         If Err Then 'match関数がエラー時
         
             sy.Quantity = 0
-            sy.Status = "登録なし"
+            sy.status = "登録なし"
             
             GetSyokonQtyKubun = sy
             
@@ -33,23 +34,18 @@ Function GetSyokonQtyKubun(Code As String) As Syokon
         
     On Error GoTo 0
     
-    'TODO:列番号は項目名を調べてセットした方がいいが…
+    'TODO:列番号は項目名を調べてセットした方がいいが、毎回動的に調べるのも実行速度が落ちる
     
     sy.Quantity = Range("M" & Row).Value
-    sy.Status = Trim(Range("P" & Row).Value)
+    sy.status = Trim(Range("P" & Row).Value)
     sy.VenderCode = Range("G" & Row).Value
 
     GetSyokonQtyKubun = sy
 
 End Function
 
-Function getQuantity(Code As String) As Long
-    
-    getQuantity = WorksheetFunction.VLookup(Code, SyokonMaster.Range("SyokonRange"), 8, 0)
 
-End Function
-
-Function getStatus(Code As String) As String
+Function getStatus(ByVal Code As String) As String
 
     Code = "0" & Code
     

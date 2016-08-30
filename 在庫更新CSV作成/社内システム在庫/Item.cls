@@ -11,32 +11,76 @@ Option Explicit
 
 Public Code As String           'ヤフーの商品情報
 Public Abstract As String
-Public LastUpdateQuantity As Integer
+Public status
 
-Public Quantity As Integer 'ヤフーショッピングに設定する在庫数はMAX100
-Public AllowOrverDraft As Integer
+Private Quantity As Integer 'ヤフーショッピングに設定する在庫数はMAX100
 
-Public AvailablePurchase As Boolean
+Private AvailablePurchase As Boolean
 
-Public Status As String  '商魂の情報を格納するメンバー
-
-Public VenderCode As String
-Public SyokonQuantity As Integer
-
-Public SecondInventryQuantity As Integer '第二倉庫の棚なし商品のメンバー
-Public IsSecondInventry As Boolean
+Private SyokonData As Syokon  '社内システムの情報を格納するメンバー
 
 Private IsEol As Boolean   'このエクセルで控えている商品リストのフラグ格納メンバー
 Private IsStockOnly As Boolean
 Private IsException As Boolean
 
+Sub Constractor(ArgsCode As String, ArgsAbstract As String)
+
+'命名は初期化でいいのだろうか。
+'シートから取得するデータがコードとAbstractなので不細工。
+
+    Code = ArgsCode
+    Abstract = ArgsAbstract
+    
+    SyokonData = SyokonMaster.GetSyokonQtyKubun(Code)
+
+    status = SyokonData.status
+
+    '廃番、在庫限りの各シートをチェック
+    Me.CheckEol
+    Me.CheckStockOnly
+    
+    '設定在庫数のセット、在庫数は物流システムの在庫データに一本化
+    
+    If Slims.HasLocation(Code) Then
+        
+        SetQuantity (Slims.GetQuantity(Code))
+    
+    Else
+        
+        Quantity = 0
+    
+    End If
+    
+    '手配可否をセット
+    Me.SetAvailablePurchase
+
+End Sub
+
+Function GetQuantity() As Long
+
+    GetQuantity = Quantity
+
+End Function
+
+Function GetAvailablePurchase() As Boolean
+    
+    GetAvailablePurchase = AvailablePurchase
+
+End Function
+Function GetSyokonData() As Syokon
+
+    GetSyokonData = SyokonData
+    
+End Function
+
 Sub CheckEol()
 
     '廃番リストに転記済みかチェック
     '廃番リストに転記されていなくて
-    '1.商魂で区分が廃番、販売中止になっている 2.Abstractに廃番、販売終了を記入している
-    '16-2-29 商魂の区分にメーカー廃番の「メ廃番」が加わりました。
-    
+    '1.社内システムで区分が廃番、販売中止になっている 2.Abstractに廃番、販売終了を記入している
+    '廃番で転記済、社内システム区分が標準などは、表示していない。
+    '16-2-29 社内システムの区分がメーカー廃番の「メ廃番」に変わりました。
+
     '廃番リストに転記済みの廃番
     If WorksheetFunction.CountIf(Eol.Range("EolCodeRange"), Code) > 0 Then
         
@@ -46,24 +90,27 @@ Sub CheckEol()
         
     End If
     
-    
-    If InStr(Status, "廃番") > 0 Or InStr(Status, "販売中止") > 0 Then
-    
-        Call addCode(Code, "EolCodeRange")
-        IsEol = True
-    
-    End If
-        
-    '2.廃番リストに転記未、Abstractに廃番
+    '廃番リストに転記未、Abstractにのみ廃番
     If InStr(Abstract, "終了") > 0 Or _
         InStr(Abstract, "廃番") > 0 Or _
         InStr(Abstract, "完売") > 0 Then
       
-        Call addCode(Code, "EolCodeRange")
+        Call AppendCode(Code, "EolCodeRange")
+        
         IsEol = True
-        Status = "廃番品"
+        
+        status = "Y廃番マーク"
         
     End If
+
+    
+    If InStr(status, "廃番") > 0 Or InStr(status, "販売中止") > 0 Then
+    
+        Call AppendCode(Code, "EolCodeRange")
+        IsEol = True
+    
+    End If
+    
 
 End Sub
 
@@ -82,10 +129,10 @@ Sub CheckStockOnly()
     End If
     
     '在庫限りリストに転記されていない
-    '1.商魂で区分が在廃、処分品になっている
-    If InStr(Status, "在廃") > 0 Or InStr(Status, "処分品") > 0 Then
+    '1.社内システムで区分が在廃、処分品になっている
+    If InStr(status, "在廃") > 0 Or InStr(status, "処分品") > 0 Then
     
-        Call addCode(Code, "StockOnlyCodeRange")
+        Call AppendCode(Code, "StockOnlyCodeRange")
         IsStockOnly = True
     
     End If
@@ -94,46 +141,13 @@ Sub CheckStockOnly()
     If InStr(Abstract, "僅少") > 0 Or _
         InStr(Abstract, "在庫限り") > 0 Then
         
-        Call addCode(Code, "StockOnlyCodeRange")
+        Call AppendCode(Code, "StockOnlyCodeRange")
         IsStockOnly = True
        
     End If
 
 End Sub
 
-Sub CheckSecondInventry()
-'コードがJANの場合は、SecondInventry=棚なしシートを調べる
-'あればIsSecondInventry=棚なしフラグがTrueで、Statusは"棚なしに有"
-
-'商魂に登録があるコードは調べる必要なし、
-If Not Status = "登録なし" Then Exit Sub
-
-LastUpdateQuantity = LastSecondInventry.getQuantity(Code)
-
-'Debug.Assert LastUpdateQuantity = 0  '前回在庫が1以上で停止
-
-If WorksheetFunction.CountIf(SecondInventry.Range("SecondInventryCodeRange"), Code) > 0 Then  '棚なしシートにJANの有無
-    
-    Status = "棚なしに有"
-    IsSecondInventry = True
-    SecondInventryQuantity = SecondInventry.getQuantity(Code)
-    
-Else 'ない場合、前回設定数を調べる
-    If LastUpdateQuantity > 0 Then  '前回設定が1以上で棚なしシートにない=他で売れて在庫がなくなっている状態
-        
-        Status = "棚なし完売"
-        SecondInventryQuantity = 0  '前回設定で0->登録なしに戻す
-    
-    Else
-    
-        Status = "登録なし"
-        SecondInventryQuantity = 0
-    
-    End If
-
-End If
-
-End Sub
 Sub SetAvailablePurchase()
 
 If IsEol Then
@@ -149,7 +163,7 @@ End If
 '仕入れ先別、入荷可否フラグが1か判定
 On Error GoTo e:
     
-    If WorksheetFunction.VLookup(VenderCode, purFlagSheet.Range("PurchaseFlgByVender"), 3, False) = 1 Then
+    If WorksheetFunction.VLookup(SyokonData.VenderCode, purFlagSheet.Range("PurchaseFlgByVender"), 3, False) = 1 Then
         AvailablePurchase = True
         Exit Sub
     End If
@@ -158,28 +172,24 @@ On Error GoTo e:
 On Error GoTo 0
 
 Exit Sub
+
 'コードがJANは基本1とする…返信FAXなどで廃番・販売終了・ロット過多はEol/StockOnlyに控えているのが前提
 e:
-    If Status = "棚なし完売" Or SecondInventryQuantity = 0 Then
-    
-        AvailablePurchase = True
+        
+        AvailablePurchase = False
         Exit Sub
-    End If
 
 End Sub
 
 Sub SetQuantity(Qty As Long)
-'商魂の在庫数量を、ヤフーへアップする形へ丸めてセット
+'社内システムの在庫数量を、ヤフーへアップする形へ丸めてセット
 
 If IsEol Then
     Quantity = 0
     Exit Sub
 End If
 
-'0以下＝0、上限100、商魂在庫数に0.6かけで小数点以下は切り捨て
-
-'棚卸の前1ヵ月は商魂と実在庫の誤差が大きくなるので、いくらか減じてから丸める
-Qty = Qty - PreDecreaseQty
+'0以下＝0、上限100、社内システム在庫数に0.6かけで小数点以下は切り捨て
 
 Select Case Qty
     
@@ -200,5 +210,4 @@ Select Case Qty
 End Select
 
 End Sub
-
 

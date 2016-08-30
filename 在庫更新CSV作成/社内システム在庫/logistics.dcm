@@ -14,7 +14,7 @@ Function getRowNum(Code As String) As Double
     Dim Row As Double
  
     'SLIMSデータはCSVから入れているので、SLIMSシートのコードはString型
-    getRowNum = WorksheetFunction.Match(Code, SlimsCsv.Range("B1:B50000"), 0)
+    getRowNum = WorksheetFunction.Match(Code, Slims.Range("B1:B60000"), 0)
 
 End Function
 
@@ -34,11 +34,11 @@ Error:
     
 End Function
     
-Function getQuantity(Code As String) As Long
+Function GetQuantity(Code As String) As Long
 
 On Error Resume Next
     
-    getQuantity = Range("H" & CStr(getRowNum(Code))).Value
+    GetQuantity = Range("H" & CStr(getRowNum(Code))).Value
 
 On Error GoTo 0
 
@@ -46,7 +46,7 @@ Exit Function
 
 Error:
     Err.Clear
-    getQuantity = 0
+    GetQuantity = 0
 
 End Function
 
@@ -55,7 +55,7 @@ Function HasLocation(Code As String) As Boolean
 Dim TmpHasLoc As Boolean
 
 'ロケーションフォーマット例 1-50-A-5-01
-If getLocation(Code) Like "1-[0-9]*-*" Then
+If getLocation(Code) Like "1-[0-9]*-*-[0-9]*" Then
     
     HasLocation = True
 
@@ -73,9 +73,9 @@ Function ImportSlimsCSV(Optional var As Variant) As Boolean
 '
 
 '
-    SlimsCsv.Activate
+    Slims.Activate
     
-    SlimsCsv.Cells.Clear
+    Slims.Cells.Clear
     
     Dim SlimsCsvPath As String
     SlimsCsvPath = SlimsInventryCsv
