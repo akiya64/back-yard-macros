@@ -17,7 +17,7 @@ Private Quantity As Integer 'ヤフーショッピングに設定する在庫数はMAX100
 
 Private AvailablePurchase As Boolean
 
-Private SyokonData As Syokon  '社内システムの情報を格納するメンバー
+Private SyokonData As Syokon  '商魂の情報を格納するメンバー
 
 Private IsEol As Boolean   'このエクセルで控えている商品リストのフラグ格納メンバー
 Private IsStockOnly As Boolean
@@ -39,7 +39,7 @@ Sub Constractor(ArgsCode As String, ArgsAbstract As String)
     Me.CheckEol
     Me.CheckStockOnly
     
-    '設定在庫数のセット、在庫数は物流システムの在庫データに一本化
+    '設定在庫数のセット、在庫数はスリムスに一本化
     
     If Slims.HasLocation(Code) Then
         
@@ -77,9 +77,9 @@ Sub CheckEol()
 
     '廃番リストに転記済みかチェック
     '廃番リストに転記されていなくて
-    '1.社内システムで区分が廃番、販売中止になっている 2.Abstractに廃番、販売終了を記入している
-    '廃番で転記済、社内システム区分が標準などは、表示していない。
-    '16-2-29 社内システムの区分がメーカー廃番の「メ廃番」に変わりました。
+    '1.商魂で区分が廃番、販売中止になっている 2.Abstractに廃番、販売終了を記入している
+    '廃番で転記済、商魂区分が標準などは、表示していない。
+    '16-2-29 商魂の区分がメーカー廃番の「メ廃番」に変わりました。
 
     '廃番リストに転記済みの廃番
     If WorksheetFunction.CountIf(Eol.Range("EolCodeRange"), Code) > 0 Then
@@ -129,7 +129,7 @@ Sub CheckStockOnly()
     End If
     
     '在庫限りリストに転記されていない
-    '1.社内システムで区分が在廃、処分品になっている
+    '1.商魂で区分が在廃、処分品になっている
     If InStr(status, "在廃") > 0 Or InStr(status, "処分品") > 0 Then
     
         Call AppendCode(Code, "StockOnlyCodeRange")
@@ -182,14 +182,14 @@ e:
 End Sub
 
 Sub SetQuantity(Qty As Long)
-'社内システムの在庫数量を、ヤフーへアップする形へ丸めてセット
+'商魂の在庫数量を、ヤフーへアップする形へ丸めてセット
 
 If IsEol Then
     Quantity = 0
     Exit Sub
 End If
 
-'0以下＝0、上限100、社内システム在庫数に0.6かけで小数点以下は切り捨て
+'0以下＝0、上限100、商魂在庫数に0.6かけで小数点以下は切り捨て
 
 Select Case Qty
     
