@@ -8,11 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
-Private Sub Worksheet_Activate()
 
-    ActiveSheet.EnableCalculation = True
-
-End Sub
 Private Sub Worksheet_Change(ByVal Target As Range)
     Dim LastRow As Long
     LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
@@ -23,9 +19,12 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     
     Else
         
+        Application.StatusBar = False
+        
         MsgBox "アドイン完了、ファイルを作成します。"
+        
         Call BuildSheets.電算提出_振分けシート作成
-    
+
     End If
 
 End Sub

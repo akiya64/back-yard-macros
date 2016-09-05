@@ -9,6 +9,11 @@ Sub 受注ファイル読込()
 
 OrderSheet.Activate
 
+If Not Range("B2").Value = "" Then
+    MsgBox "データ取得済です。"
+    End
+End If
+
 Dim LineBuf As Variant
 
 'ファイル操作オブジェクト生成
@@ -38,10 +43,12 @@ Call ReadMeisai(MeisaiPath)
 
 Call ReadTyumonH(TyumonhPath)
 
+OrderSheet.Shapes(1).Delete
+
+'アドイン用の行・列 表示
 Dim LastRow As Long
 LastRow = Range("D1").SpecialCells(xlCellTypeLastCell).Row
 
-'アドイン用の行・列 指定
 Range("L1").Value = "アドイン指定 台帳：9998"
 Range("L2:O2") = Array(2, 4, LastRow, 12)
 
@@ -66,7 +73,7 @@ Do Until TS.AtEndOfStream
     
 ' 行を取り出して必要な項目のみを配列に入れ直す
     Dim LineBuf As Variant
-    LineBuf = Split(TS.ReadLine, ",")
+    LineBuf = Split(TS.ReadLine, """,""")
        
     Dim j As Integer
     For j = 0 To UBound(LineBuf)
@@ -78,7 +85,8 @@ Do Until TS.AtEndOfStream
     If LineBuf(0) = "Order ID" Then GoTo increment
     
     'CSV側ヘッダー 0:Order ID/1:Line ID/2:Quantity/3:Product Code/4:Description/5:Option Name/6:Option Value/7:Unit Price/
-    
+        
+    ':ToDo ここからシート、セルの値のが入るので分割した方がいいかもしれない。
     With Worksheets("受注データシート")
         .Range("A" & i).Value = LineBuf(0)
         .Range("C" & i).Value = LineBuf(1)
@@ -93,24 +101,33 @@ Do Until TS.AtEndOfStream
         .Range("F" & i).Value = LineBuf(2)
         .Range("G" & i).Value = LineBuf(7)
         
-        'E列をアドイン用に6ケタへ変換
-        Dim ycode As String
-        ycode = .Range("D" & i).Value
-        
-        If ycode Like "#####" Then
-        
-            .Range("D" & i).Value = "0" & ycode
-        
-        End If
-        
+        'Yahoo!登録コードをチェック
         'セット分解 7777始まり
-        If ycode Like "7777*" Then
+        Dim YahooCode As String
+        YahooCode = .Range("D" & i).Value
+        
+        If YahooCode Like "7777*" Then
             
             Call SetParser.ParseItems(.Range("D" & i))
         
         End If
     
-        '単体セット分解
+        '単体○個セット分解 ハイフン含むコードなら分解可能かチェック
+        
+        If YahooCode Like "*-*" Then
+        
+            Call SetParser.ParseScalingSet(.Range("D" & i))
+        
+        End If
+    
+        'D列をアドイン用に6ケタに修正
+        
+        If YahooCode Like "#####" Then
+                    
+            .Range("D" & i).NumberFormatLocal = "@"
+            .Range("D" & i).Value = "0" & YahooCode
+        
+        End If
     
     End With
     
@@ -151,8 +168,8 @@ Do Until TS.AtEndOfStream
     
     Next
 
-    '注文番号の行を調べる、注文番号はDobule型で入っている。CSVはString型。
-    'Match関数の返値はDouble型
+    '注文番号の行を調べる
+    '注文番号はDobule型で入っている。CSVはString型、Match関数の返値はDouble型
     
     Dim FindRow As Double
     
@@ -170,7 +187,7 @@ Do Until TS.AtEndOfStream
     Dim i As Long
     i = 0
     
-    '注文者名を記入 オフセットしつつ、全ての行へ記入
+    '注文者名を記入 オフセットしつつ、該当注文番号の全ての行へ記入
     Do While Range("A" & FindRow).Offset(i, 0).Value = CDbl(Order(0))
         
         Range("A" & FindRow).Offset(i, 1).Value = LineBuf(5)
@@ -183,7 +200,7 @@ Do Until TS.AtEndOfStream
     tmp = ""
     
     If Order(3) = "payment_d1" And Order(4) < 0 Then tmp = "代引き クーポン利用 "
-    If Order(3) = "payment_b1" Then tmp = tmp & "振込 口座案内 未"
+    If Order(3) = "payment_b1" Then tmp = tmp & "銀行振込"
     If Order(3) = "payment_a16" Then tmp = tmp & "Yahoo!マネー払い"
     
     Range("K" & FindRow).Value = tmp 'tmpをセルに書き戻す
@@ -198,3 +215,4 @@ Set TS = Nothing
 Set FSO = Nothing
 
 End Sub
+

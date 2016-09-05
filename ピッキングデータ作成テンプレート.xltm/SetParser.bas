@@ -12,11 +12,11 @@ ThisWorkbook.Activate
 Dim HitSheet As Worksheet
 Set HitSheet = SetParser.SearchTiedItemSheet(r.Value)
 
-Dim Items As Collection
-Set Items = GetComponentItems(r.Value, HitSheet)
+Dim ComponentItems As Collection
+Set ComponentItems = GetComponentItems(r.Value, HitSheet)
 
 'セット内容書き出し処理
-Call InsertComponetRow(r, Items)
+Call InsertComponetRow(r, ComponentItems)
 
 End Sub
 
@@ -59,7 +59,7 @@ For i = 1 To d.Count
         
     End If
     
-    '分解後アイテムは登録コードを setとする
+    '分解後アイテムは登録コードを Setとする
     c.Offset(1, -1).Value = "Set"
     
     '注文番号を入れる
@@ -187,3 +187,33 @@ For Each wb In Workbooks
 Next
 
 End Sub
+
+Sub ParseScalingSet(r As Variant)
+
+Dim Code As String
+Code = r.Value
+
+'If Code Like "*-*" Then
+'    Debug.Print "○個セットかもな!"
+'End If
+
+Dim SeparatedCode As Variant
+SeparatedCode = Split(Code, "-", 2)
+
+'IsNumericメソッドで、ハイフンの後ろが数値に変換可能かチェック
+'変換可能なら、○個セットと見なす
+
+If Not IsNumeric(SeparatedCode(1)) Then
+    'Debug.Print "いや、セットちゃうわ"
+    Exit Sub
+End If
+
+'セットなら、D列は単体コード、数量はセット数量×受注数量
+r.Offset(0, 1).Value = CStr(SeparatedCode(0))
+Range("E", r.Row).Value = Range("E", r.Row).Value * CLng(Val(SeparatedCode(1)))
+
+'備考に、セット分解済記入
+Range("K" & r.Row).Value = Range("K" & r.Row).Value & "セット分解 済"
+
+End Sub
+

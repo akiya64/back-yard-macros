@@ -1,24 +1,28 @@
 Attribute VB_Name = "BuildSheets"
 Option Explicit
 
-Sub é›»ç®—æå‡º_æŒ¯åˆ†ã‘ã‚·ãƒ¼ãƒˆä½œæˆ()
+Sub “dZ’ño_U•ª‚¯ƒV[ƒgì¬()
 
-Const OUTPUT_FOLDER As String = "\\Server\ãƒãƒƒãƒˆè²©å£²\ãƒ”ãƒƒã‚­ãƒ³ã‚°\"
+Const OUTPUT_FOLDER As String = "\\Server02\¤•i•”\ƒlƒbƒg”Ì”„ŠÖ˜A\ƒsƒbƒLƒ“ƒO\"
 
 OrderSheet.Activate
 
-If InStr(Range("A1").Value, "ã‚¢ãƒ‰ã‚¤ãƒ³æŒ‡å®š") > 0 Then
-    MsgBox "ã‚¢ãƒ‰ã‚¤ãƒ³ã‚’å®Ÿè¡Œã—ã¦ä¸‹ã•ã„ã€‚"
+If InStr(Range("A1").Value, "ƒAƒhƒCƒ“w’è") > 0 Then
+    MsgBox "ƒAƒhƒCƒ“‚ğÀs‚µ‚Ä‰º‚³‚¢B"
 End If
 
 SyokonData.TransferOrderSheet
+
+'U•ª‚¯—pƒV[ƒg‚Ì—ñ•ŒÅ’è‚Ì‚½‚ß‚Ì•ÛŒì‚ğ‰ğœ
+ForSorterSheet.Unprotect
+ForSorterSetItemSheet.Unprotect
 
 BuildSheets.TransferPickingData
 BuildSheets.TransferSorterSheet
 
 Dim i As Long
 
-'ç½«ç·šå¼•ã
+'Œrüˆø‚­
 For i = 2 To 5
 
     With Worksheets(i).Range("A1").CurrentRegion.Borders
@@ -27,82 +31,100 @@ For i = 2 To 5
 
 Next
 
-'æå‡ºç”¨ä½œæˆ ç‰©æµå€‰åº« ãƒ­ã‚±ãƒ¼ã‚·ãƒ§ãƒ³æœ‰ã‚Š
-Sheets("ç‰©æµå€‰åº«ãƒ­ã‚±ã‚ã‚Š").Copy
+'U•ª‚¯—pƒV[ƒg‚ğ•\¦‚µ‚ÄAƒ\[ƒg
+Worksheets("U•ª‚¯—pˆê——ƒV[ƒg").Activate
+Sort.U•ª—pƒV[ƒg_ƒ\[ƒg
 
-ActiveWorkbook.SaveAs filename:=OUTPUT_FOLDER & "ãƒ¤ãƒ•ãƒ¼Pã‚·ãƒ¼ãƒˆ" & Format(Date, "MMdd") & "-2-3.xlsx"
+ForSorterSheet.Protect AllowSorting:=True, AllowFiltering:=True
+ForSorterSetItemSheet.Protect AllowSorting:=True, AllowFiltering:=True
 
+'“dZ’ño—p•Û‘¶ 100”Ô ’I—L‚è
+Sheets("100”Ô").Copy
+ActiveWorkbook.SaveAs filename:=OUTPUT_FOLDER & "ƒ„ƒt[PƒV[ƒg" & Format(Date, "MMdd") & "-2-3.xlsx"
 ActiveWorkbook.Close
 
-'æå‡ºç”¨ä½œæˆ ãƒ­ã‚±ç„¡ã—
-
-Sheets("ãƒ­ã‚±ç„¡ã—").Copy
-
-ActiveWorkbook.SaveAs filename:=OUTPUT_FOLDER & "ãƒ¤ãƒ•ãƒ¼Pã‚·ãƒ¼ãƒˆ" & Format(Date, "MMdd") & "-a.xlsx"
-
+'“dZ’ño—p•Û‘¶ ’I–³‚µ
+Sheets("’I–³‚µ").Copy
+ActiveWorkbook.SaveAs filename:=OUTPUT_FOLDER & "ƒ„ƒt[PƒV[ƒg" & Format(Date, "MMdd") & "-a.xlsx"
 ActiveWorkbook.Close
 
-'ã“ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä¿å­˜
+'‚±‚Ìƒtƒ@ƒCƒ‹‚ğ•Û‘¶
 Application.DisplayAlerts = False
-ThisWorkbook.SaveAs filename:="\\shipper\Users\shipper\Desktop\ãƒ¤ãƒ•ãƒ¼\ãƒ”ãƒƒã‚­ãƒ³ã‚°ç”Ÿæˆç”¨éå»ãƒ•ã‚¡ã‚¤ãƒ«\" & "ãƒ¤ãƒ•ãƒ¼æå‡ºãƒ»æŒ¯åˆ†ã‘ç”¨" & Format(Date, "MMdd") & ".xlsx"
+ThisWorkbook.SaveAs filename:="\\MOS10\Users\mos10\Desktop\ƒ„ƒt[\ƒsƒbƒLƒ“ƒO¶¬—p‰ß‹ƒtƒ@ƒCƒ‹\" & "ƒ„ƒt[’ñoEU•ª‚¯—p" & Format(Date, "MMdd") & ".xlsx"
 
 End Sub
 
 Private Sub TransferSorterSheet()
 
-Worksheets("æŒ¯åˆ†ã‘ç”¨ä¸€è¦§ã‚·ãƒ¼ãƒˆ").PageSetup.LeftHeader = Format(Date, "M/dd") & " Yahoo!ã‚·ãƒ§ãƒƒãƒ”ãƒ³ã‚°"
-Worksheets("æŒ¯åˆ†ã‘ç”¨ä¸€è¦§ã‚·ãƒ¼ãƒˆ-ã‚»ãƒƒãƒˆ").PageSetup.LeftHeader = Format(Date, "M/dd") & " Yahoo!ã‚·ãƒ§ãƒƒãƒ”ãƒ³ã‚° ã‚»ãƒƒãƒˆ"
+Worksheets("U•ª‚¯—pˆê——ƒV[ƒg").PageSetup.LeftHeader = Format(Date, "M/dd") & " Yahoo!ƒVƒ‡ƒbƒsƒ“ƒO"
+Worksheets("U•ª‚¯—pˆê——ƒV[ƒg-ƒZƒbƒg").PageSetup.LeftHeader = Format(Date, "M/dd") & " Yahoo!ƒVƒ‡ƒbƒsƒ“ƒO ƒZƒbƒg"
 
 Dim i As Long, k As Long, j As Long, Order(8) As Variant
-'å—æ³¨ãƒ‡ãƒ¼ã‚¿ã‚·ãƒ¼ãƒˆè¡Œã‚«ã‚¦ãƒ³ã‚¿
+'ó’ƒf[ƒ^ƒV[ƒgsƒJƒEƒ“ƒ^
 i = 2
 
-'æ£šç„¡ã—ã‚·ãƒ¼ãƒˆè¡Œã‚«ã‚¦ãƒ³ã‚¿
+'U•ª‚¯—pƒV[ƒgsƒJƒEƒ“ƒ^
 j = 2
 
-'100ç•ªã‚·ãƒ¼ãƒˆè¡Œã‚«ã‚¦ãƒ³ã‚¿
+'U•ª‚¯—pƒZƒbƒgƒV[ƒgsƒJƒEƒ“ƒ^
 k = 2
 
 Do
-    'é…åˆ—ã«è¡Œã‚’æ ¼ç´
-    Order(0) = CStr(Range("A" & i).Value) 'æ³¨æ–‡ç•ªå·
-    Order(1) = Range("B" & i).Value 'ãŠå±Šã‘å…ˆå
-    Order(2) = Range("D" & i).Value '6ã‚±ã‚¿
-    Order(3) = Range("E" & i).Value 'å•†å“å
-    Order(4) = Range("F" & i).Value 'æ•°é‡
-    Order(5) = Range("L" & i).Value 'JAN
-    Order(6) = Range("I" & i).Value 'ç¾åœ¨åº«
-    Order(7) = Range("K" & i).Value 'å‚™è€ƒ
-    Order(8) = Range("J" & i).Value 'ãƒ­ã‚±ãƒ¼ã‚·ãƒ§ãƒ³
+    '”z—ñ‚És‚ğŠi”[
+    Order(0) = CStr(Range("A" & i).Value) '’•¶”Ô†
+    Order(1) = Range("B" & i).Value '‚¨“Í‚¯æ–¼
+    Order(2) = CStr(Range("D" & i).Value) '6ƒPƒ^
+    Order(3) = Range("E" & i).Value '¤•i–¼
+    Order(4) = Range("F" & i).Value '”—Ê
+    Order(5) = CStr(Range("L" & i).Value) 'JAN
+    Order(6) = Range("I" & i).Value 'Œ»İŒÉ
+    Order(7) = Range("K" & i).Value '”õl
+    Order(8) = Range("J" & i).Value 'ƒƒP[ƒVƒ‡ƒ“
     
-    'è»¢è¨˜å…ˆåˆ¤å®š
-    '7777å§‹ã¾ã‚Šã‚»ãƒƒãƒˆã¨ã‚»ãƒƒãƒˆå†…å®¹å“
+    '“]‹Læ”»’è
+    '7777n‚Ü‚èƒZƒbƒg‚ÆƒZƒbƒg“à—e•i
     If Order(2) Like "7777*" Or Range("C" & i).Value = "Set" Then
        
-        Worksheets("æŒ¯åˆ†ã‘ç”¨ä¸€è¦§ã‚·ãƒ¼ãƒˆ-ã‚»ãƒƒãƒˆ").Range("A" & j & ":I" & j).NumberFormatLocal = "@"
-        Worksheets("æŒ¯åˆ†ã‘ç”¨ä¸€è¦§ã‚·ãƒ¼ãƒˆ-ã‚»ãƒƒãƒˆ").Range("A" & j & ":I" & j) = Order
-
+        With Worksheets("U•ª‚¯—pˆê——ƒV[ƒg-ƒZƒbƒg")
+            
+            .Range("A" & j & ":I" & j).NumberFormatLocal = "@"
+            .Range("A" & j & ":I" & j) = Order
+            
+            '”—ÊAŒ»İŒÉ‚Í‰EŠñ‚¹
+            .Range("E" & j).HorizontalAlignment = xlRight
+            .Range("G" & j).HorizontalAlignment = xlRight
+        
+        End With
+        
         j = j + 1
           
-    'ãã‚Œä»¥å¤–
+    '‚»‚êˆÈŠO
     Else
-    
-        Worksheets("æŒ¯åˆ†ã‘ç”¨ä¸€è¦§ã‚·ãƒ¼ãƒˆ").Range("A" & k & ":I" & k).NumberFormatLocal = "@"
-        Worksheets("æŒ¯åˆ†ã‘ç”¨ä¸€è¦§ã‚·ãƒ¼ãƒˆ").Range("A" & k & ":I" & k) = Order
-       
-       'æ£šç•ªãªã—ã¯ã€è¡Œã«è‰²ã‚’ä»˜ã‘ã‚‹ã€‚
-        If Order(8) = "" Then
-                
-            With Worksheets("æŒ¯åˆ†ã‘ç”¨ä¸€è¦§ã‚·ãƒ¼ãƒˆ").Range("A" & k & ":I" & k).Interior
-                .Pattern = xlSolid
-                .PatternColorIndex = xlAutomatic
-                .ThemeColor = xlThemeColorAccent2
-                .TintAndShade = 0.799981688894314
-                .PatternTintAndShade = 0
-            End With
+        With Worksheets("U•ª‚¯—pˆê——ƒV[ƒg")
         
-        End If
-    
+            .Range("A" & k & ":I" & k).NumberFormatLocal = "@"
+            .Range("A" & k & ":I" & k) = Order
+       
+           '”—ÊAŒ»İŒÉ‚Í‰EŠñ‚¹
+            .Range("E" & k).HorizontalAlignment = xlRight
+            .Range("G" & k).HorizontalAlignment = xlRight
+        
+       
+        '’I”Ô‚È‚µ‚ÍAs‚ÉF‚ğ•t‚¯‚éB
+            If Order(8) = "" Then
+                     
+                With .Range("A" & k & ":I" & k).Interior
+                    .Pattern = xlSolid
+                    .PatternColorIndex = xlAutomatic
+                    .ThemeColor = xlThemeColorAccent2
+                    .TintAndShade = 0.799981688894314
+                    .PatternTintAndShade = 0
+                End With
+             
+            End If
+        
+        End With
+        
         k = k + 1
     
     End If
@@ -113,47 +135,53 @@ Continue:
 
 Loop Until IsEmpty(Range("A" & i))
 
+Worksheets("U•ª‚¯—pˆê——ƒV[ƒg").Range("A1").CurrentRegion.Font.Size = 9
+Worksheets("U•ª‚¯—pˆê——ƒV[ƒg-ƒZƒbƒg").Range("A1").CurrentRegion.Font.Size = 9
+
 End Sub
 
 Private Sub TransferPickingData()
 
-Dim i As Long, k As Long, j As Long, Order(5) As Variant
-'å—æ³¨ãƒ‡ãƒ¼ã‚¿ã‚·ãƒ¼ãƒˆè¡Œã‚«ã‚¦ãƒ³ã‚¿
+Dim i As Long, k As Long, j As Long, Order(6) As Variant
+'ó’ƒf[ƒ^ƒV[ƒgsƒJƒEƒ“ƒ^
 i = 2
 
-'æ£šç„¡ã—ã‚·ãƒ¼ãƒˆè¡Œã‚«ã‚¦ãƒ³ã‚¿
+'’I–³‚µƒV[ƒgsƒJƒEƒ“ƒ^
 j = 2
 
-'100ç•ªã‚·ãƒ¼ãƒˆè¡Œã‚«ã‚¦ãƒ³ã‚¿
+'100”ÔƒV[ƒgsƒJƒEƒ“ƒ^
 k = 2
 
 Do
-    'é…åˆ—ã«è¡Œã‚’æ ¼ç´
-    Order(0) = Range("A" & i).Value 'æ³¨æ–‡ç•ªå·
-    Order(1) = Range("D" & i).Value '6ã‚±ã‚¿
-    Order(2) = Range("E" & i).Value 'å•†å“å
-    Order(3) = Range("F" & i).Value 'æ•°é‡
-    Order(4) = Range("G" & i).Value 'ãƒ¤ãƒ•ãƒ¼è²©å£²ä¾¡æ ¼
-    Order(5) = Range("J" & i).Value 'æ£šç•ª
+    '”z—ñ‚És‚ğŠi”[
+    Order(0) = Range("A" & i).Value '’•¶”Ô†
+    Order(1) = CStr(Range("D" & i).Value) '6ƒPƒ^
+    Order(2) = Range("E" & i).Value '¤•i–¼
+    Order(3) = Range("F" & i).Value '”—Ê
+    Order(4) = Range("G" & i).Value 'ƒ„ƒt[”Ì”„‰¿Ši
+    Order(5) = Range("I" & i).Value 'Œ»İŒÉ
+    Order(6) = Range("J" & i).Value '’I”Ô
     
-    'è»¢è¨˜å…ˆåˆ¤å®š
-    'ãƒ­ã‚±ãƒ¼ã‚·ãƒ§ãƒ³ãªã—
-    If Order(5) = "" Then
+    '“]‹Læ”»’è
+    'ƒƒP[ƒVƒ‡ƒ“‚È‚µ
+    If Order(6) = "" Then
         
         If Not Order(0) Like "7777*" Then
            
-           Worksheets("æ£šç„¡ã—").Range("B" & j).NumberFormatLocal = "@"
-           Worksheets("æ£šç„¡ã—").Range("B" & j & ":G" & j) = Order
+           'ƒR[ƒh‚ª“ü‚é—ñ‚Í•¶š—ñ‚Æ‚µ‚ÄAæ“ªƒ[ƒ‚ªƒJƒbƒg‚³‚ê‚È‚¢‚æ‚¤‚É
+           Worksheets("’I–³‚µ").Range("C" & j).NumberFormatLocal = "@"
+           Worksheets("’I–³‚µ").Range("B" & j & ":G" & j) = Order
         
            j = j + 1
         
         End If
         
-    'ãƒ­ã‚±ãƒ¼ã‚·ãƒ§ãƒ³æœ‰ã‚Š
+    'ƒƒP[ƒVƒ‡ƒ“—L‚è
     Else
     
-       Worksheets("100ç•ª").Range("B" & k).NumberFormatLocal = "@"
-       Worksheets("100ç•ª").Range("B" & k & ":G" & k) = Order
+       'ƒR[ƒh‚ª“ü‚é—ñ‚Í•¶š—ñ‚Æ‚µ‚ÄAæ“ªƒ[ƒ‚ªƒJƒbƒg‚³‚ê‚È‚¢‚æ‚¤‚É
+       Worksheets("100”Ô").Range("C" & k).NumberFormatLocal = "@"
+       Worksheets("100”Ô").Range("B" & k & ":H" & k) = Order
        
        k = k + 1
     
