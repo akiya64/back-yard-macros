@@ -1,7 +1,7 @@
 'ファイル名を格納する配列
 Dim QtyBooks(1)
-QtyBooks(0) = "在庫ファイル1.xlsm"
-QtyBooks(1) = "在庫ファイル2.xlsm"
+QtyBooks(0) = "在庫表1.xlsm"
+QtyBooks(1) = "在庫表2.xlsm"
 
 'ファイル操作、Dir取得FSOオブジェクト
 Dim Fso
@@ -27,11 +27,11 @@ Dim exApp
 Set exApp = Wscript.CreateObject("Excel.Application")
 exApp.Visible = True
 
-For i =0 to 2
+For i = 0 to 1
 
 	Dim wb
-	set wb = exApp.Workbooks.Open (Fso & "\" & QtyBooks(i))
-	exApp.Run ("AppendQtyCsv")
+	set wb = exApp.Workbooks.Open (CurrentPath & "\" & QtyBooks(i))
+	exApp.Run ("CSV生成")
 
 	wb.Close True
 
