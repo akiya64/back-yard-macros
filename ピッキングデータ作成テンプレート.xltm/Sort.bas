@@ -16,7 +16,7 @@ With Worksheets("振分け用一覧シート").Sort
     '一旦ソートをクリア
     .SortFields.Clear
     
-    'ソートキーをセット 第一キー 商品コード列：色  商品コード：昇順
+    'ソートキーをセット 第一キー 商品コード：色、第二キー 商品コード：昇順
     .SortFields.Add Key:=CodeRange, SortOn:=xlSortOnCellColor, Order:=xlAscending, DataOption:=xlSortNormal
     .SortFields.Add Key:=CodeRange, SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
 

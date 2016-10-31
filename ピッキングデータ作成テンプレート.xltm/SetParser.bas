@@ -49,20 +49,26 @@ For i = 1 To d.Count
     c.Offset(1, 2).Value = c.Offset(1, 2).Value
     
     '1個目のアイテムにのみ販売価格を付け替える
-    If i = d.Count Then
+    
+    '売価転記済フラグ
+    Dim Flg As Boolean
+    
+    If v.Quantity = 1 And Flg = False Then
     
         c.Offset(1, 3).Value = c.Offset(0, 3).Value
         c.Offset(0, 3).Value = 0
-    
+                
+        Flg = True
+        
     Else
         c.Offset(1, 3).Value = 0
         
     End If
     
-    '分解後アイテムは登録コードを Setとする
-    c.Offset(1, -1).Value = "Set"
+    '挿入後の行に、ヤフー登録コードはセットの7777コードを入れる
+    c.Offset(1, -1).Value = c.Value
     
-    '注文番号を入れる
+    '同じく、挿入後の行に注文番号を入れる
     c.Offset(1, -3).Value = c.Offset(0, -3).Value
     
 Next
@@ -193,10 +199,6 @@ Sub ParseScalingSet(r As Variant)
 Dim Code As String
 Code = r.Value
 
-'If Code Like "*-*" Then
-'    Debug.Print "○個セットかもな!"
-'End If
-
 Dim SeparatedCode As Variant
 SeparatedCode = Split(Code, "-", 2)
 
@@ -204,13 +206,14 @@ SeparatedCode = Split(Code, "-", 2)
 '変換可能なら、○個セットと見なす
 
 If Not IsNumeric(SeparatedCode(1)) Then
-    'Debug.Print "いや、セットちゃうわ"
     Exit Sub
 End If
 
 'セットなら、D列は単体コード、数量はセット数量×受注数量
-r.Offset(0, 1).Value = CStr(SeparatedCode(0))
-Range("E", r.Row).Value = Range("E", r.Row).Value * CLng(Val(SeparatedCode(1)))
+r.NumberFormatLocal = "@"
+r.Value = CStr(SeparatedCode(0))
+
+Range("F" & r.Row).Value = Range("F" & r.Row).Value * CLng(Val(SeparatedCode(1)))
 
 '備考に、セット分解済記入
 Range("K" & r.Row).Value = Range("K" & r.Row).Value & "セット分解 済"

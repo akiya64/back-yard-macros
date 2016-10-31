@@ -14,9 +14,6 @@ End If
 SyokonData.TransferOrderSheet
 
 '振分け用シートの列幅固定のための保護を解除
-ForSorterSheet.Unprotect
-ForSorterSetItemSheet.Unprotect
-
 BuildSheets.TransferPickingData
 BuildSheets.TransferSorterSheet
 
@@ -35,22 +32,28 @@ Next
 Worksheets("振分け用一覧シート").Activate
 Sort.振分用シート_ソート
 
-ForSorterSheet.Protect AllowSorting:=True, AllowFiltering:=True
-ForSorterSetItemSheet.Protect AllowSorting:=True, AllowFiltering:=True
-
 '電算提出用保存 100番 棚有り
 Sheets("100番").Copy
-ActiveWorkbook.SaveAs filename:=OUTPUT_FOLDER & "ヤフーPシート" & Format(Date, "MMdd") & "-2-3.xlsx"
+ActiveWorkbook.SaveAs Filename:=OUTPUT_FOLDER & "ヤフーPシート" & Format(Date, "MMdd") & "-2-3.xlsx"
 ActiveWorkbook.Close
 
 '電算提出用保存 棚無し
 Sheets("棚無し").Copy
-ActiveWorkbook.SaveAs filename:=OUTPUT_FOLDER & "ヤフーPシート" & Format(Date, "MMdd") & "-a.xlsx"
+ActiveWorkbook.SaveAs Filename:=OUTPUT_FOLDER & "ヤフーPシート" & Format(Date, "MMdd") & "-a.xlsx"
 ActiveWorkbook.Close
+
+'振分け用シートの列幅調整
+Call AdjustWidth
 
 'このファイルを保存
 Application.DisplayAlerts = False
-ThisWorkbook.SaveAs filename:="\\MOS10\Users\mos10\Desktop\ヤフー\ピッキング生成用過去ファイル\" & "ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
+ThisWorkbook.SaveAs Filename:="\\MOS10\Users\mos10\Desktop\ヤフー\ピッキング生成用過去ファイル\" & "ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
+
+ForSorterSheet.Protect
+ForSorterSetItemSheet.Protect
+
+'この後、ThisWorkBookのコードへ処理を戻さない
+End
 
 End Sub
 
@@ -83,7 +86,7 @@ Do
     
     '転記先判定
     '7777始まりセットとセット内容品
-    If Order(2) Like "7777*" Or Range("C" & i).Value = "Set" Then
+    If Range("C" & i) Like "7777*" Then
        
         With Worksheets("振分け用一覧シート-セット")
             
@@ -153,6 +156,11 @@ j = 2
 k = 2
 
 Do
+    
+    'セットコードの7777は電算提出データに含めない。
+    '分解済の6ケタもしくはJANで提出する
+    If Range("C" & i).Value Like "7777*" Then GoTo Continue
+
     '配列に行を格納
     Order(0) = Range("A" & i).Value '注文番号
     Order(1) = CStr(Range("D" & i).Value) '6ケタ
@@ -166,15 +174,11 @@ Do
     'ロケーションなし
     If Order(6) = "" Then
         
-        If Not Order(0) Like "7777*" Then
-           
-           'コードが入る列は文字列として、先頭ゼロがカットされないように
-           Worksheets("棚無し").Range("C" & j).NumberFormatLocal = "@"
-           Worksheets("棚無し").Range("B" & j & ":G" & j) = Order
-        
-           j = j + 1
-        
-        End If
+       'コードが入る列は文字列として、先頭ゼロがカットされないように
+       Worksheets("棚無し").Range("C" & j).NumberFormatLocal = "@"
+       Worksheets("棚無し").Range("B" & j & ":G" & j) = Order
+    
+       j = j + 1
         
     'ロケーション有り
     Else
@@ -192,5 +196,30 @@ Continue:
     i = i + 1
 
 Loop Until IsEmpty(Range("A" & i))
+
+End Sub
+
+Private Sub AdjustWidth()
+'列幅 調整時にアラートが出るのを抑止
+Application.DisplayAlerts = False
+
+
+Dim WidthArr As Variant
+WidthArr = Array(8.13, 15.25, 11.75, 53.13, 4.75, 12.5, 5.5, 14.88, 13.5)
+
+Dim SheetNameArr As Variant
+SheetNameArr = Array("振分け用一覧シート", "振分け用一覧シート-セット")
+
+Dim j As Long, k As Long
+
+For j = 0 To 1
+    With Worksheets(SheetNameArr(j))
+        For k = 0 To 8
+            .Columns(k + 1).ColumnWidth = WidthArr(k)
+        Next
+    End With
+Next
+
+Application.DisplayAlerts = True
 
 End Sub
