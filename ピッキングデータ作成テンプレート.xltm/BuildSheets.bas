@@ -7,7 +7,7 @@ Const OUTPUT_FOLDER As String = "\\Server02\商品部\ネット販売関連\ピッキング\"
 
 OrderSheet.Activate
 
-If InStr(Range("A1").Value, "アドイン指定") > 0 Then
+If InStr(Range("L1").Value, "アドイン指定") > 0 Then
     MsgBox "アドインを実行して下さい。"
 End If
 
@@ -47,8 +47,20 @@ Call AdjustWidth
 
 'このファイルを保存
 Application.DisplayAlerts = False
-ThisWorkbook.SaveAs Filename:="\\MOS10\Users\mos10\Desktop\ヤフー\ピッキング生成用過去ファイル\" & "ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
 
+Const DEFAULT_XLSX_SAVE_PATH As String = "\\MOS10\Users\mos10\Desktop\ヤフー\ピッキング生成用過去ファイル\"
+
+If Dir(DEFAULT_XLSX_SAVE_PATH, vbDirectory) <> "" Then
+
+    ThisWorkbook.SaveAs Filename:=DEFAULT_XLSX_SAVE_PATH & "ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
+
+Else
+    Dim SavePath As String
+    SavePath = "C:" & Environ("HOMEPATH") & "\Desktop\ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
+
+End If
+
+'振分け用商品リストのシート保護を再セット
 ForSorterSheet.Protect
 ForSorterSetItemSheet.Protect
 

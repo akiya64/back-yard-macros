@@ -32,7 +32,7 @@ Private Function CutOffUnlocation(Location As String) As String
 Dim Reg As New RegExp
 
 Reg.Global = True
-Reg.Pattern = "\[[0-3|\s]\-[0|\s]\-[0|\s]\-[0|\s]\-[0|\s]\]"
+Reg.Pattern = "\[[0-3|\s]\-[0-3|\s]\-[0|\s]\-[0|\s]\-[0|\s]\]"
 
 CutOffUnlocation = Reg.Replace(Location, "")
 

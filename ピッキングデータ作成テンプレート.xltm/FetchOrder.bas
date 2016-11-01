@@ -1,25 +1,25 @@
 Attribute VB_Name = "FetchOrder"
 Option Explicit
 
-'ï¿½ï¿½ï¿½×‚Æ’ï¿½ï¿½ï¿½ï¿½wï¿½bï¿½_ï¿½[ï¿½Ì‚ï¿½ï¿½ï¿½ï¿½tï¿½Hï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½wï¿½ï¿½ï¿½Aï¿½ÅŒï¿½ï¿½Kï¿½ï¿½\ï¿½}ï¿½[ï¿½N
-Const CSV_PATH As String = "C:\Users\mos10\Desktop\ï¿½ï¿½ï¿½tï¿½[\"
-Const ALTER_CSV_PATH As String = "\\MOS10\Users\mos10\Desktop\ï¿½ï¿½ï¿½tï¿½[\"
+'–¾×‚Æ’•¶ƒwƒbƒ_[‚Ì‚ ‚éƒtƒHƒ‹ƒ_‚ğw’èAÅŒã•K‚¸\ƒ}[ƒN
+Const CSV_PATH As String = "C:\Users\mos10\Desktop\ƒ„ƒt[\"
+Const ALTER_CSV_PATH As String = "\\MOS10\Users\mos10\Desktop\ƒ„ƒt[\"
 
-Sub ï¿½ó’ƒtï¿½@ï¿½Cï¿½ï¿½ï¿½Çï¿½()
+Sub ó’ƒtƒ@ƒCƒ‹“Ç()
 
 OrderSheet.Activate
 
 If Not Range("B2").Value = "" Then
-    MsgBox "ï¿½fï¿½[ï¿½^ï¿½æ“¾ï¿½Ï‚Å‚ï¿½ï¿½B"
+    MsgBox "ƒf[ƒ^æ“¾Ï‚Å‚·B"
     End
 End If
 
 Dim LineBuf As Variant
 
-'ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½uï¿½Wï¿½Fï¿½Nï¿½gï¿½ï¿½ï¿½ï¿½
+'ƒtƒ@ƒCƒ‹‘€ìƒIƒuƒWƒFƒNƒg¶¬
 Dim FSO As New FileSystemObject
 
-' Meisai.csvï¿½ï¿½tyumon_H.csvï¿½ï¿½CSVï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ìƒpï¿½Xï¿½ï¿½ï¿½Zï¿½bï¿½g
+' Meisai.csv‚Ætyumon_H.csv‚ÌCSVƒtƒ@ƒCƒ‹‚ÌƒpƒX‚ğƒZƒbƒg
 Dim MeisaiPath As String, TyumonhPath As String
 
 If FSO.FileExists(CSV_PATH & "Meisai.csv") Then
@@ -34,7 +34,9 @@ ElseIf FSO.FileExists(ALTER_CSV_PATH & "Meisai.csv") Then
 
 Else
     
-    MsgBox "meisai.csv ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½È‚ï¿½"
+    'TODO:ƒtƒ@ƒCƒ‹w’è‚Å“Ç‚İ‚Ü‚¹‚é
+    
+    MsgBox "meisai.csv ƒtƒ@ƒCƒ‹‚È‚µ"
     End
 
 End If
@@ -43,22 +45,23 @@ Call ReadMeisai(MeisaiPath)
 
 Call ReadTyumonH(TyumonhPath)
 
+'ƒ}ƒNƒ‹N“®ƒ{ƒ^ƒ“‚ğÁ‹
 OrderSheet.Shapes(1).Delete
 
-'ï¿½Aï¿½hï¿½Cï¿½ï¿½ï¿½pï¿½Ìsï¿½Eï¿½ï¿½ ï¿½\ï¿½ï¿½
+'ƒAƒhƒCƒ“—p‚ÌsE—ñ •\¦
 Dim LastRow As Long
 LastRow = Range("D1").SpecialCells(xlCellTypeLastCell).Row
 
-Range("L1").Value = "ï¿½Aï¿½hï¿½Cï¿½ï¿½ï¿½wï¿½ï¿½ ï¿½ä’ ï¿½F9998"
+Range("L1").Value = "ƒAƒhƒCƒ“w’è ‘ä’ F9998"
 Range("L2:O2") = Array(2, 4, LastRow, 12)
 
-MsgBox "ï¿½Aï¿½hï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½ï¿½Ä‰ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½B"
+MsgBox "ƒAƒhƒCƒ“‚ğÀs‚µ‚Ä‰º‚³‚¢B"
 
 End Sub
 
 Private Sub ReadMeisai(Path As String)
 
-'Meisai.CSVï¿½ï¿½OrderSheet=ï¿½ï¿½ï¿½ï¿½ï¿½ê——ï¿½É’Ç‹Lï¿½ï¿½ï¿½ï¿½
+'Meisai.CSV‚ğOrderSheet=’•¶ˆê——‚É’Ç‹L‚·‚é
 
 Dim FSO As Object
 Set FSO = New FileSystemObject
@@ -67,27 +70,27 @@ Dim TS As Textstream
 Set TS = FSO.OpenTextFile(Path, ForReading)
 
 Dim i As Long
-i = 1 'ï¿½ï¿½ï¿½Úsï¿½Íoï¿½Í‚ï¿½ï¿½È‚ï¿½ï¿½Ì‚ÅAiï¿½ï¿½1ï¿½sï¿½Ú‚ï¿½ï¿½ï¿½ï¿½Jï¿½n
+i = 1 '€–Ús‚Ío—Í‚µ‚È‚¢‚Ì‚ÅAi‚Í1s–Ú‚©‚çŠJn
     
 Do Until TS.AtEndOfStream
     
-' ï¿½sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½ï¿½ï¿½Ä•Kï¿½vï¿½Èï¿½ï¿½Ú‚Ì‚İ‚ï¿½ï¿½zï¿½ï¿½ï¿½É“ï¿½ï¿½ê’¼ï¿½ï¿½
+' s‚ğæ‚èo‚µ‚Ä•K—v‚È€–Ú‚Ì‚İ‚ğ”z—ñ‚É“ü‚ê’¼‚·
     Dim LineBuf As Variant
     LineBuf = Split(TS.ReadLine, """,""")
        
     Dim j As Integer
     For j = 0 To UBound(LineBuf)
-        LineBuf(j) = Trim(Replace(LineBuf(j), Chr(34), "")) 'chr(34)ï¿½ï¿½ " [ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½dï¿½ï¿½ï¿½pï¿½ï¿½]
+        LineBuf(j) = Trim(Replace(LineBuf(j), Chr(34), "")) 'chr(34)‚Å " [”¼Šp“ñdˆø—p•„]
     
     Next
     
-    'ï¿½ï¿½ï¿½[ï¿½vï¿½ï¿½ï¿½ï¿½ï¿½Ú‚Å‚Íƒwï¿½bï¿½_ï¿½[ï¿½È‚Ì‚ÅAï¿½Cï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½Ö”ï¿½ï¿½ï¿½
+    'ƒ‹[ƒvˆê‰ñ–Ú‚Å‚Íƒwƒbƒ_[‚È‚Ì‚ÅAƒCƒ“ƒNƒŠƒƒ“ƒg‚Ö”ò‚Ô
     If LineBuf(0) = "Order ID" Then GoTo increment
     
-    'CSVï¿½ï¿½ï¿½wï¿½bï¿½_ï¿½[ 0:Order ID/1:Line ID/2:Quantity/3:Product Code/4:Description/5:Option Name/6:Option Value/7:Unit Price/
+    'CSV‘¤ƒwƒbƒ_[ 0:Order ID/1:Line ID/2:Quantity/3:Product Code/4:Description/5:Option Name/6:Option Value/7:Unit Price/
         
-    ':ToDo ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Vï¿½[ï¿½gï¿½Aï¿½Zï¿½ï¿½ï¿½Ì’lï¿½Ì‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚Å•ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È‚ï¿½ï¿½B
-    With Worksheets("ï¿½ó’ƒfï¿½[ï¿½^ï¿½Vï¿½[ï¿½g")
+    ':ToDo ‚±‚±‚©‚çƒV[ƒgAƒZƒ‹‚Ì’l‚Ì‚ª“ü‚é‚Ì‚Å•ªŠ„‚µ‚½•û‚ª‚¢‚¢‚©‚à‚µ‚ê‚È‚¢B
+    With Worksheets("ó’ƒf[ƒ^ƒV[ƒg")
         .Range("A" & i).Value = LineBuf(0)
         .Range("C" & i).Value = LineBuf(1)
         
@@ -101,8 +104,8 @@ Do Until TS.AtEndOfStream
         .Range("F" & i).Value = LineBuf(2)
         .Range("G" & i).Value = LineBuf(7)
         
-        'Yahoo!ï¿½oï¿½^ï¿½Rï¿½[ï¿½hï¿½ï¿½ï¿½`ï¿½Fï¿½bï¿½N
-        'ï¿½Zï¿½bï¿½gï¿½ï¿½ï¿½ï¿½ 7777ï¿½nï¿½Ü‚ï¿½
+        'Yahoo!“o˜^ƒR[ƒh‚ğƒ`ƒFƒbƒN
+        'ƒZƒbƒg•ª‰ğ 7777n‚Ü‚è
         Dim YahooCode As String
         YahooCode = .Range("D" & i).Value
         
@@ -110,13 +113,13 @@ Do Until TS.AtEndOfStream
             
             Call SetParser.ParseItems(.Range("D" & i))
             
-            'ParseItemsï¿½Åsï¿½ï¿½ï¿½}ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚ÅAï¿½sï¿½Jï¿½Eï¿½ï¿½ï¿½^ï¿½ï¿½ï¿½Zï¿½bï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            'ParseItems‚Ås‚ª‘}“ü‚³‚ê‚é‚Ì‚ÅAsƒJƒEƒ“ƒ^‚ğƒZƒbƒg‚µ’¼‚·
             i = OrderSheet.Range("A1").CurrentRegion.Rows.Count
             
         
         End If
     
-        'ï¿½Pï¿½Ìï¿½ï¿½ÂƒZï¿½bï¿½gï¿½ï¿½ï¿½ï¿½ ï¿½nï¿½Cï¿½tï¿½ï¿½ï¿½Ü‚ŞƒRï¿½[ï¿½hï¿½È‚ç•ªï¿½ï¿½ï¿½Â”\ï¿½ï¿½ï¿½`ï¿½Fï¿½bï¿½N
+        '’P‘Ì›ŒÂƒZƒbƒg•ª‰ğ ƒnƒCƒtƒ“ŠÜ‚ŞƒR[ƒh‚È‚ç•ª‰ğ‰Â”\‚©ƒ`ƒFƒbƒN
         
         If YahooCode Like "*-*" Then
         
@@ -124,7 +127,7 @@ Do Until TS.AtEndOfStream
         
         End If
     
-        'Dï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½hï¿½Cï¿½ï¿½ï¿½pï¿½ï¿½6ï¿½Pï¿½^ï¿½ÉCï¿½ï¿½
+        'D—ñ‚ğƒAƒhƒCƒ“—p‚É6ƒPƒ^‚ÉC³
         
         If YahooCode Like "#####" Then
                     
@@ -152,28 +155,28 @@ Set FSO = New FileSystemObject
 Dim TS As Textstream
 Set TS = FSO.OpenTextFile(Path, ForReading)
 
-'ï¿½Çï¿½ï¿½Ï’ï¿½ï¿½ï¿½ï¿½Ôï¿½ï¿½Ìƒï¿½ï¿½ï¿½ï¿½Wï¿½ï¿½ï¿½Zï¿½bï¿½gï¿½AA1ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½Ì”Ôï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÅIï¿½Zï¿½ï¿½ï¿½Ü‚ï¿½
+'“ÇÏ’•¶”Ô†‚ÌƒŒƒ“ƒW‚ğƒZƒbƒgAA1‚©‚çA—ñ‚Ì”Ô†“ü‚èÅIƒZƒ‹‚Ü‚Å
 Dim LoadedOrderRange As Range
 Set LoadedOrderRange = OrderSheet.Cells(1, 1).Resize(OrderSheet.Cells(1, 1).SpecialCells(xlCellTypeLastCell).Row, 1)
 
 Do Until TS.AtEndOfStream
     
-' ï¿½sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½ï¿½ï¿½Ä•Kï¿½vï¿½Èï¿½ï¿½Ú‚Ì‚İ‚ï¿½ï¿½zï¿½ï¿½ï¿½É“ï¿½ï¿½ê’¼ï¿½ï¿½
+' s‚ğæ‚èo‚µ‚Ä•K—v‚È€–Ú‚Ì‚İ‚ğ”z—ñ‚É“ü‚ê’¼‚·
     Dim LineBuf As Variant
     LineBuf = Split(TS.ReadLine, """,""")
     
-    '0=1ï¿½ï¿½ï¿½ï¿½=ï¿½ï¿½ï¿½ï¿½ï¿½Ôï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Ò–ï¿½ï¿½Aï¿½vï¿½]ï¿½Aï¿½ï¿½ï¿½Ï•ï¿½ï¿½@ï¿½Aï¿½Nï¿½[ï¿½|ï¿½ï¿½ï¿½lï¿½ï¿½ï¿½ï¿½
+    '0=1—ñ–Ú=’•¶”Ô†A’•¶Ò–¼A—v–]AŒˆÏ•û–@AƒN[ƒ|ƒ“’lˆø‚«
     Dim Order As Variant
     Order = Array(LineBuf(0), LineBuf(5), LineBuf(36), LineBuf(34), LineBuf(43))
         
     Dim j As Integer
     For j = 0 To UBound(Order)
-        Order(j) = Trim(Replace(Order(j), Chr(34), "")) 'chr(34)ï¿½ï¿½ " [ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½dï¿½ï¿½ï¿½pï¿½ï¿½]
+        Order(j) = Trim(Replace(Order(j), Chr(34), "")) 'chr(34)‚Å " [”¼Šp“ñdˆø—p•„]
     
     Next
 
-    'ï¿½ï¿½ï¿½ï¿½ï¿½Ôï¿½ï¿½Ìsï¿½ğ’²‚×‚ï¿½
-    'ï¿½ï¿½ï¿½ï¿½ï¿½Ôï¿½ï¿½ï¿½Dobuleï¿½^ï¿½Å“ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½BCSVï¿½ï¿½Stringï¿½^ï¿½AMatchï¿½Öï¿½ï¿½Ì•Ô’lï¿½ï¿½Doubleï¿½^
+    '’•¶”Ô†‚Ìs‚ğ’²‚×‚é
+    '’•¶”Ô†‚ÍDobuleŒ^‚Å“ü‚Á‚Ä‚¢‚éBCSV‚ÍStringŒ^AMatchŠÖ”‚Ì•Ô’l‚ÍDoubleŒ^
     
     Dim FindRow As Double
     
@@ -191,7 +194,7 @@ Do Until TS.AtEndOfStream
     Dim i As Long
     i = 0
     
-    'ï¿½ï¿½ï¿½ï¿½ï¿½Ò–ï¿½ï¿½ï¿½ï¿½Lï¿½ï¿½ ï¿½Iï¿½tï¿½Zï¿½bï¿½gï¿½ï¿½ï¿½Â‚ÂAï¿½Yï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôï¿½ï¿½Ì‘Sï¿½Ä‚Ìsï¿½Ö‹Lï¿½ï¿½
+    '’•¶Ò–¼‚ğ‹L“ü ƒIƒtƒZƒbƒg‚µ‚Â‚ÂAŠY“–’•¶”Ô†‚Ì‘S‚Ä‚Ìs‚Ö‹L“ü
     Do While Range("A" & FindRow).Offset(i, 0).Value = CDbl(Order(0))
         
         Range("A" & FindRow).Offset(i, 1).Value = LineBuf(5)
@@ -199,21 +202,21 @@ Do Until TS.AtEndOfStream
     
     Loop
     
-    'ï¿½ï¿½ï¿½lï¿½ï¿½ï¿½Ö’Ç‹L ï¿½Nï¿½[ï¿½|ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½Â‘ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½sï¿½Uï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½tï¿½[ï¿½}ï¿½lï¿½[ï¿½ï¿½ï¿½ï¿½ ï¿½mï¿½Fï¿½ï¿½ï¿½ï¿½
+    '”õl—“‚Ö’Ç‹L ƒN[ƒ|ƒ“—˜—p‚©‚Â‘ãˆø‚«E‹âsUEƒ„ƒt[ƒ}ƒl[ŒˆÏ Šm”F‚µ‚Ä
     Dim tmp As String
     tmp = ""
     
-    If Order(3) = "payment_d1" And Order(4) < 0 Then tmp = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Nï¿½[ï¿½|ï¿½ï¿½ï¿½ï¿½ï¿½p "
-    If Order(3) = "payment_b1" Then tmp = tmp & "ï¿½ï¿½ï¿½sï¿½Uï¿½ï¿½"
-    If Order(3) = "payment_a16" Then tmp = tmp & "Yahoo!ï¿½}ï¿½lï¿½[ï¿½ï¿½ï¿½ï¿½"
+    If Order(3) = "payment_d1" And Order(4) < 0 Then tmp = "‘ãˆø‚« ƒN[ƒ|ƒ“—˜—p "
+    If Order(3) = "payment_b1" Then tmp = tmp & "‹âsU"
+    If Order(3) = "payment_a16" Then tmp = tmp & "Yahoo!ƒ}ƒl[•¥‚¢"
     
-    Range("K" & FindRow).Value = tmp 'tmpï¿½ï¿½ï¿½Zï¿½ï¿½ï¿½Éï¿½ï¿½ï¿½ï¿½ß‚ï¿½
+    Range("K" & FindRow).Value = tmp 'tmp‚ğƒZƒ‹‚É‘‚«–ß‚·
         
 Continue:
     
 Loop
 
-' ï¿½Iï¿½uï¿½Wï¿½Fï¿½Nï¿½gï¿½ï¿½ï¿½jï¿½ï¿½
+' ƒIƒuƒWƒFƒNƒg‚ğ”jŠü
 TS.Close
 Set TS = Nothing
 Set FSO = Nothing
