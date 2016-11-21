@@ -17,6 +17,7 @@ With Worksheets("振分け用一覧シート").Sort
     .SortFields.Clear
     
     'ソートキーをセット 第一キー 商品コード：色、第二キー 商品コード：昇順
+    'セル背景に色がついている棚無しを下に固める。背景なし＝棚あり、背景色つき＝棚無し それぞれの中で6ケタ昇順
     .SortFields.Add Key:=CodeRange, SortOn:=xlSortOnCellColor, Order:=xlAscending, DataOption:=xlSortNormal
     .SortFields.Add Key:=CodeRange, SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
 
