@@ -16,8 +16,36 @@ Option Explicit
 Const TIED_ITEM_LIST_BOOK As String = "ｾｯﾄ商品ﾘｽﾄ.xls"
 Const LIST_BOOK_FOLDER As String = "\\server02\商品部\ネット販売関連\"
 
+Sub セット分解()
 
-Sub ParseTiedItem(CodeCell As Range)
+Worksheets("作業シート").Activate
+
+Dim CodeRange As Range
+Set CodeRange = Range(Cells(2, 2), Cells(Cells.SpecialCells(xlCellTypeLastCell).Row, 2))
+
+Dim c As Range
+For Each c In CodeRange
+
+    Dim Code As String
+    Code = c.Value
+    
+    '77777始まりセットコードなら
+    If Code Like "77777*" Then
+        
+        Call ParseTiedItem(Cells(c.Row, 2))
+    
+    '-02 -04 -120 ハイフン-数量 セットなら ハイフンを含みアルファベット始まりでない
+    ElseIf InStr(Code, "-") > 1 And Not Code Like "[a-zA-Z]*" Then
+        
+        Call ParseMultipleSet(Cells(c.Row, 2))
+    
+    End If
+
+Next
+
+End Sub
+
+Private Sub ParseTiedItem(CodeCell As Range)
 
 Dim ComponentItems As Collection
 Set ComponentItems = GetComponentItems(CodeCell.Value)
@@ -44,20 +72,20 @@ For i = 1 To ComponentItems.Count
     End If
     
     '商品名出力と必要数量をかける
-    CodeCell.Offset(1, 1).Value = v.Name
-    CodeCell.Offset(1, 2).Value = v.Quantity * CodeCell.Offset(0, 2).Value
+    CodeCell.Offset(1, 2).Value = v.Name
+    CodeCell.Offset(1, 3).Value = v.Quantity * CodeCell.Offset(0, 3).Value
     
     '挿入後の行に注文番号を入れる
     CodeCell.Offset(1, -1).Value = CodeCell.Offset(0, -1).Value
     
+    '挿入後の行にE列以降の注文情報を入れる
+    CodeCell.Offset(1, 4).Resize(1, 11).Value = CodeCell.Offset(0, 4).Resize(1, 11).Value
+    
 Next
-
-'分解後の7777始まりコードは行削除？
-'Row(CodeCell.Row).Delete
 
 End Sub
 
-Sub ParseMultipleSet(CodeCell As Range)
+Private Sub ParseMultipleSet(CodeCell As Range)
 '012345-02など、ハイフン 数字のセットを分解します。
 
 'コード文字列をハイフンの位置で分解
@@ -91,7 +119,7 @@ Next
 
 '分解後コード・数量を出力
 
-With CodeCell.Offset(0, 5)
+With CodeCell
     .NumberFormatLocal = "@"
     .Value = ComponentCode
 End With
@@ -101,11 +129,11 @@ End With
 
 If MultipleRatio > 0 Then
 
-    CodeCell.Offset(0, 6).Value = CodeCell.Offset(0, 2) * MultipleRatio
+    CodeCell.Offset(0, 3).Value = CodeCell.Offset(0, 3) * MultipleRatio
 
 Else
     
-    CodeCell.Offset(0, 6).Value = CodeCell.Offset(0, 2).Value
+    CodeCell.Offset(0, 3).Value = CodeCell.Offset(0, 3).Value
     
 End If
 
@@ -185,8 +213,6 @@ Do Until HitSheet.Cells(HitRow, i) = ""
         .Quantity = CLng(UnitCell.Offset(0, 2).Value)
     
     End With
-        
-    Debug.Print Unit.Jan & Unit.Name
     
     ComponetItems.Add Unit
     
