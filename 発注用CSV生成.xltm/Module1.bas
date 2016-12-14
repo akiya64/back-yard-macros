@@ -281,7 +281,7 @@ Const PICKING_FILE_FOLDER As String = "\\Server02\商品部\ネット販売関連\ピッキン
 Dim FSO As Object
 Set FSO = CreateObject("Scripting.FileSystemObject")
     
-Dim f As Object, Newest As Object
+Dim f As Object, PickingFile As Object
       
 '事前バインディング
 'Dim FSO As FileSystemObject
@@ -290,14 +290,13 @@ Dim f As Object, Newest As Object
 'Dim f As File, Newest As File
 
 
-'指定フォルダー内のFileNameを含むファイル名を調べて、最新のファイルを1つ取得する。
-'LINQか何か、1構文で済むの欲しい
+'指定フォルダー内のファイル名に-aを含むExcelファイルを1つ取得する。
 
 For Each f In FSO.GetFolder(PICKING_FILE_FOLDER).Files
 
     If f.Name Like FileName & "*-a.xls*" Then
     
-        Set Newest = f
+        Set PickingFile = f
     
         Exit For
     End If
@@ -305,7 +304,7 @@ For Each f In FSO.GetFolder(PICKING_FILE_FOLDER).Files
 Next
 
 
-RetrievePickingFilePath = PICKING_FILE_FOLDER & Newest.Name
+RetrievePickingFilePath = PICKING_FILE_FOLDER & PickingFile.Name
 
 End Function
 
