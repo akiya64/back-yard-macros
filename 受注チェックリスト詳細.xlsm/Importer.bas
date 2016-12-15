@@ -1,46 +1,95 @@
 Attribute VB_Name = "Importer"
 Option Explicit
-Sub 受注チェックCSV読込()
+Sub CSV読込()
 
-GetOrderCheckListPath
+Worksheets("Santyoku受注データ").Activate
 
+Dim CsvPath As String
+CsvPath = GetOrderCheckListPath()
+
+With ActiveSheet.QueryTables.Add(Connection:= _
+    "TEXT;" & CsvPath, Destination:=Range("$A$2"))
+    .Name = "受注チェックリスト詳細読込"
+    .FieldNames = False
+    .RowNumbers = False
+    .FillAdjacentFormulas = False
+    .PreserveFormatting = True
+    .RefreshOnFileOpen = False
+    .RefreshStyle = xlInsertDeleteCells
+    .SavePassword = False
+    .SaveData = True
+    .AdjustColumnWidth = True
+    .RefreshPeriod = 0
+    .TextFilePromptOnRefresh = False
+    .TextFilePlatform = 932
+    .TextFileStartRow = 2
+    .TextFileParseType = xlDelimited
+    .TextFileTextQualifier = xlTextQualifierDoubleQuote
+    .TextFileConsecutiveDelimiter = False
+    .TextFileTabDelimiter = False
+    .TextFileSemicolonDelimiter = False
+    .TextFileCommaDelimiter = True
+    .TextFileSpaceDelimiter = False
+    .TextFileColumnDataTypes = Array(2, 2, 2, 1, 9, 9, 9, 2, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, _
+    9, 9, 9, 9, 5, 5, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 2, 1, 2, 9, 9, 9, 9 _
+    , 9, 9, 9, 2, 9, 9, 9, 2, 2, 2, 2, 2, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, _
+    9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 5, 9, 9, 9, 9, 9, 9, 9)
+    .TextFileTrailingMinusNumbers = True
+    .Refresh BackgroundQuery:=False
+End With
+
+ActiveWorkbook.Connections(1).Delete
+
+
+'取込日の日付チェック 最初の注文行と、最後の注文行の日付に対して
+
+Dim LastRow As Long
+LastRow = Range("Q1").SpecialCells(xlCellTypeLastCell).Row
+
+If DateDiff("D", Cells(2, 17).Value, DateValue(Date)) <> 0 _
+    Or DateDiff("D", Cells(LastRow, 17).Value, DateValue(Date)) <> 0 Then
+
+    Dim ContinueWrongDate As VbMsgBoxResult
+        ContinueWrongDate = MsgBox(Buttons:=vbExclamation + vbOKCancel, Prompt:="産直への取込日が本日ではありません。" & vbLf & "処理を続行します。" & vbLf & vbLf & "取込データ記載の取込日:" & Range("Q2").Value)
+    
+    If ContinueWrongDate <> vbOK Then
+        '続行しない場合、データを消してマクロ終了
+        Worksheets("Santyoku受注データ").UsedRange.Offset(1, 0).Clear
+        End
+        
+    End If
+    
+End If
 
 End Sub
-Private Function GetOrderCheckListPath(FileName As String) As String
+Private Function GetOrderCheckListPath() As String
 'ピッキングシートの-a＝棚無のセット分解前ファイルを探してフルパスをセット
 
-Const SANTYOKU_DUMP_FOLDER As String = "\\Server02\商品部\ネット販売関連\ピッキング\" '末尾\マーク必須
+Const SANTYOKU_DUMP_FOLDER As String = "\\Server02\商品部\ネット販売関連\梱包室データ\ARY受注チェックリスト\" '末尾\マーク必須
 
-'楽天の場合、楽天Pシート0627-a.xls
-
-'実行時バインディング ScriptingRuntimeはDictionary配列使うのに必要で参照ONだから、事前バインディングでいいかも。
+'実行時バインディング
 Dim FSO As Object
 Set FSO = CreateObject("Scripting.FileSystemObject")
 
-Dim f As Object, Newest As Object
+Dim f As Object, TodayCSV As Object
       
-'事前バインディング
-'Dim FSO As FileSystemObject
-'Set FSO = New FileSystemObject
-
-'Dim f As File, Newest As File
-
-
-'指定フォルダー内のFileNameを含むファイル名を調べて、最新のファイルを1つ取得する。
-'LINQか何か、1構文で済むの欲しい
+'指定フォルダー内のFileNameを含むファイル名を調べて、本日 日付ファイルを一つ取得する
 
 For Each f In FSO.GetFolder(SANTYOKU_DUMP_FOLDER).Files
 
-    If f.Name Like FileName & ".csv" Then
+    If DateDiff("D", f.DateLastModified, DateValue(Date)) = 0 Then
     
-        Set Newest = f
+        Set TodayCSV = f
     
         Exit For
     End If
 
 Next
 
+'本日日付のファイルがなければ、一旦マクロ終了
+'TODO:本日日付ファイルがなければファイル指定ダイアログを出して手動セット
+If TodayCSV Is Nothing Then End
 
-RetrievePickingFilePath = PICKING_FILE_FOLDER & Newest.Name
+GetOrderCheckListPath = SANTYOKU_DUMP_FOLDER & TodayCSV.Name
 
 End Function

@@ -5,16 +5,14 @@ Sub 作業シートへデータ抽出()
 
 '産直シートをフィルターして必要列のレンジのみをコピーする
 
-Sheet2.Range("A1").CurrentRegion.AutoFilter Field:=2, Criteria1:="<>"
+Sheet1.Range("A1").CurrentRegion.AutoFilter Field:=2, Criteria1:="<>"
 
 Dim FilteredRange As Range
 Set FilteredRange = Range("A1").CurrentRegion
 
 '必要な列のレンジを指定
 Dim RequireColumns As Range
-Set RequireColumns = Columns("A:D")
-
-Set RequireColumns = Union(RequireColumns, Columns("H"), Columns("Z:AA"), Columns("BC:BE"), Columns("BM"), Columns("BQ:BU"))
+Set RequireColumns = Columns("A:P")
 
 Dim TargetRange As Range
 
@@ -37,7 +35,7 @@ With Worksheets.Add
 End With
 
 'オートフィルター解除
-Sheet2.Range("A1").CurrentRegion.AutoFilter
+Sheet1.Range("A1").CurrentRegion.AutoFilter
 
 '後の処理のために、先に列を挿入
 Columns("L").Insert
@@ -106,6 +104,50 @@ Loop Until IsEmpty(Cells(i, 1))
 
 End Sub
 
+Sub 楽天商品名修正()
+
+'商品名から、楽天のキャンペーン情報を削除する
+'≪≫か【】で先頭に記載されているので、今回はInstrで ≫ 】の位置を検出して前を削除
+'正規表現での実装は、whatnot受注取込マクロにある。
+
+Worksheets("作業シート").Activate
+
+'キャンペーン情報を囲っている閉じカッコ配列を定義
+Dim CloseBrackets() As Variant
+CloseBrackets = Array(Array("【", "】"), Array("≪", "≫"))
+
+'行カウンタ
+Dim i As Long
+i = 2
+
+Do
+    Dim ProductName As String
+    ProductName = Cells(i, 3).Value
+    
+    '閉じ括弧が何文字目に出てくるか調べる
+    Dim k As Integer
+    For k = 0 To UBound(CloseBrackets)
+    
+        'キャンペーン情報の括弧が冒頭にあるかチェック
+        If InStr(1, ProductName, CloseBrackets(k)(0)) = 1 Then
+            
+            Dim CampaignInfoCharEnd As Integer
+            CampaignInfoCharEnd = InStr(1, ProductName, CloseBrackets(k)(1)) + 1
+            
+            Debug.Assert CampaignInfoCharEnd = 0
+            
+            Cells(i, 3) = Mid(ProductName, CampaignInfoCharEnd)
+            
+        End If
+        
+    Next
+        
+    i = i + 1
+
+Loop Until IsEmpty(Cells(i, 1))
+
+End Sub
+
 Sub 提出用シートへ転記()
 
 Worksheets("作業シート").Activate
@@ -118,7 +160,7 @@ k = 2
 Do
 
     '7777始まりは転記しない
-    If Cells(i, 2).Value Like "77777" Then GoTo Continue
+    If Cells(i, 3).Value Like "77777" Then GoTo Continue
     
     '1行分のレンジを定義
     Dim Record As Range
