@@ -16,9 +16,24 @@ Transfer.JAN転記
 Transfer.楽天商品名修正
 
 
-'提出用ファイル作成処理
 Transfer.提出用シートへ転記
 
-MsgBox "シート作成 完了"
+'提出ファイル保存
+Sheets("提出シート").Copy
+
+Application.DisplayAlerts = False
+    ActiveWorkbook.SaveAs FileName:="提出" & Format(Date, "MMdd") & ".xlsx"
+    ActiveWorkbook.Close
+Application.DisplayAlerts = True
+
+Dim w As Workbook
+
+For Each w In Workbooks
+    If w.Name = "ｾｯﾄ商品ﾘｽﾄ.xls" Then w.Close False
+Next
+
+MsgBox "ファイル作成 完了"
+
+ThisWorkbook.Close False
 
 End Sub

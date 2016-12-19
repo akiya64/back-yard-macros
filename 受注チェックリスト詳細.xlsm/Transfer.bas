@@ -80,16 +80,16 @@ Do
     Dim Code As String, Jan As String
     Code = Cells(i, 2).Value
     
-    '数字6ケタ化、5ケタの時0補完
-    If Code Like String(5, "#") Then
+    '数字5ケタ化
+    If Code Like String(6, "#") And InStr(1, Code, "0") = 1 Then
         
-        Code = "0" & Code
+        Code = Right(Code, 5)
         Jan = ""
         
-        Cells(i, 2).Value = Code
+        Cells(i, 2).Resize(1, 2).Value = Array(Code, Jan)
     
     '5ケタでも6ケタでもない場合、JAN列へ入れる
-    ElseIf Not Code Like String(6, "#") Then
+    ElseIf Not Code Like String(5, "#") And Not Code Like "5" & String(5, "#") Then
         
         Jan = Code
         Code = ""

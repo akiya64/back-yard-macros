@@ -107,8 +107,6 @@ For Each f In FSO.GetFolder(SANTYOKU_DUMP_FOLDER).Files
 
 Next
 
-Set TodayCSV = Nothing
-
 '本日日付ファイルがなければファイル指定ダイアログを出して手動セット
 If TodayCSV Is Nothing Then
     
