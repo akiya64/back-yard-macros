@@ -27,7 +27,7 @@ Next
 End Function
 
 Private Function CutOffUnlocation(Location As String) As String
-' 正規表現でロケーション[0-0-0-0][- - - - ][1-0-0-0-0]などを削除して返します。
+' 正規表現でロケーション[0-0-0-0][0- -0- - ][1-0-0-0-0]などを削除して返します。
 
 Dim Reg As New RegExp
 

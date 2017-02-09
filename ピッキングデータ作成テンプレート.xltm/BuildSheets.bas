@@ -48,21 +48,37 @@ Call AdjustWidth
 'このファイルを保存
 Application.DisplayAlerts = False
 
-Const DEFAULT_XLSX_SAVE_PATH As String = "\\MOS10\Users\mos10\Desktop\ヤフー\ピッキング生成用過去ファイル\"
+'擬似的なTry-Catchでファイルを保存する
+On Error Resume Next
+    
+    'Try
+  
+    ThisWorkbook.SaveAs Filename:="C:" & Environ("HOMEPATH") & "\Desktop\ヤフー\ピッキング生成用過去ファイル\ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
+    
+    'catch
+    If Err Then
+        Err.Clear
+        ThisWorkbook.SaveAs Filename:="\\MOS10\ヤフー\ピッキング生成用過去ファイル\" & "ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
 
-If Dir(DEFAULT_XLSX_SAVE_PATH, vbDirectory) <> "" Then
+    End If
+    
+    'catch2
+    If Err Then
+            MsgBox "ファイルを保存できませんでした。手動で保存してください。"
+    End If
 
-    ThisWorkbook.SaveAs Filename:=DEFAULT_XLSX_SAVE_PATH & "ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
-
-Else
-    Dim SavePath As String
-    SavePath = "C:" & Environ("HOMEPATH") & "\Desktop\ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
-
-End If
+'On Error Goto 0 宣言でErrは解除される
+On Error GoTo 0
 
 '振分け用商品リストのシート保護を再セット
 ForSorterSheet.Protect
 ForSorterSetItemSheet.Protect
+
+'セット商品リストブックを閉じる
+Dim w As Workbook
+For Each w In Workbooks
+    If w.Name = "ｾｯﾄ商品ﾘｽﾄ.xls" Then w.Close False
+Next
 
 'この後、ThisWorkBookのコードへ処理を戻さない
 End

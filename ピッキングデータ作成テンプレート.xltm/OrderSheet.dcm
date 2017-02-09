@@ -10,21 +10,53 @@ Attribute VB_Exposed = True
 Option Explicit
 
 Private Sub Worksheet_Change(ByVal Target As Range)
-    Dim LastRow As Long
-    LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
-
-    If Intersect(Target, Cells(LastRow, 28)) Is Nothing Then
-        
-        Exit Sub
     
-    Else
-        
-        Application.StatusBar = False
-        
-        MsgBox "アドイン完了、ファイルを作成します。"
-        
-        Call BuildSheets.電算提出_振分けシート作成
+Dim LastRow As Long
+LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
 
-    End If
+Dim CheckCell As Range
+Set CheckCell = Intersect(Target, Cells(LastRow, 28))
+
+'最終行のN列が変更されていない場合
+If CheckCell Is Nothing Then Exit Sub
+
+If CheckCell.Value = "" Then
+
+    '最終行が棚無しで、アドインで何も出力されないときの処理
+    Dim i As Long
+    For i = LastRow To 2 Step -1
+        If Cells(i, 28).Value <> "" Then
+            
+            Exit For
+        
+        ElseIf i = 2 Then
+        '全ての行でN列が空欄の時
+            MsgBox "アドインで正しくデータが取得出来ていません｡"
+            End
+        
+        End If
+    Next
+
+End If
+
+'アドインで表示するステータスバーが残ってる場合がある
+Application.StatusBar = False
+
+Dim IsContinue As Integer
+IsContinue = MsgBox("アドイン完了、ファイルを作成します。", vbOKCancel)
+
+If IsContinue = vbOK Then
+
+    Call BuildSheets.電算提出_振分けシート作成
+
+Else
+
+    MsgBox "マクロを終了します。"
+    Call SetParser.CloseDataBook(True)
+    
+    End
+
+End If
 
 End Sub
+

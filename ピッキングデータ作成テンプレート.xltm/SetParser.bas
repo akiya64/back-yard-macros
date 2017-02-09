@@ -178,7 +178,7 @@ Application.OnTime Now + TimeSerial(0, 1, 0), "CloseDataBook"
 
 End Sub
 
-Private Sub CloseDataBook()
+Function CloseDataBook(Optional ByVal Arg As Variant) As Boolean
 
 Dim wb As Workbook
 
@@ -192,7 +192,7 @@ For Each wb In Workbooks
 
 Next
 
-End Sub
+End Function
 
 Sub ParseScalingSet(r As Variant)
 

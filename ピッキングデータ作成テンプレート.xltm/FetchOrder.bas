@@ -3,7 +3,7 @@ Option Explicit
 
 '明細と注文ヘッダーのあるフォルダを指定、最後必ず\マーク
 Const CSV_PATH As String = "C:\Users\mos10\Desktop\ヤフー\"
-Const ALTER_CSV_PATH As String = "\\MOS10\Users\mos10\Desktop\ヤフー\"
+Const ALTER_CSV_PATH As String = "\\MOS10\ヤフー\"
 
 Sub 受注ファイル読込()
 
