@@ -1,0 +1,106 @@
+@startuml CROSSMALL-BigmanEC
+
+skinparam monochrome true
+
+title ロジス ネット販売 受注・発送の流れ
+
+entity Amazon
+entity 楽天
+entity Yahoo
+
+Loop 常時取得
+
+    Amazon <- CROSSMALL :API
+    activate Amazon
+    Amazon --> CROSSMALL :受注データ
+    deactivate Amazon
+
+    楽天 <- CROSSMALL : API
+    activate 楽天
+    楽天 --> CROSSMALL : 受注データ
+    deactivate 楽天
+
+    Yahoo <- CROSSMALL : API
+    activate Yahoo
+    Yahoo --> CROSSMALL : 受注データ
+    deactivate Yahoo
+end
+
+deactivate CROSSMALL
+
+== 8:00 ～ 受注取込 ==
+
+    Boundary ピッキングシート生成
+
+    CROSSMALL -> ピッキングシート生成 : CSV
+
+    activate ピッキングシート生成   
+        ピッキングシート生成 -> 電算室 : Amazonピッキング
+        ピッキングシート生成 -> 電算室 : 楽天ピッキング
+        ピッキングシート生成 -> 電算室 : Yahooピッキング
+        database SLIMS
+        ピッキングシート生成 -> 振分 : 振分け用商品リスト
+    deactivate ピッキングシート生成
+
+        電算室 -> SLIMS : DB投入
+
+
+    
+    Boundary 受注チェックリスト生成
+
+    database ハンディ用DB
+    ピッキングシート生成 <- 受注チェックリスト生成 : 楽天データ取得
+    受注チェックリスト生成 -> ハンディ用DB :DB投入
+
+
+    entity e飛伝
+    entity ネコポス
+
+    CROSSMALL -> e飛伝 :CSV_e飛伝
+    CROSSMALL -> ネコポス :CSV_ヤマトB2
+
+== 9:30～ 振分・梱包 ==
+    SLIMS <-- ピッキング : ハンディ
+    
+    activate ピッキング
+
+        e飛伝 -> 振分 : 佐川送り状
+    
+    activate 振分
+    
+    CROSSMALL -> 振分 : 納品書
+    ピッキング -> 振分 : 商品
+        deactivate ピッキング
+
+
+        振分 -> 梱包 : 商品・納品書
+    
+    deactivate 振分
+
+    activate 梱包
+
+        ネコポス -> 梱包 : ネコポス送り状
+    
+        ハンディ用DB <-- 梱包 : 注文内容・出荷商品チェック
+
+        梱包 -> 出荷 : 梱包済_商品
+    
+    deactivate 梱包
+
+== 16:00～ 出荷通知 ==
+
+    e飛伝 -> CROSSMALL : 送り状番号
+    activate CROSSMALL
+    ネコポス -> CROSSMALL : 送り状番号
+
+Loop APIにて実行
+    CROSSMALL -> Amazon : 送り状番号
+    CROSSMALL -> 楽天 : 送り状番号
+    CROSSMALL -> Yahoo : 送り状番号
+    deactivate CROSSMALL
+end
+
+@enduml
+
+
+
