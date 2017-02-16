@@ -1,5 +1,12 @@
-# macros-for-yahoo-shopping
-Excel macros for Yahoo Shopping Store Operation
+# Tools for EC backyard process
 
-Use by Ariawase
-https://github.com/vbaidiot/Ariawase
+* Excel macros
+* Windows PowerShell
+
+## Related repository
+
+* [akiya64/SearchAmazonCatalogAddin](https://github.com/akiya64/SearchAmazonCatalogAddin)
+* [akiya64/AmazonScrapingExcelFile](https://github.com/akiya64/AmazonScrapingExcelFile)
+
+## VBA module convert to source code
+Use by [vbaidiot/Ariawase](https://github.com/vbaidiot/Ariawase)
