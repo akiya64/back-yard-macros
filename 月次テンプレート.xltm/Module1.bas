@@ -1,22 +1,18 @@
 Attribute VB_Name = "Module1"
 Sub “ÇWŒv_ƒtƒ‹ƒI[ƒg()
     'MeisaiSheet/paymentMethod‚ğ“Ç‚İ‚ñ‚Å®‚à“ü‚ê‚ÄAV‹KƒV[ƒg‚Ö•Û‘¶‚µ‚ÄI—¹
-    'Œv3ŒÂ‚Ìƒtƒ@ƒCƒ‹‚ª•K—v‚Å‚·‚Ì‚ÅAƒ}ƒNƒ‹N“®Œã‚Ìƒtƒ@ƒCƒ‹‘I‘ğƒEƒBƒ“ƒhƒE‚Åw’è‚µ‚Ä‰º‚³‚¢B
-    'CSV:MeisaiSheet,PaymentMethod Xlsx:‰¿Šiƒ`ƒFƒbƒN›Œ.xlsx
+    'CSV:MeisaiSheet,PaymentMethod
     
     Dim MonthName As String
     MonthName = Format(DateAdd("M", -1, Date), "yy”NMŒ")
     
     Sheets("¤•i•ÊWŒv").Range("A1") = MonthName & " ƒ„ƒt[ŒŸ"
     
-    Call PaymentCsv“Ç
-    Call MeisaiSheetCsv“Ç
+    Call meisaiCSVƒCƒ“ƒ|[ƒg
     
     Call “]‹L‚Æd•¡íœ
     Call WŒv®‚Ì‘}“ü
     Call Œrü‚ğˆø‚­
-    
-    Call Œ´‰¿î•ñ‚Ì“]‹L
     
     Dim FileName As String
     FileName = "ƒ„ƒt[ŒŸ" & MonthName & "_ì‹Æ’†.xlsm"
@@ -29,7 +25,7 @@ Sub “ÇWŒv_ƒtƒ‹ƒI[ƒg()
     
     ThisWorkbook.SaveAs FileName:=Path, FileFormat:=xlOpenXMLWorkbookMacroEnabled
     
-    Call ¤•i•ÊWŒv‚ğV‹Kƒtƒ@ƒCƒ‹‚ÖƒRƒs[
+    Call ¤•i•ÊWŒv‚ğV‹KƒV[ƒg‚ÖƒRƒs[
     
 End Sub
 
@@ -39,13 +35,8 @@ findColum = WorksheetFunction.Match(str, MeisaiSheet.Range("A1").Resize(1, 20), 
 
 End Function
 
-Sub MeisaiSheetCsv“Ç()
+Sub meisaiCSVƒCƒ“ƒ|[ƒg()
 
-'Meisai.csvƒtƒ@ƒCƒ‹‚ğw’è
-'1s‚¸‚Â”z—ñ‚É“ü‚ê‚ÄAƒV[ƒg‚Ö“]‹L
-'Quantity=0‚ÍƒLƒƒƒ“ƒZƒ‹‚È‚Ì‚Å’e‚«‚Ü‚·
-
-'-----‚±‚±‚©‚ç-----------------'
 Dim FilePath
 FilePath = setCsvPath("Meisai")
 
@@ -54,168 +45,34 @@ If FilePath = "" Then
     Exit Sub
 End If
 
-'CSV“Ç‚ÌTextStream‚ğ€”õ
-Dim LineBuf As Variant
-Dim FSO As Object
+MeisaiSheet.Activate
 
-Set FSO = CreateObject("Scripting.FileSystemObject")
-
-Dim TS As Textstream
-Set TS = FSO.OpenTextFile(FilePath, ForReading)
-    
-'-------‚±‚±‚Ü‚ÅPaymentMethod‚Å‚à“¯‚¶ˆ—‚ğ‚µ‚Ä‚¢‚Ü‚·CSV–¼‚ªˆá‚¤‚¾‚¯----------"
-    
-Dim Header As Variant
-Header = Split(TS.ReadLine, """,""")
-
-'1€–Ú–Ú‚Ì"‚ÆAÅŒã‚Ì€–Ú‚Ì"‚ªc‚é‚Ì‚Åíœ‚µ‚Ü‚·Achr(34)‚Å"‚Å‚·
-Header(0) = (Replace(Header(0), Chr(34), ""))
-Header(UBound(Header)) = (Replace(Header(UBound(Header)), Chr(34), ""))
-
-'ƒLƒƒƒ“ƒZƒ‹‚Ì’•¶‚ğWŒv‚µ‚È‚¢‚½‚ß‚ÉAŒÂ”‚Ì—ñ‚Í‰½”Ô–Ú‚©“Á’è‚·‚é
-For j = 0 To UBound(Header)
-    
-    Dim QtyCol As Integer
-    
-    If Header(j) = "Quantity" Then
-        QtyCol = j
-        Exit For
-    End If
-
-Next
-
-'ƒwƒbƒ_[‚ğƒV[ƒg‚É“]‹L
-Sheets("Meisai").Range("A1").Resize(1, UBound(Header) + 1).Value = Header
-
-Dim i As Long
-i = 1
-
-'‘±‚¢‚ÄMeisaiSheetƒf[ƒ^‚ğƒV[ƒg‚Ö“]‹L
-Do Until TS.AtEndOfStream
-    
-    'LineBuf”z—ñ‚É1€–Ú‚¸‚Â“ü‚ê‚é
-    LineBuf = Split(TS.ReadLine, """,""")
-        
-    For j = 0 To UBound(LineBuf)
-        LineBuf(j) = Trim(Replace(LineBuf(j), Chr(34), "")) '”O‚Ì‚½‚ßÄ“xchr(34)‚Å " [”¼Šp“ñdˆø—p•„]‚ğœ‹‚µ‚ÄƒgƒŠƒ€
-        
-        If j = QtyCol Then  'qty=0‚È‚çƒLƒƒƒ“ƒZƒ‹‚Ì’•¶‚È‚Ì‚ÅA‚³‚Á‚³‚ÆContinue‚Ö”ò‚Ô
-            If LineBuf(j) = 0 Then GoTo Continue
-        
-        End If
-    
-    Next
-    
-    'A1ƒZƒ‹‚©‚çAƒIƒtƒZƒbƒg{ƒŠƒTƒCƒY‚µ‚Â‚Â“]‹L
-    Sheets("Meisai").Range("A1").Offset(i, 0).Resize(1, UBound(LineBuf) + 1).Value = LineBuf
-    
-    i = i + 1
-
-Continue:
-
-Loop
-
-' w’èƒtƒ@ƒCƒ‹‚ğCLOSE
-TS.Close
-
-End Sub
-
-Sub PaymentCsv“Ç()
-
-'Csv‚ğw’è‚·‚é
-Dim FilePath
-FilePath = setCsvPath("PaymentMethod")
-
-If FilePath = "" Then
-    MsgBox "ƒtƒ@ƒCƒ‹w’è‚ªƒLƒƒƒ“ƒZƒ‹‚³‚ê‚Ü‚µ‚½B"
-    Exit Sub
-End If
-
-'CSV“Ç—p‚ÌTextStreamƒIƒuƒWƒFƒNƒg‚ğ—pˆÓ
-Dim LineBuf As Variant
-Dim FSO As Object
-
-Set FSO = CreateObject("Scripting.FileSystemObject")
-
-Dim TS As Textstream
-Set TS = FSO.OpenTextFile(FilePath, ForReading)
-    
-Dim Header As Variant
-Header = Split(TS.ReadLine, """,""")
-
-'1€–Ú–Ú‚Ì"‚ÆAÅŒã‚Ì€–Ú‚Ì"‚ªc‚é‚Ì‚Åíœ‚µ‚Ü‚·Achr(34)‚Å"‚Å‚·
-Header(0) = (Replace(Header(0), Chr(34), ""))
-Header(UBound(Header)) = (Replace(Header(UBound(Header)), Chr(34), ""))
-
-'ƒwƒbƒ_[‚ğƒV[ƒg‚É“]‹L
-Sheets("PaymentMethod").Range("A1").Resize(1, UBound(Header) + 1).Value = Header
-
-Dim i As Long
-i = 1
-
-'‘±‚¢‚ÄPaymentMethod‚ÌƒŒƒR[ƒh‚ğƒV[ƒg‚Ö“]‹L
-Do Until TS.AtEndOfStream
-    
-    'LineBuf”z—ñ‚É1€–Ú‚¸‚Â“ü‚ê‚é
-    LineBuf = Split(TS.ReadLine, """,""")
-        
-    For j = 0 To UBound(LineBuf)
-        LineBuf(j) = Trim(Replace(LineBuf(j), Chr(34), "")) '”O‚Ì‚½‚ßÄ“xchr(34)‚Å " [”¼Šp“ñdˆø—p•„]‚ğœ‹‚µ‚ÄƒgƒŠƒ€
-        
-        If j = SaleTotalCol Then  'SaleTotalCol=0‚È‚çƒLƒƒƒ“ƒZƒ‹‚Ì’•¶‚È‚Ì‚ÅA‚³‚Á‚³‚ÆContinue‚Ö”ò‚Ô
-            If LineBuf(j) = 0 Then GoTo Continue
-        
-        End If
-    
-    Next
-    
-    'A1ƒZƒ‹‚©‚çAƒIƒtƒZƒbƒg{ƒŠƒTƒCƒY‚µ‚Â‚Â“]‹L
-    Sheets("PaymentMethod").Range("A1").Offset(i, 0).Resize(1, UBound(LineBuf) + 1).Value = LineBuf
-    
-    i = i + 1
-
-Continue:
-
-Loop
-
-' w’èƒtƒ@ƒCƒ‹‚ğCLOSE
-TS.Close
-
-' “Ç‚İ‚İŒã‚ÌWŒv ‚±‚±‚©‚ç•ÊƒvƒƒV[ƒWƒƒ‚Ì•û‚ª‚¢‚¢‚©‚à
-With PaymentSheet
-    
-    .Activate 'ƒAƒNƒeƒBƒu‚Å‚È‚¢‚Æƒ_ƒ‚©‚àAƒLƒƒƒXƒg‚ª
-    
-    Dim EndRow As Long
-    EndRow = .Range("A1").End(xlDown).Row
-    
-    For i = 2 To EndRow
-        .Cells(i, 8).NumberFormat = "0"
-        .Cells(i, 8).Value = CDbl(Cells(i, 8).Value) 'SUMIF‚ÅŒvZ‚·‚é‚Ì‚ÅƒZƒ‹‚Ì’l‚Íƒ_ƒuƒ‹Œ^
-
-    Next
-
-    'Total‚Ìƒf[ƒ^ƒŒƒ“ƒWA•¶š—ñ‚Å
-    Dim TotalRangeStr As String
-    TotalRangeStr = .Rows(1).Find(what:="Total", LookAt:=xlWhole).Offset(1, 0).Resize(EndRow, 1).Address(RowAbsolute:=False, ColumnAbsolute:=False)
-    
-    'PaymentMethod‚Ìƒf[ƒ^ƒŒƒ“ƒWA•¶š—ñ‚Å
-    Dim PaymentMethodRangeStr As String
-    PaymentMethodRangeStr = .Rows(1).Find(what:="Payment Method", LookAt:=xlWhole).Offset(1, 0).Resize(EndRow, 1).Address(RowAbsolute:=False, ColumnAbsolute:=False)
-    
-    'WŒv—p‚Ì®‚ğƒZƒ‹‚ÖŠi”[
-        
-    .Range("K3").Formula = "=COUNTIF(" & PaymentMethodRangeStr & ",J16)"
-    .Range("L3").Formula = "=SUMIF(" & PaymentMethodRangeStr & ",J16," & TotalRangeStr & ")"
-    
-    .Range("K4").Formula = "=COUNTIF(" & PaymentMethodRangeStr & ",J28)"
-    .Range("L4").Formula = "=SUMIF(" & PaymentMethodRangeStr & ",J28," & TotalRangeStr & ")"
-    
-    .Range("K5").Formula = "=COUNTIF(" & PaymentMethodRangeStr & ",""payment_b1"")"
-    .Range("L5").Formula = "=SUMIF(" & PaymentMethodRangeStr & ",""payment_b1""," & TotalRangeStr & ")"
-        
-    Set AllSaleTotalRange = .Rows(1).Find(what:="", LookAt:=xlPart) 'ŒŸõƒEƒBƒ“ƒhƒE‚Ìİ’è‚ğ–ß‚·‚½‚ß‚É‹óŒŸõ
-        
+With ActiveSheet.QueryTables.Add(Connection:= _
+    "TEXT;" & FilePath, Destination:=Range("$A$1"))
+    .Name = "Meisai"
+    .FieldNames = True
+    .RowNumbers = False
+    .FillAdjacentFormulas = False
+    .PreserveFormatting = True
+    .RefreshOnFileOpen = False
+    .RefreshStyle = xlInsertDeleteCells
+    .SavePassword = False
+    .SaveData = True
+    .AdjustColumnWidth = True
+    .RefreshPeriod = 0
+    .TextFilePromptOnRefresh = False
+    .TextFilePlatform = 932
+    .TextFileStartRow = 1
+    .TextFileParseType = xlDelimited
+    .TextFileTextQualifier = xlTextQualifierDoubleQuote
+    .TextFileConsecutiveDelimiter = False
+    .TextFileTabDelimiter = False
+    .TextFileSemicolonDelimiter = False
+    .TextFileCommaDelimiter = True
+    .TextFileSpaceDelimiter = False
+    .TextFileColumnDataTypes = Array(2, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1)
+    .TextFileTrailingMinusNumbers = True
+    .Refresh BackgroundQuery:=False
 End With
 
 End Sub
@@ -233,11 +90,12 @@ setCsvPath = Path
     
 End Function
 
-
-Private Sub “]‹L‚Æd•¡íœ()
+Sub “]‹L‚Æd•¡íœ()
 '”„ã¤•i‚ÌˆêˆÓ‚È•\‚ğ—pˆÓ‚µ‚Ü‚·B
 'MeisaiSheet‚ÌƒR[ƒh‚Æ¤•i–¼‚ğWŒvƒV[ƒg‚É“]‹L‚µ‚Äd•¡íœ‚µ‚Ü‚·B
 'Rangeƒƒ\ƒbƒh‚ÌRemoveDuplicates‚ğg‚¤B
+
+ItemTotalSheet.Activate
 
 '¤•i•ÊWŒvƒV[ƒg‚Ö‚Ì“]‹L
 
@@ -258,11 +116,23 @@ On Error GoTo 0
 
 With ItemTotalSheet
     
-    For i = 2 To MeisaiSheet.UsedRange.Rows.Count
-        .Cells(i + 1, 1).Value = MeisaiSheet.Cells(i, DescriptionCol)
-        .Cells(i + 1, 2).Value = MeisaiSheet.Cells(i, codeCol)
-    Next
+    Dim i As Long
+    i = 2
 
+    Do While MeisaiSheet.Cells(i, codeCol).Value <> ""
+        
+        '”—Ê0‚ÍƒLƒƒƒ“ƒZƒ‹‚È‚Ì‚Å”ò‚Î‚·
+        If MeisaiSheet.Cells(i, 3).Value = 0 Then GoTo Continue
+        
+        Dim WriteRow As Long
+        WriteRow = .Range("A1").SpecialCells(xlCellTypeLastCell).Row + 1
+        
+        .Cells(WriteRow, 1).Value = MeisaiSheet.Cells(i, DescriptionCol)
+        .Cells(WriteRow, 2).Value = MeisaiSheet.Cells(i, codeCol)
+        
+Continue:
+    i = i + 1
+    Loop
     
     'Range‚ğw’è‚µ‚ÄRangeƒIƒuƒWƒFƒNƒg‚ÌRemoveDuplicateƒƒ\ƒbƒh‚Åˆê”­d•¡íœ¡ƒGƒNƒZƒ‹2010ˆÈ~B
     
@@ -346,130 +216,21 @@ MsgBox "ˆ—‚ğ’†~‚µ‚Ü‚µ‚½B" & vbLf & "MeisaiƒV[ƒg‚ÉProduct Code‚ÆDescription‚
 
 End Sub
 
-Sub Œrü‚ğˆø‚­()
+Private Sub Œrü‚ğˆø‚­()
 '¤•i•ÊWŒv‚ÌƒV[ƒg‚ÉŒrü‚ğˆø‚«‚Ü‚·
 
 ResizeRow = ItemTotalSheet.Range("A2").End(xlDown).Row - 1
 
-With ItemTotalSheet.Range("A2").Resize(ResizeRow, 9)
-
-    With .Borders(xlEdgeLeft)
+With ItemTotalSheet.Range("A2").Resize(ResizeRow, 9).Borders
+        
         .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
         .Weight = xlThin
-    End With
-    
-    With .Borders(xlEdgeTop)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    
-    With .Borders(xlEdgeBottom)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    
-    With .Borders(xlEdgeRight)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    
-    With .Borders(xlInsideVertical)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    
-    With .Borders(xlInsideHorizontal)
-        .LineStyle = xlContinuous
-        .ColorIndex = 0
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
     
 End With
 
 End Sub
 
-Sub Œ´‰¿î•ñ‚Ì“]‹L()
-
-'ó’ƒ`ƒFƒbƒNxlsmƒtƒ@ƒCƒ‹‚ğw’è
-Dim FilePath
-FilePath = setCsvPath("ƒ„ƒt[‰¿Šiƒ`ƒFƒbƒN‚ğw’è")
-
-If FilePath = "" Then
-    MsgBox "ƒtƒ@ƒCƒ‹w’è‚ªƒLƒƒƒ“ƒZƒ‹‚³‚ê‚Ü‚µ‚½B"
-    Exit Sub
-End If
-
-
-'‰¿Šiƒ`ƒFƒbƒNƒ[ƒNƒV[ƒg‚ÌƒRƒs[
-
-Workbooks.Open FilePath
-  
-With ActiveWorkbook
-    
-    .Worksheets("‰¿Šiƒ`ƒFƒbƒN").Copy After:=ThisWorkbook.Worksheets("¤•i•ÊWŒv")
-    .Close
-
-End With
-
-
-'Œ´‰¿ƒ`ƒFƒbƒNƒV[ƒg‚Ì¤•iƒR[ƒh‚ğC³„Vlookup‚Åƒqƒbƒg‚³‚¹‚é‚½‚ß‚ÉStrŒ^‚ÅŠi”[‚µ’¼‚·B
-
-Worksheets("‰¿Šiƒ`ƒFƒbƒN").Activate 'With‚ÅŠ‡‚é‚ÆƒŒƒ“ƒWw’è‚ª–Ê“|‚É‚È‚é‚Ì‚ÅAActivate‚µ‚Äì‹Æ
-    
-Dim EndRow As Integer
-EndRow = Worksheets("‰¿Šiƒ`ƒFƒbƒN").UsedRange.Rows.Count
-
-For i = 2 To EndRow
-    Cells(i, 1).NumberFormatLocal = "@"
-    Cells(i, 1).Value = CStr(Cells(i, 1).Value)
-Next
-
-'Vlookup‚ÅŒŸõ‚·‚é”ÍˆÍ‚ğw’è
-Dim SearchRange As Range
-Set SearchRange = Range("A1").Resize(EndRow, 5)
-
-
-Dim SearchRangeAddress As String
-SearchRangeAddress = "‰¿Šiƒ`ƒFƒbƒN!" & SearchRange.Address(RowAbsolute:=False, ColumnAbsolute:=False)
-
-'Vlookup®‚ğ‘—‚è‚Ş
-ItemTotalSheet.Activate
-
-j = 3 'sƒJƒEƒ“ƒ^‰Šú‰»AWŒvƒV[ƒg‚Í3s–Ú‚©‚ç¤•iƒR[ƒh‚ªn‚Ü‚é
-
-Do Until IsEmpty(Cells(j, 2))
-    
-    Dim CodeAddress As String
-    CodeAddress = Cells(j, 2).Address(RowAbsolute:=False, ColumnAbsolute:=False)
-    
-    Cells(j, 2).Offset(0, 5).Formula = "=VLOOKUP(" & CodeAddress & "," & SearchRangeAddress & ",5,FALSE)"
-    Cells(j, 2).Offset(0, 6).Formula = "=F" & j & "*" & "G" & j
-    
-    With Cells(j, 2).Offset(0, 7)
-        .Formula = "=H" & j & "/" & "C" & j
-        .NumberFormatLocal = "0.00%"
-    End With
-    
-    j = j + 1
-    
-Loop
-
-Range("H1").Formula = "=SUM(H3:H" & j - 1 & ")"
-
-End Sub
-
-Sub ¤•i•ÊWŒv‚ğV‹Kƒtƒ@ƒCƒ‹‚ÖƒRƒs[()
+Private Sub ¤•i•ÊWŒv‚ğV‹Kƒtƒ@ƒCƒ‹‚ÖƒRƒs[()
 
 ItemTotalSheet.Activate
 
@@ -484,12 +245,23 @@ Set RngFg = Range("F3:G3").Resize(Range("A1").End(xlDown).Row - 2, 2)
 
 Set Rng = Union(RngCd, RngFg)
 
-'®‚ğíœ‚µ‚Ä’l‚Ì‚İ‚Æ‚·‚éê‡‚ÍAValue‚ğŠi”[‚µ’¼‚·‚¾‚¯‚Å‚¢‚¢I
-'http://www.relief.jp/itnote/archives/003686.php‘S
+'®‚ğíœ‚µ‚Ä’l‚Ì‚İ‚Æ‚·‚éê‡‚ÍAValue‚ğŠi”[‚µ’¼‚·‚¾‚¯‚Å‚¢‚¢
+'http://www.relief.jp/itnote/archives/003686.php
 
 For Each c In Rng
     
     c.Value = c.Value
+
+Next
+
+'ƒR[ƒh‚ğ6ƒPƒ^‚ÉC³
+Dim RngCode As Range
+Set RngCode = Range("B3").Resize(Range("A1").End(xlDown).Row - 2, 1)
+
+For Each c In RngCode
+    
+    c.NumberFormatLocal = "@"
+    If Len(c.Value) = 5 Then c.Value = "0" & c.Value
 
 Next
 
@@ -506,5 +278,47 @@ Sheets("¤•i•ÊWŒv").Copy
 ActiveWorkbook.SaveAs Path
 
 ThisWorkbook.Close SaveChanges:=False
+
+End Sub
+
+Private Sub ¤•i•ÊWŒv‚ğV‹KƒV[ƒg‚ÖƒRƒs[()
+
+ItemTotalSheet.Activate
+ItemTotalSheet.Copy After:=Worksheets("¤•i•ÊWŒv")
+
+ActiveSheet.Name = "Œ´‰¿“ü—Í"
+
+'®‚ğ’l‚É’¼‚·
+'CD FG—ñ‚Ì3s–Ú‚©‚çÅIs‚Ü‚Å‚ğ’l‚Ì‚İ‚É‚µ‚Ü‚·
+
+'”ÍˆÍ‚ğ‘I‘ğ‚µ‚Ä
+Dim RngCd As Range, RngFg As Range, Rng As Range
+
+Set RngCd = Range("C3:D3").Resize(Range("A1").End(xlDown).Row - 2, 2)
+Set RngFg = Range("F3:G3").Resize(Range("A1").End(xlDown).Row - 2, 2)
+
+Set Rng = Union(RngCd, RngFg)
+
+'®‚ğíœ‚µ‚Ä’l‚Ì‚İ‚Æ‚·‚éê‡‚ÍAValue‚ğŠi”[‚µ’¼‚·‚¾‚¯‚Å‚¢‚¢
+'http://www.relief.jp/itnote/archives/003686.php
+
+For Each c In Rng
+    
+    c.Value = c.Value
+
+Next
+
+'ƒR[ƒh‚ğ6ƒPƒ^‚ÉC³
+Dim RngCode As Range
+Set RngCode = Range("B3").Resize(Range("A1").End(xlDown).Row - 2, 1)
+
+For Each c In RngCode
+    
+    c.NumberFormatLocal = "@"
+    If Len(c.Value) = 5 Then c.Value = "0" & c.Value
+
+Next
+
+ActiveSheet.Shapes(1).Delete
 
 End Sub

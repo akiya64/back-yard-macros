@@ -10,27 +10,30 @@ Attribute VB_Exposed = True
 Option Explicit
 
 Private Sub Worksheet_Change(ByVal Target As Range)
-    
+'アドインで書き込まれる最終列、最終行の変更を検出する
+'WorkSheet_Changeイベントは変更があったセルを引数にとる。
+
 Dim LastRow As Long
 LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
 
 Dim CheckCell As Range
-Set CheckCell = Intersect(Target, Cells(LastRow, 28))
+Set CheckCell = Intersect(Target, Cells(LastRow, 25))
 
-'最終行のN列が変更されていない場合
+'最終行のY列が変更されていない場合
 If CheckCell Is Nothing Then Exit Sub
 
 If CheckCell.Value = "" Then
-
-    '最終行が棚無しで、アドインで何も出力されないときの処理
+    '最終行が棚無しで、アドインで何も出力されないときは、
+    '末尾列であるY列を2行目までさかのぼって値が入っていないか調べる
+    
     Dim i As Long
     For i = LastRow To 2 Step -1
-        If Cells(i, 28).Value <> "" Then
+        If Cells(i, 25).Value <> "" Then
             
             Exit For
         
         ElseIf i = 2 Then
-        '全ての行でN列が空欄の時
+        '全ての行でY列が空欄の時
             MsgBox "アドインで正しくデータが取得出来ていません｡"
             End
         
@@ -47,12 +50,11 @@ IsContinue = MsgBox("アドイン完了、ファイルを作成します。", vbOKCancel)
 
 If IsContinue = vbOK Then
 
-    Call BuildSheets.電算提出_振分けシート作成
+    Call Main.電算提出_振分けシート作成
 
 Else
 
     MsgBox "マクロを終了します。"
-    Call SetParser.CloseDataBook(True)
     
     End
 

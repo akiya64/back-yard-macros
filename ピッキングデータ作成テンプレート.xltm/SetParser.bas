@@ -5,15 +5,15 @@ Const TIED_ITEM_LIST_BOOK As String = "ｾｯﾄ商品ﾘｽﾄ.xls"
 Const LIST_BOOK_FOLDER As String = "\\server02\商品部\ネット販売関連\"
 Sub ParseItems(r As Range)
 
+'セット商品リストのブックを開く
 Call OpenListBook
 
 ThisWorkbook.Activate
 
-Dim HitSheet As Worksheet
-Set HitSheet = SetParser.SearchTiedItemSheet(r.Value)
-
 Dim ComponentItems As Collection
-Set ComponentItems = GetComponentItems(r.Value, HitSheet)
+Set ComponentItems = GetComponentItems(r.Value)
+
+If ComponentItems Is Nothing Then Exit Sub
 
 'セット内容書き出し処理
 Call InsertComponetRow(r, ComponentItems)
@@ -75,45 +75,35 @@ Next
 
 End Sub
 
-Private Function SearchTiedItemSheet(Code As String) As Worksheet
-    '該当コードのあるワークシートを探します。
-      
-    Dim Hits As Long
-    Dim i As Long
-    
-    For i = 1 To Workbooks(TIED_ITEM_LIST_BOOK).Worksheets.Count
+Private Function GetComponentItems(TiedCode As String) As Collection
+'渡されたコードから、セット内容Collectionを返します。
+'セット商品リストは呼び出し側のプロシージャで開いているものとします。
+
+'セット商品リストのブックを取得する
+
+Dim i As Long
+For i = 1 To Workbooks(TIED_ITEM_LIST_BOOK).Worksheets.Count
         
-        Dim LastRow As Long
-        LastRow = Workbooks(TIED_ITEM_LIST_BOOK).Worksheets(i).Cells(2, 1).SpecialCells(xlCellTypeLastCell).Row
+    Dim TiedCodeList As Worksheet
+    Set TiedCodeList = Workbooks(TIED_ITEM_LIST_BOOK).Worksheets(i)
+
+    Dim CodeRange As Range
+    Set CodeRange = TiedCodeList.Range("A1:A" & TiedCodeList.Cells(2, 1).SpecialCells(xlCellTypeLastCell).Row)
         
-        Dim TiedItemCodeList As Range
-        Set TiedItemCodeList = Workbooks(TIED_ITEM_LIST_BOOK).Worksheets(i).Range("A1:A" & LastRow)
+    On Error Resume Next
         
-        Hits = WorksheetFunction.CountIf(TiedItemCodeList, Code)
-
-        If Hits > 0 Then
-            
-            Set SearchTiedItemSheet = Workbooks(TIED_ITEM_LIST_BOOK).Worksheets(i)
-            Exit Function
+        Dim HitRow As Double
+        HitRow = WorksheetFunction.Match(TiedCode, CodeRange, 0)
         
-        End If
-    
-    Next
+        If HitRow > 0 Then Exit For
+        
+    On Error GoTo 0
 
-End Function
+Next
 
-Private Function GetComponentItems(TiedCode As String, TiedCodeList As Worksheet) As Collection
-
-'渡されたシートとコードから、セット内容Collectionを返します。
-'呼び出し側でエラーハンドリングを行うので、On Errorステートメントは不要
-
-'登録コードのレンジ、ここをMatch関数で調べて、Codeの行番号を出す
-Dim CodeRange As Range
-Set CodeRange = TiedCodeList.Range("A1:A" & TiedCodeList.Cells(2, 1).SpecialCells(xlCellTypeLastCell).Row)
-
-Dim HitRow As Double
-HitRow = WorksheetFunction.Match(TiedCode, CodeRange, 0)
-
+If HitRow = 0 Then
+    Exit Function
+End If
 
 Dim ComponetItems As Collection
 Set ComponetItems = New Collection
@@ -122,18 +112,18 @@ Set ComponetItems = New Collection
 'ヘッダー  SKU(連番77777始まり)/売価(税込)/JAN単位の総数量(●点ｾｯﾄ)     /JAN /商魂SKU /数量 / 商品名
 
 '列カウンタ
-Dim i As Integer
-i = TiedCodeList.Rows(1).Find("商品情報1").Column
+Dim k As Integer
+k = TiedCodeList.Rows(1).Find("商品情報1").Column
 
 'IsEmptyだと空白セル拾う場合がある
-Do Until TiedCodeList.Cells(HitRow, i) = ""
+Do Until TiedCodeList.Cells(HitRow, k) = ""
 
     Dim UnitCell As Range
     
     Dim Unit As ComponentItem
     Set Unit = New ComponentItem
     
-    Set UnitCell = TiedCodeList.Cells(HitRow, i)
+    Set UnitCell = TiedCodeList.Cells(HitRow, k)
     
     With Unit
         
@@ -146,7 +136,7 @@ Do Until TiedCodeList.Cells(HitRow, i) = ""
         
     ComponetItems.Add Unit
     
-    i = i + 4
+    k = k + 4
 
 Loop
 
@@ -156,7 +146,8 @@ End Function
 
 Private Sub OpenListBook()
 
-'セットリストのエクセルファイルを開きます。
+'セットリストのエクセルファイルを開くか、開いていればそのまま終了します。
+'1つのピッキングシートの処理で何回か開く場合があるので、閉じるのは呼び出し側でセット分解終了のタイミングで行います。
 
 Dim wb As Workbook
 
@@ -174,11 +165,9 @@ Set wb = Workbooks.Open(LIST_BOOK_FOLDER & TIED_ITEM_LIST_BOOK, ReadOnly:=True)
 
 ret:
 
-Application.OnTime Now + TimeSerial(0, 1, 0), "CloseDataBook"
-
 End Sub
 
-Function CloseDataBook(Optional ByVal Arg As Variant) As Boolean
+Function CloseSetMasterBook(Optional ByVal Arg As Variant) As Boolean
 
 Dim wb As Workbook
 

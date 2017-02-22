@@ -1,0 +1,147 @@
+@startuml picking_create_vba
+
+skinparam monochrome true
+skinparam packageFontSize 25
+
+title ピッキングテンプレートVBA
+
+
+box "外部ファイル" #white
+    entity CSV
+    entity ｾｯﾄ商品ﾘｽﾄ.xls
+end box
+
+participant Main
+
+[-> Main : マクロ起動
+activate Main
+
+note right
+  <size:16>進捗表示ダイアログを実装すること</size>
+end note
+
+Main -> FetchCsv : 呼出
+activate FetchCsv
+
+CSV <- FetchCsv : TextStreamingOpen 
+
+participant SetParser
+
+Loop 1行ずつ読み出し
+    CSV -> FetchCsv : 1Line
+
+    entity OrdersSheet
+    FetchCsv -> OrdersSheet : 受注データ書込
+
+    note right
+        商品名変更が必要な可能性アリ
+        1. 20万行のマッピングリストを使う
+        2. アドインデータを使う
+        3. 正規表現で【】≪≫を中身ごと削除する
+    end note
+
+    SetParser <- OrdersSheet : セット分解
+    
+    activate SetParser
+        ｾｯﾄ商品ﾘｽﾄ.xls <- SetParser : GetComponentItems()
+        ｾｯﾄ商品ﾘｽﾄ.xls --> SetParser : ItemCollection
+    
+        SetParser -> OrdersSheet : アイテム行挿入
+    
+    deactivate SetParser
+
+    SetParser <- OrdersSheet :○個組分解
+    activate SetParser
+        SetParser -> OrdersSheet : 単体数量上書
+    deactivate SetParser
+
+    |||
+    end loop
+
+CSV <- FetchCsv : TextStreamingClose
+deactivate FetchCsv
+
+... <size:28>アドインでデータ取得 手動実行</size> ...
+
+participant LocationCutter
+
+    Main -> LocationCutter
+
+    activate LocationCutter
+
+    loop 受注データFix
+        |||
+        OrdersSheet -> LocationCutter :ロケ文字列取得
+        OrdersSheet <- LocationCutter :無効ロケ削除
+        |||
+    end
+    deactivate LocationCutter
+
+participant SheetBuilder
+
+Main -> SheetBuilder : シート作成モジュール実行
+activate SheetBuilder
+
+loop 3モール分実行     
+    Group ピッキングデータ作成
+
+        create entity Picking_2_3
+        SheetBuilder -> Picking_2_3 : ブック作成
+
+        create entity Picking_a
+        SheetBuilder -> Picking_a : ブック作成
+
+        OrdersSheet <- SheetBuilder : 受注データ取得
+
+        SheetBuilder -> SheetBuilder : 受注モール判定
+
+        else 棚有り
+            SheetBuilder -> Picking_2_3 : 6ケタ振替 データ転記
+
+        else 棚無し
+            SheetBuilder -> Picking_a : データ転記
+    end
+
+    SheetBuilder -> Picking_2_3 : ファイル保存
+    destroy Picking_2_3
+    SheetBuilder -> Picking_a : ファイル保存
+    deactivate SheetBuilder
+
+    destroy Picking_a
+    deactivate SheetBuilder
+
+    Group 振分シート作成
+        activate SheetBuilder
+        Main -> SheetBuilder : CreateForSorterSheet
+        create entity ForSorter1
+        SheetBuilder -> ForSorter1 : シート作成
+        create entity ForSorter2
+        SheetBuilder -> ForSorter2 : シート作成
+        OrdersSheet <- SheetBuilder : 受注データ取得
+        SheetBuilder -> SheetBuilder : 受注モール判定
+
+        else 単体受注品
+
+            SheetBuilder -> ForSorter1 : 受注データ転記
+        
+        else セット商品
+
+            SheetBuilder -> ForSorter2 : 受注データ転記
+        else
+
+            SheetBuilder -> ForSorter1 : 商品コードでソート
+
+    end
+end
+
+deactivate SheetBuilder
+
+Main --> ForSorter1 : VBA:PrintOut 
+Main --> ForSorter2 : VBA:PrintOut
+
+
+[<- Main : 終了メッセージ
+
+deactivate Main
+
+@enduml

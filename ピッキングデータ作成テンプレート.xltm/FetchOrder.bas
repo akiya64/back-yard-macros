@@ -1,65 +1,7 @@
 Attribute VB_Name = "FetchOrder"
 Option Explicit
 
-'明細と注文ヘッダーのあるフォルダを指定、最後必ず\マーク
-Const CSV_PATH As String = "C:\Users\mos10\Desktop\ヤフー\"
-Const ALTER_CSV_PATH As String = "\\MOS10\ヤフー\"
-
-Sub 受注ファイル読込()
-
-OrderSheet.Activate
-
-If Not Range("B2").Value = "" Then
-    MsgBox "データ取得済です。"
-    End
-End If
-
-Dim LineBuf As Variant
-
-'ファイル操作オブジェクト生成
-Dim FSO As New FileSystemObject
-
-' Meisai.csvとtyumon_H.csvのCSVファイルのパスをセット
-Dim MeisaiPath As String, TyumonhPath As String
-
-If FSO.FileExists(CSV_PATH & "Meisai.csv") Then
-
-    MeisaiPath = CSV_PATH & "Meisai.csv"
-    TyumonhPath = CSV_PATH & "tyumon_H.csv"
-
-ElseIf FSO.FileExists(ALTER_CSV_PATH & "Meisai.csv") Then
-   
-    MeisaiPath = ALTER_CSV_PATH & "Meisai.csv"
-    TyumonhPath = ALTER_CSV_PATH & "tyumon_H.csv"
-
-Else
-    
-    'TODO:ファイル指定で読み込ませる
-    
-    MsgBox "meisai.csv ファイルなし"
-    End
-
-End If
-
-Call ReadMeisai(MeisaiPath)
-
-Call ReadTyumonH(TyumonhPath)
-
-'マクロ起動ボタンを消去
-OrderSheet.Shapes(1).Delete
-
-'アドイン用の行・列 表示
-Dim LastRow As Long
-LastRow = Range("D1").SpecialCells(xlCellTypeLastCell).Row
-
-Range("L1").Value = "アドイン指定 台帳：9998"
-Range("L2:O2") = Array(2, 4, LastRow, 12)
-
-MsgBox "アドインを実行して下さい。"
-
-End Sub
-
-Private Sub ReadMeisai(Path As String)
+Sub ReadMeisai(Path As String)
 
 'Meisai.CSVをOrderSheet=注文一覧に追記する
 
@@ -84,32 +26,53 @@ Do Until TS.AtEndOfStream
     
     Next
     
-    'ループ一回目ではヘッダーなので、インクリメントへ飛ぶ
-    If LineBuf(0) = "Order ID" Then GoTo increment
-    
     'CSV側ヘッダー 0:Order ID/1:Line ID/2:Quantity/3:Product Code/4:Description/5:Option Name/6:Option Value/7:Unit Price/
+    'ループ一回目ではヘッダーなので、インクリメントへ飛ぶ
+    
+    If LineBuf(0) = "Order ID" Then GoTo increment
         
     ':ToDo ここからシート、セルの値のが入るので分割した方がいいかもしれない。
+    
     With Worksheets("受注データシート")
+        'A列、注文番号
         .Range("A" & i).Value = LineBuf(0)
-        .Range("C" & i).Value = LineBuf(1)
         
+        'C列、受注時の商品コード
         .Range("C" & i).NumberFormatLocal = "@"
         .Range("C" & i).Value = LineBuf(3)
         
-        .Range("D" & i).NumberFormatLocal = "@"
-        .Range("D" & i).Value = LineBuf(3)
+        'D列、アドイン実行用に6ケタ化したコード、もしくはJAN
+        '空欄がありえるので、ピッキングデータ・振分リストに転記時に空欄判定する
         
+        '6ケタならそのまま入れる
+        If LineBuf(3) Like "######" Then
+            .Range("D" & i).NumberFormatLocal = "@"
+            .Range("D" & i).Value = LineBuf(3)
+        
+        '数字5ケタは頭にゼロを追記
+        ElseIf LineBuf(3) Like "#####" Then
+            
+            .Range("D" & i).NumberFormatLocal = "@"
+            .Range("D" & i).Value = "0" & LineBuf(3)
+        
+        'JANもそのまま入れる
+        ElseIf LineBuf(3) Like String(13, "#") Then
+            
+            .Range("D" & i).NumberFormatLocal = "@"
+            .Range("D" & i).Value = LineBuf(3)
+        
+        End If
+        
+        'E列：商品名  F列：受注数量  G列：売価
         .Range("E" & i).Value = LineBuf(4)
         .Range("F" & i).Value = LineBuf(2)
         .Range("G" & i).Value = LineBuf(7)
         
-        'Yahoo!登録コードをチェック
-        'セット分解 7777始まり
-        Dim YahooCode As String
-        YahooCode = .Range("D" & i).Value
+        'CSV1行をリード完了
         
-        If YahooCode Like "7777*" Then
+
+        'セット分解 7777始まり
+        If .Range("D" & i).Value Like "7777*" Then
             
             Call SetParser.ParseItems(.Range("D" & i))
             
@@ -119,20 +82,11 @@ Do Until TS.AtEndOfStream
         
         End If
     
-        '単体○個セット分解 ハイフン含むコードなら分解可能かチェック
+        '単体○個セット分解 ハイフン含むコードなら分解処理へ投げる
         
-        If YahooCode Like "*-*" Then
+        If .Range("D" & i).Value Like "*-*" Then
         
             Call SetParser.ParseScalingSet(.Range("D" & i))
-        
-        End If
-    
-        'D列をアドイン用に6ケタに修正
-        
-        If YahooCode Like "#####" Then
-                    
-            .Range("D" & i).NumberFormatLocal = "@"
-            .Range("D" & i).Value = "0" & YahooCode
         
         End If
     
@@ -145,9 +99,11 @@ Loop
 
 TS.Close
 
+SetParser.CloseSetMasterBook
+
 End Sub
 
-Private Sub ReadTyumonH(Path As String)
+Sub ReadTyumonH(Path As String)
 
 Dim FSO As Object
 Set FSO = New FileSystemObject
@@ -201,25 +157,12 @@ Do Until TS.AtEndOfStream
         i = i + 1
     
     Loop
-    
-    '備考欄へ追記 クーポン利用かつ代引き・銀行振込・ヤフーマネー決済 確認して
-    Dim tmp As String
-    tmp = ""
-    
-    If Order(3) = "payment_d1" And Order(4) < 0 Then tmp = "代引き クーポン利用 "
-    If Order(3) = "payment_b1" Then tmp = tmp & "銀行振込"
-    If Order(3) = "payment_a16" Then tmp = tmp & "Yahoo!マネー払い"
-    
-    Range("K" & FindRow).Value = tmp 'tmpをセルに書き戻す
+
         
 Continue:
     
 Loop
 
-' オブジェクトを破棄
 TS.Close
-Set TS = Nothing
-Set FSO = Nothing
 
 End Sub
-

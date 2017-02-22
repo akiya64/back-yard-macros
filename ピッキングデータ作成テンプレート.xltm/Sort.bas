@@ -1,17 +1,17 @@
 Attribute VB_Name = "Sort"
 Option Explicit
 
-Sub 振分用シート_ソート()
+Sub 振分用シート_ソート(Sheet As Worksheet)
 Attribute 振分用シート_ソート.VB_ProcData.VB_Invoke_Func = " \n14"
-    
+
 Dim SortRange As Range
-Set SortRange = Worksheets("振分け用一覧シート").Range("A1").CurrentRegion
+Set SortRange = Sheet.Range("A1").CurrentRegion
 
 Dim CodeRange As Range
-Set CodeRange = Worksheets("振分け用一覧シート").Range("C2:C" & SortRange.Rows.Count)
+Set CodeRange = Sheet.Range("A2:A" & SortRange.Rows.Count)
 
 'ソート条件をセット
-With Worksheets("振分け用一覧シート").Sort
+With Sheet.Sort
     
     '一旦ソートをクリア
     .SortFields.Clear
@@ -31,5 +31,9 @@ With Worksheets("振分け用一覧シート").Sort
     .Apply
 
 End With
+
+'カレントリージョンがセレクトされているので、選択セルをセルA1にセットし直す
+Sheet.Activate
+Range("A1").Select
 
 End Sub
