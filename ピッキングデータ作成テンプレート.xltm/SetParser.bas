@@ -26,50 +26,58 @@ Dim i As Long, v As Variant
 
 For i = 1 To d.Count
     
-    Set v = d.Item(i)
-    
     Rows(c.Offset(1, 0).Row).Insert (xlShiftDown)
+    
+    Set v = d.Item(i)
     
     '6ケタあれば6ケタ、なければJAN
     c.Offset(1, 0).NumberFormatLocal = "@"
+    c.Offset(1, 0).Value = c.Value
     
     If v.Code <> "" Then
 
-        c.Offset(1, 0).Value = v.Code
+        c.Offset(1, 7).Value = v.Code
     
     Else
     
-        c.Offset(1, 0).Value = v.Jan
+        c.Offset(1, 7).Value = v.Jan
     
     End If
     
-    '商品名出力と必要数量をかける
+    '商品名書き込み
     c.Offset(1, 1).Value = v.Name
-    c.Offset(1, 2).Formula = "=" & v.Quantity & "*" & c.Offset(0, 2).Value
-    c.Offset(1, 2).Value = c.Offset(1, 2).Value
+    
+    '単体商品コードと必要数量書き込み
+    c.Offset(1, 3).Value = v.Quantity * c.Offset(0, 3).Value
+    
+    c.Offset(1, 7).Value = v.Code
+    c.Offset(1, 8).Value = v.Quantity * c.Offset(0, 3).Value
     
     '1個目のアイテムにのみ販売価格を付け替える
-    
     '売価転記済フラグ
     Dim Flg As Boolean
     
     If v.Quantity = 1 And Flg = False Then
     
-        c.Offset(1, 3).Value = c.Offset(0, 3).Value
-        c.Offset(0, 3).Value = 0
+        c.Offset(1, 2).Value = c.Offset(0, 2).Value
+        c.Offset(0, 2).Value = 0
                 
         Flg = True
         
     Else
-        c.Offset(1, 3).Value = 0
+        c.Offset(1, 2).Value = 0
         
     End If
     
-    '挿入後の行に、ヤフー登録コードはセットの7777コードを入れる
-    c.Offset(1, -1).Value = c.Value
+    '挿入後の行に、受注時コードはセットの7777コードを入れる
+    c.Offset(1, 0).Value = c.Value
     
     '同じく、挿入後の行に注文番号を入れる
-    c.Offset(1, -3).Value = c.Offset(0, -3).Value
+    c.Offset(1, -1).Value = c.Offset(0, -1).Value
+    
+    c.Offset(1, 4).Value = c.Offset(0, 4).Value
+    c.Offset(1, 5).Value = c.Offset(0, 5).Value
+    c.Offset(1, 6).Value = c.Offset(0, 6).Value
     
 Next
 
@@ -185,11 +193,21 @@ End Function
 
 Sub ParseScalingSet(r As Variant)
 
-Dim Code As String
+Dim Code As String, FixedCode As String
 Code = r.Value
 
 Dim SeparatedCode As Variant
 SeparatedCode = Split(Code, "-", 2)
+
+If SeparatedCode(0) Like String(5, "#") Then
+    FixedCode = "0" & SeparatedCode(0)
+Else
+    FixedCode = SeparatedCode(0)
+End If
+
+'単体コードをI列に入れる
+Range("I" & r.Row).NumberFormatLocal = "@"
+Range("I" & r.Row).Value = FixedCode
 
 'IsNumericメソッドで、ハイフンの後ろが数値に変換可能かチェック
 '変換可能なら、○個セットと見なす
@@ -198,14 +216,9 @@ If Not IsNumeric(SeparatedCode(1)) Then
     Exit Sub
 End If
 
-'セットなら、D列は単体コード、数量はセット数量×受注数量
-r.NumberFormatLocal = "@"
-r.Value = CStr(SeparatedCode(0))
+'セットなら、必要数量はセット数量×受注数量に書き換え
+Range("J" & r.Row).Value = Range("J" & r.Row).Value * CLng(Val(SeparatedCode(1)))
 
-Range("F" & r.Row).Value = Range("F" & r.Row).Value * CLng(Val(SeparatedCode(1)))
-
-'備考に、セット分解済記入
-Range("K" & r.Row).Value = Range("K" & r.Row).Value & "セット分解 済"
 
 End Sub
 

@@ -63,23 +63,23 @@ deactivate FetchCsv
 
 ... <size:28>アドインでデータ取得 手動実行</size> ...
 
-participant LocationCutter
+participant DataValidate
 
-    Main -> LocationCutter
+    Main -> DataValidate : LocationCutter
 
-    activate LocationCutter
+    activate DataValidate
 
     loop 受注データFix
         |||
-        OrdersSheet -> LocationCutter :ロケ文字列取得
-        OrdersSheet <- LocationCutter :無効ロケ削除
+        OrdersSheet -> DataValidate :ロケ文字列取得
+        OrdersSheet <- DataValidate :無効ロケ削除
         |||
     end
-    deactivate LocationCutter
+    deactivate DataValidate
 
 participant SheetBuilder
 
-Main -> SheetBuilder : シート作成モジュール実行
+Main -> SheetBuilder : Sub CreatePicking()
 activate SheetBuilder
 
 loop 3モール分実行     
@@ -110,34 +110,35 @@ loop 3モール分実行
     destroy Picking_a
     deactivate SheetBuilder
 
-    Group 振分シート作成
+
+    Main -> SheetBuilder : Sub CreateForSorterSheet()
+        Group 振分シート作成
         activate SheetBuilder
-        Main -> SheetBuilder : CreateForSorterSheet
-        create entity ForSorter1
-        SheetBuilder -> ForSorter1 : シート作成
-        create entity ForSorter2
-        SheetBuilder -> ForSorter2 : シート作成
+        create entity ForSorter
+        SheetBuilder -> ForSorter : シート作成
+        create entity ForSorter_set
+        SheetBuilder -> ForSorter_set : シート作成
         OrdersSheet <- SheetBuilder : 受注データ取得
         SheetBuilder -> SheetBuilder : 受注モール判定
 
         else 単体受注品
 
-            SheetBuilder -> ForSorter1 : 受注データ転記
+            SheetBuilder -> ForSorter : 受注データ転記
         
         else セット商品
 
-            SheetBuilder -> ForSorter2 : 受注データ転記
+            SheetBuilder -> ForSorter_set : 受注データ転記
         else
 
-            SheetBuilder -> ForSorter1 : 商品コードでソート
+            SheetBuilder -> ForSorter : 商品コードでソート
 
     end
 end
 
 deactivate SheetBuilder
 
-Main --> ForSorter1 : VBA:PrintOut 
-Main --> ForSorter2 : VBA:PrintOut
+Main --> ForSorter : VBA:PrintOut 
+Main --> ForSorter_set : VBA:PrintOut
 
 
 [<- Main : 終了メッセージ

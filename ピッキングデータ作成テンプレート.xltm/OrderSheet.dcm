@@ -13,11 +13,14 @@ Private Sub Worksheet_Change(ByVal Target As Range)
 'アドインで書き込まれる最終列、最終行の変更を検出する
 'WorkSheet_Changeイベントは変更があったセルを引数にとる。
 
+'I1セルが空欄なら、アドイン前なので終了
+If Range("L1").Value = "" Then Exit Sub
+
 Dim LastRow As Long
 LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
 
 Dim CheckCell As Range
-Set CheckCell = Intersect(Target, Cells(LastRow, 25))
+Set CheckCell = Intersect(Target, Cells(LastRow, 29))
 
 '最終行のY列が変更されていない場合
 If CheckCell Is Nothing Then Exit Sub
@@ -28,7 +31,7 @@ If CheckCell.Value = "" Then
     
     Dim i As Long
     For i = LastRow To 2 Step -1
-        If Cells(i, 25).Value <> "" Then
+        If Cells(i, 28).Value <> "" Then
             
             Exit For
         
