@@ -7,25 +7,21 @@ Const SAVE_FOLDER As String = "\\server02\è§ïiïî\ÉlÉbÉgîÃîÑä÷òA\î≠íçä÷òA\éËîzèëç
 'PickingSheetNames(2)ÇÃï¿Ç—Ç∆ìØÇ∂ÅAéËîzàÀóäè§ïiêîÉJÉEÉìÉ^
 Dim ItemCount(2) As Integer
 
-
 Sub ÉçÉSÉXéËîzÉäÉXÉgçÏê¨()
+
+'É}ÉNÉçãNìÆÉ{É^ÉìçÌèúÅAçƒíäèoÉ{É^ÉìçÌèú
+ActiveSheet.Shapes("ButtonExtractLogos").Delete
 
 'ÉVÅ[ÉgÇ…ñ{ì˙ì˙ïtÇì¸ÇÍÇÈ
 Worksheets("ÉçÉSÉXñ{ì˙ï™").Range("A1").Value = Format(Date, "måédì˙")
 
-'í©àÍÇ≈ÉçÉSÉXB2BÇ©ÇÁÉ_ÉEÉìÉçÅ[ÉhÇµÇƒÇ≠ÇÈç›å…ï\ÇéÊÇËçûÇﬁ
-Call FetchLogosQuantityCsv
-
 'äeÉsÉbÉLÉìÉOÉVÅ[ÉgÇÉRÉsÅ[ÇµÇƒÅAÉçÉSÉXéËîzÇ≈É}Å[ÉNÇ≥ÇÍÇƒÇ¢ÇÈè§ïiÇÉRÉsÅ[
-'ÉÑÉtÅ[ÇÃÇ›ÉsÉbÉLÉìÉOÉVÅ[ÉgÇ≈ÇÕÇ»Ç≠ÅAMOS10Ç…ï€ë∂Ç≥ÇÍÇÈMeisai.csvÇégÇ§
 
 'ÉÇÅ[ÉãñºÅAÉsÉbÉLÉìÉOÉVÅ[ÉgåƒÇ—èoÇµÇ∆ÉVÅ[ÉgñºÇ…égÇ§ï∂éöóÒ îzóÒ
 Dim PickingSheetNames(2) As String
-PickingSheetNames(0) = "ÉAÉ}É]Éì"
+PickingSheetNames(0) = "Amazon"
 PickingSheetNames(1) = "äyìV"
-PickingSheetNames(2) = "ÉÑÉtÅ["
-
-
+PickingSheetNames(2) = "Yahoo"
 
 Dim PickingSheetName As Variant
 
@@ -36,9 +32,20 @@ For Each PickingSheetName In PickingSheetNames
     'îΩïúéqÇ™Variantå^ÅiVBAÇÃédólÅjÇ»ÇÃÇ≈CopySheetä÷êîÇ÷ìnÇπÇÈÉXÉgÉäÉìÉOå^Ç…ÉLÉÉÉXÉg
     Name = CStr(PickingSheetName)
     
-    Call CopySheet(Name)
-    Call ExtractLogosItems(Name)
+    On Error Resume Next
+        
+        Call CopySheet(Name)
+        Call ExtractLogosItems(Name)
     
+        If Err Then
+        
+            MsgBox Prompt:=Name & " íIñ≥ÇµÉsÉbÉLÉìÉOÉVÅ[Égñ≥ÇµÅAèàóùÇë±çsÇµÇ‹Ç∑ÅB"
+        
+        End If
+    
+    On Error GoTo 0
+continue:
+
 Next
 
 'ç≈å„Ç…ÉRÉsÅ[ÇµÇΩÉVÅ[ÉgÇ™ActiveÇ»ÇÃÇ≈ñ{ì˙ï™ÉVÅ[ÉgÇ…ñﬂÇÈ
@@ -48,12 +55,18 @@ Worksheets("ÉçÉSÉXñ{ì˙ï™").Activate
 'ÉçÉSÉXéËîzïiÇÃóLñ≥ÇämîF
 If ActiveSheet.UsedRange.Rows.Count = 1 Then
 
-    MsgBox prompt:="ÉçÉSÉX ÉsÉbÉLÉìÉOÉVÅ[ÉgÇ≈ÇÃéËîzàÀóäè§ïiÇÕÇOì_Ç≈Ç∑ÅB" & vbLf & "ÉAÉbÉvÉçÅ[ÉhópÉtÉ@ÉCÉãÇÕê∂ê¨Ç≥ÇÍÇ‹ÇπÇÒÅB"
+    MsgBox Prompt:="ÉçÉSÉX ÉsÉbÉLÉìÉOÉVÅ[ÉgÇ≈ÇÃéËîzàÀóäè§ïiÇÕÇOì_Ç≈Ç∑ÅB" & vbLf & "ÉAÉbÉvÉçÅ[ÉhópÉtÉ@ÉCÉãÇÕê∂ê¨Ç≥ÇÍÇ‹ÇπÇÒÅB"
     Exit Sub
+
+Else
+    MsgBox Prompt:="ÉçÉSÉXéËîzàÀóä íäèoäÆóπ" & vbLf & _
+                "Amazonï™ÅF" & ItemCount(0) & "ì_" & vbLf & _
+                "äyìVï™ÅF" & ItemCount(1) & "ì_" & vbLf & _
+                "ÉÑÉtÅ[ï™ÅF" & ItemCount(2) & "ì_"
 
 End If
 
-'ïiî‘ÅAÉÅÅ[ÉJÅ[ç›å…Çà¯Ç¡í£ÇÈVlookupéÆÇì¸ÇÍÇÈÅAîÕàÕÇÉnÅ[ÉhÉRÅ[ÉfÉBÉìÉOÇµÇƒÇ¢ÇÈÇÃÇ≈íçà”
+'ïiî‘ÅAÉÅÅ[ÉJÅ[ç›å…Çà¯Ç¡í£ÇÈVlookupéÆÇì¸ÇÍÇÈ
 Call InsertVlookup
 
 With ActiveSheet
@@ -63,23 +76,38 @@ With ActiveSheet
    
 End With
 
+'çƒíäèoÉ{É^ÉìÅACSVçƒï€ë∂É{É^ÉìÇîzíu
+'CSVçƒï€ë∂É{É^Éìîzíu
+With ActiveSheet.Buttons.Add( _
+        Range("H3").Left, _
+        Range("H3").Top, _
+        Range("H3:I4").Width, _
+        Range("H3:I4").Height _
+        )
+    .OnAction = "B2BópCSVï€ë∂"
+    .Characters.Text = "B2BópCSV çƒï€ë∂"
+End With
+
 'Server02ÇÃéËîzèëçÏê¨ÉtÉHÉãÉ_Ç…xlsxå`éÆÇ≈ï€ë∂
 Application.DisplayAlerts = False
 ThisWorkbook.SaveAs FileName:=SAVE_FOLDER & "ÉçÉSÉX" & Format(Date, "mmdd") & ".xlsx"
 
-Call SaveAsCsv
-
-'É{É^ÉìÇè¡ÇµÇƒÅAäÆóπÉÅÉbÉZÅ[ÉWï\é¶
 ThisWorkbook.Worksheets("ÉçÉSÉXñ{ì˙ï™").Activate
 
-ActiveSheet.Shapes("ButtonExtractLogos").Delete
+'ïiî‘Ç™éÊìæÇ≈Ç´ÇƒÇ¢Ç»Ç¢è§ïiÇ™Ç†ÇÍÇŒCSVê∂ê¨ÇàÍíUï€óØÅAÉ{É^ÉìÇ≈éËìÆê∂ê¨Ç∆Ç∑ÇÈ
+If HasProductCode Then
 
-MsgBox prompt:="ÉçÉSÉXB2BÉAÉbÉvÉçÅ[ÉhÉtÉ@ÉCÉã ï€ë∂äÆóπ" & vbLf & _
-                "Amazonï™ÅF" & ItemCount(0) & "ì_" & vbLf & _
-                "äyìVï™ÅF" & ItemCount(1) & "ì_" & vbLf & _
-                "ÉÑÉtÅ[ï™ÅF" & ItemCount(2) & "ì_"
+    Call B2BópCSVï€ë∂
+    MsgBox Prompt:="B2BópCSVÇï€ë∂ÇµÇ‹ÇµÇΩÅB", Buttons:=vbInformation
+
+Else
+    
+    MsgBox Prompt:="ÉçÉSÉXïiî‘Ç™éÊìæÇ≈Ç´ÇƒÇ¢Ç»Ç¢è§ïiÇ™Ç†ÇËÇ‹Ç∑ÅB" & vbLf & "ämîFå„ÅAçƒï€ë∂É{É^ÉìÇ≈CSVÇê∂ê¨ÇµÇƒâ∫Ç≥Ç¢ÅB", Buttons:=vbCritical
+
+End If
 
 End Sub
+
 Private Sub InsertVlookup()
 'ïiî‘ÇÉçÉSÉXïiî‘ÉVÅ[ÉgÇ©ÇÁà¯Ç¡í£Ç¡ÇƒÇ≠ÇÈVlookupéÆÇì¸ÇÍÇÈ
 
@@ -102,20 +130,23 @@ Do Until IsEmpty(Cells(i, 2))
     If c.Value Like "77777*" Then
         Call MarkAsTiedItem(c)
         Call InsertComponentItems(c)
-        GoTo Continue
+        GoTo continue
     End If
     
-    'ïiî‘ÇÉçÉSÉXïiî‘ÉVÅ[ÉgÇ©ÇÁèEÇ§VlookupéÆÇì¸ÇÍÇÈ ÉåÉìÉWÇÕÉnÅ[ÉhÉRÅ[ÉfÉCÉìÉOÇæÇ™ÅAÉZÉãÇ…éÆÇì¸ÇÍÇÈÇÃÇ≈Ç‹Ç†Ç¢Ç¢Ç©
+    'ïiî‘ÇÉçÉSÉXïiî‘ÉVÅ[ÉgÇ©ÇÁèEÇ§VlookupéÆÇì¸ÇÍÇÈ
     
-    If Not IsEmpty(pc) Then GoTo Continue
+    Dim LastRow As Long
+    LastRow = Worksheets("ÉçÉSÉXïiî‘ÉVÅ[Ég").UsedRange.Rows.Count
+    
+    If Not IsEmpty(pc) Then GoTo continue
          
     '6ÉPÉ^Ç≈à¯Ç¡í£ÇÈVlookup
-    pc.Formula = "=Vlookup(" & c.Address & ",ÉçÉSÉXïiî‘ÉVÅ[Ég!$A$1:$C$2723,3,FALSE)"
+    pc.Formula = "=Vlookup(" & c.Address & ",ÉçÉSÉXïiî‘ÉVÅ[Ég!$A$1:$C$" & LastRow & ",3,FALSE)"
     
     If IsError(pc.Value) Then
     
         'JanÇ≈à¯Ç¡í£ÇÈVlookup
-        pc.Formula = "=Vlookup(" & c.Address & ",ÉçÉSÉXïiî‘ÉVÅ[Ég!$B$1:$C$2723,2,FALSE)"
+        pc.Formula = "=Vlookup(" & c.Address & ",ÉçÉSÉXïiî‘ÉVÅ[Ég!$B$1:$C$" & LastRow & ",2,FALSE)"
     
     End If
     
@@ -124,7 +155,7 @@ Do Until IsEmpty(Cells(i, 2))
         
         On Error Resume Next
             Dim CurRow As Double
-            CurRow = WorksheetFunction.Match(pc.Value, Worksheets("ÉÅÅ[ÉJÅ[ç›å…ï\").Range("B1:B4000"), 0)
+            CurRow = WorksheetFunction.Match(pc.Value, Worksheets("ÉÅÅ[ÉJÅ[ç›å…ï\").Range("B1:B6000"), 0)
             
             pc.Value = CStr(Worksheets("ÉÅÅ[ÉJÅ[ç›å…ï\").Cells(CurRow, 1))
         
@@ -139,13 +170,13 @@ Do Until IsEmpty(Cells(i, 2))
     
     'ÉZÉbÉgì‡óeÇÃè§ïiÇÕè§ïiñºÇ™ãÛçsÇ…Ç»ÇÈÇÃÇ≈ÅAVlookupÇ≈à¯Ç¡í£ÇÈ
     If Not TypeName(c.Offset(0, 1).Value) = "String" Then
-        c.Offset(0, 1).Formula = "=Vlookup(" & pc.Address & ",ÉçÉSÉXïiî‘ÉVÅ[Ég!$C$1:$D$2723,2,FALSE)"
+        c.Offset(0, 1).Formula = "=Vlookup(" & pc.Address & ",ÉçÉSÉXïiî‘ÉVÅ[Ég!$C$1:$D$" & LastRow & ",2,FALSE)"
     End If
     
     'ÉçÉSÉX ÉÅÅ[ÉJÅ[ç›å…êîÇà¯Ç¡í£ÇÈ
     pc.Offset(0, 1).Formula = "=Vlookup(" & pc.Address & ",ÉÅÅ[ÉJÅ[ç›å…ï\!A:E,4,FALSE)"
     
-Continue:
+continue:
     i = i + 1
 
 Loop
@@ -160,21 +191,6 @@ TodayDate = Format(Date, "mmdd")
 
 Worksheets(PickingSheetName & TodayDate).Activate
 
-'ÉsÉbÉLÉìÉOÉVÅ[Égï ÇÃèàóù
-'äyìVÅAâΩåÃÇ©ëóóøÅEÉRÉåÉNÉgÇ…â©êFÇÃîwåiêFÇ™Ç¬Ç¢ÇƒÇ¢ÇÈÇÃÇ≈ÅAêFñ≥ÇµÇ…
-If PickingSheetName = "äyìV" Then
-
-    Dim AnnotationHeader As Range
-    Set AnnotationHeader = Range("A1:E20").Find("ëóóøÅEÉRÉåÉNÉg*")
-    
-    If Not AnnotationHeader Is Nothing Then
-    
-        AnnotationHeader.Interior.ColorIndex = 0
-        
-    End If
-
-End If
-
 'è§ïiñºÇÃóÒÅAçsî‘çÜÇì¡íË
 Dim FoundCell As Range
 Set FoundCell = Range("A1:E20").Find("è§ïiñº")
@@ -183,23 +199,10 @@ Dim col As Double, nrow As Double
 col = FoundCell.Column
 nrow = FoundCell.Row
 
-'ÉtÉBÉãÉ^Å[Ç∑ÇÈÉåÉìÉWÇéwíË
+'ÉtÉBÉãÉ^Å[Ç∑ÇÈÉåÉìÉWÇéwíËÇµÇƒîwåiêFâ©êFÇÉtÉBÉãÉ^Å[
 Dim ProductListRange As Range
-Set ProductListRange = Range(Cells(2, 1), Range("A1").CurrentRegion.SpecialCells(xlCellTypeLastCell))
-
-'êFÇ≈ÉtÉBÉãÉ^Å[ÅAÉÑÉtÅ[ÇÃÇ›ÉçÉSÉXï∂éöóÒÇ≈ÇÃÉtÉBÉãÉ^Å[
-'ÉsÉbÉLÉìÉOÉVÅ[ÉgÇ≈ÇÕÉçÉSÉXÇÃéËîzàÀóäÇÕîwåiêFÇ™â©êF
-
-
-If PickingSheetName = "ÉÑÉtÅ[" Then
-
-    ProductListRange.AutoFilter Field:=5, Criteria1:="ÉçÉSÉX*"
-    
-Else
-    
-    ProductListRange.AutoFilter Field:=col, Criteria1:=RGB(255, 255, 0), Operator:=xlFilterCellColor
-
-End If
+Set ProductListRange = Range(Cells(1, 1), Range("A1").CurrentRegion.SpecialCells(xlCellTypeLastCell))
+ProductListRange.AutoFilter Field:=col, Criteria1:=RGB(255, 255, 0), Operator:=xlFilterCellColor
 
 'ÉtÉBÉãÉ^Å[ÇµÇΩå„ÇÃçsêîÇÉJÉEÉìÉgÅÅàÀóäè§ïiêî
 Dim CountItem As Long
@@ -208,14 +211,14 @@ CountItem = WorksheetFunction.Subtotal(3, Cells(3, col).Resize(Cells(3, col).Spe
 Call setItemCount(PickingSheetName, CountItem)
 
 'ÉtÉBÉãÉ^Å[ÇµÇƒï\é¶ÇµÇƒÇ¢ÇÈÉåÉìÉWÇÃÇ›éÊìæ
-Dim A As Range, B As Range
+Dim A As Range, b As Range
 Set A = ProductListRange.SpecialCells(xlCellTypeVisible)
 
 'è§ïiñºÇÃëOå„1óÒÅÅåv3óÒÇÉRÉsÅ[ÇµÇΩÇ¢ÅA1óÒëOÅÅÉRÅ[ÉhÅA1óÒå„ÇÎÅÅêîó 
-Set B = Cells(nrow, col).Offset(1, -1).Resize(Cells(2, col).SpecialCells(xlCellTypeLastCell).Row, 3)
+Set b = Cells(nrow, col).Offset(1, -1).Resize(Cells(2, col).SpecialCells(xlCellTypeLastCell).Row, 3)
 
 Dim IntersectRange As Range
-Set IntersectRange = Application.Intersect(A, B)
+Set IntersectRange = Application.Intersect(A, b)
 
 'ÉtÉBÉãÉ^Å[ÇµÇƒï\é¶ÇµÇƒÇ¢ÇÈïîï™ÇÉçÉSÉXñ{ì˙ï™Ç÷ÉRÉsÅ[
 Dim LastRow As Integer
@@ -224,7 +227,7 @@ LastRow = Worksheets("ÉçÉSÉXñ{ì˙ï™").Range("A1").SpecialCells(xlCellTypeLastCell
 Dim CopyDestinationRange As Range
 Set CopyDestinationRange = Worksheets("ÉçÉSÉXñ{ì˙ï™").Cells(LastRow + 1, 1).Offset(0, 1)
 
-'éÛíçñ≥ÇµÇæÇ∆ÉtÉBÉãÉ^Å[å„ÇÃÉåÉìÉWÇ™Ç»Ç¢ÇÃÇ≈É`ÉFÉbÉN
+'éÛíçñ≥ÇµÇæÇ∆ÉtÉBÉãÉ^Å[å„ÇÃÉåÉìÉWÇ™Ç»Ç¢ÇÃÇ≈É`ÉFÉbÉNÇµÇƒÉRÉsÅ[
 If Not IntersectRange Is Nothing Then
 
     CopyDestinationRange.Offset(0, -1).Value = getMallId(PickingSheetName)
@@ -246,23 +249,12 @@ End Sub
 
 Private Sub CopySheet(Mall As String)
 
-'ÉAÉ}É]ÉìÇÃÉsÉbÉLÉìÉOÉVÅ[ÉgÉtÉ@ÉCÉãñºÇÕÅuÉsÉbÉLÉìÉOÅv
-If Mall = "ÉAÉ}É]Éì" Then Mall = "ÉsÉbÉLÉìÉO"
-
-'ÉÑÉtÅ[ÇÃÇ›MOS10ÇÃéÛíçCSVÇì«Ç›Ç…çsÇ≠
-If Mall = "ÉÑÉtÅ[" Then
-    Call FetchYahooMeisai
-    Exit Sub
-End If
-
 Workbooks.Open FileName:=RetrievePickingFilePath(Mall), ReadOnly:=True
 
 Dim BookName As String
 BookName = ActiveWorkbook.Name 'ÉtÉ@ÉCÉãÇäJÇ¢ÇΩÇÁäJÇ¢ÇΩÉuÉbÉNÇ™ActiveÇ…Ç»Ç¡ÇƒÇ¢ÇÈ
 
 ActiveWorkbook.Sheets(1).Copy After:=ThisWorkbook.Worksheets("ÉçÉSÉXñ{ì˙ï™")
-
-If Mall = "ÉsÉbÉLÉìÉO" Then Mall = "ÉAÉ}É]Éì" 'ÉVÅ[ÉgñºÇÕÉAÉ}É]Éì
 
 ActiveSheet.Name = Mall & Format(Date, "mmdd")
 
@@ -275,28 +267,20 @@ Private Function RetrievePickingFilePath(FileName As String) As String
 
 Const PICKING_FILE_FOLDER As String = "\\Server02\è§ïiïî\ÉlÉbÉgîÃîÑä÷òA\ÉsÉbÉLÉìÉO\" 'ññîˆ\É}Å[ÉNïKê{
 
-'äyìVÇÃèÍçáÅAäyìVPÉVÅ[Ég0627-a.xls
-
 'é¿çséûÉoÉCÉìÉfÉBÉìÉO ScriptingRuntimeÇÕDictionaryîzóÒégÇ§ÇÃÇ…ïKóvÇ≈éQè∆ONÇæÇ©ÇÁÅAéñëOÉoÉCÉìÉfÉBÉìÉOÇ≈Ç¢Ç¢Ç©Ç‡ÅB
 Dim FSO As Object
 Set FSO = CreateObject("Scripting.FileSystemObject")
     
-Dim f As Object, PickingFile As Object
-      
-'éñëOÉoÉCÉìÉfÉBÉìÉO
-'Dim FSO As FileSystemObject
-'Set FSO = New FileSystemObject
+Dim f As Object, Target As Object
 
-'Dim f As File, Newest As File
-
-
-'éwíËÉtÉHÉãÉ_Å[ì‡ÇÃÉtÉ@ÉCÉãñºÇ…-aÇä‹ÇﬁExcelÉtÉ@ÉCÉãÇ1Ç¬éÊìæÇ∑ÇÈÅB
+'éwíËÉtÉHÉãÉ_Å[ì‡ÇÃFileNameÇä‹ÇﬁÉtÉ@ÉCÉãñºÇí≤Ç◊ÇƒÅAÉÇÅ[ÉãñºÇ∆-aÇä‹ÇﬁExcelÉtÉ@ÉCÉãÇàÍÇ¬éÊìæÇ∑ÇÈÅB
+'äyìVÇÃèÍçáÅAäyìVPÉVÅ[Ég0627-a.xlsÇéÊìæ
 
 For Each f In FSO.GetFolder(PICKING_FILE_FOLDER).Files
 
     If f.Name Like FileName & "*-a.xls*" Then
     
-        Set PickingFile = f
+        Set Target = f
     
         Exit For
     End If
@@ -304,7 +288,7 @@ For Each f In FSO.GetFolder(PICKING_FILE_FOLDER).Files
 Next
 
 
-RetrievePickingFilePath = PICKING_FILE_FOLDER & PickingFile.Name
+RetrievePickingFilePath = PICKING_FILE_FOLDER & Target.Name
 
 End Function
 
@@ -378,108 +362,19 @@ Set ParseTiedItems = d
 
 End Function
 
-
-Private Sub FetchLogosQuantityCsv()
-
-Worksheets("ÉÅÅ[ÉJÅ[ç›å…ï\").Activate '.QueryTablesÉÅÉ\ÉbÉhÇÕActiveSheetÇ≈Ç»Ç¢Ç∆ëñÇÁÇ»Ç¢
-
-With ActiveSheet.QueryTables.Add(Connection:="TEXT;" & MAKER_QTY_PATH, Destination:=Range("$A$1"))
-        
-        .Name = "ÉçÉSÉXÉÅÅ[ÉJÅ[ç›å…ï\"
-        .FieldNames = True
-        .RowNumbers = False
-        .FillAdjacentFormulas = False
-        .PreserveFormatting = True
-        .RefreshOnFileOpen = False
-        .RefreshStyle = xlInsertDeleteCells
-        .SavePassword = False
-        .SaveData = True
-        .AdjustColumnWidth = True
-        .RefreshPeriod = 0
-        .TextFilePromptOnRefresh = False
-        .TextFilePlatform = 932
-        .TextFileStartRow = 1
-        .TextFileParseType = xlDelimited
-        .TextFileTextQualifier = xlTextQualifierDoubleQuote
-        .TextFileConsecutiveDelimiter = False
-        .TextFileTabDelimiter = False
-        .TextFileSemicolonDelimiter = False
-        .TextFileCommaDelimiter = True
-        .TextFileSpaceDelimiter = False
-        .TextFileColumnDataTypes = Array(2, 2, 2, 1, 1)
-        .TextFileTrailingMinusNumbers = True
-        .Refresh BackgroundQuery:=False
-
-End With
-
-Range("G1").Value = "zç›å…ÇÃCSVéÊìæéûçè"
-Range("G2").Value = Hour(Time) & ":" & Minute(Time)
-
-Worksheets("ÉçÉSÉXñ{ì˙ï™").Activate
-
-End Sub
-
-Private Sub FetchYahooMeisai()
-'ÉÑÉtÅ[ÇÃÇ›MOS10ÇÃMeisai.CSVÇì«Ç›çûÇÒÇ≈ÉVÅ[ÉgÇèCê≥Ç∑ÇÈÅB
-
-'ÉVÅ[Égë}ì¸à íuÇÕÉçÉSÉXñ{ì˙ÇÃå„ÇÎ
-ThisWorkbook.Worksheets.Add After:=ThisWorkbook.Worksheets("ÉçÉSÉXñ{ì˙ï™")
-ActiveSheet.Name = "ÉÑÉtÅ[" & Format(Date, "mmdd")
-
-    With ActiveSheet.QueryTables.Add(Connection:= _
-        "TEXT;\\MOS10\Users\mos10\Desktop\ÉÑÉtÅ[\Meisai.csv", Destination:=Range("$A$1") _
-        )
-        
-        .Name = "Meisai"
-        .FieldNames = True
-        .RowNumbers = False
-        .FillAdjacentFormulas = False
-        .PreserveFormatting = True
-        .RefreshOnFileOpen = False
-        .RefreshStyle = xlInsertDeleteCells
-        .SavePassword = False
-        .SaveData = True
-        .AdjustColumnWidth = True
-        .RefreshPeriod = 0
-        .TextFilePromptOnRefresh = False
-        .TextFilePlatform = 932
-        .TextFileStartRow = 1
-        .TextFileParseType = xlDelimited
-        .TextFileTextQualifier = xlTextQualifierDoubleQuote
-        .TextFileConsecutiveDelimiter = False
-        .TextFileTabDelimiter = False
-        .TextFileSemicolonDelimiter = False
-        .TextFileCommaDelimiter = False
-        .TextFileSpaceDelimiter = False
-        .TextFileOtherDelimiter = ","
-        .TextFileColumnDataTypes = Array(2, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1)
-        .TextFileTrailingMinusNumbers = True
-        .Refresh BackgroundQuery:=False
-    
-    End With
-    
-    'ExtractLogosItemsÉÅÉ\ÉbÉhÇ≈íäèoÇ≈Ç´ÇÈÇÊÇ§ÅAÉVÅ[ÉgÇí≤êﬂÇµÇ‹Ç∑ÅB
-    
-    ActiveSheet.Rows(1).Find("Description").Value = "è§ïiñº"
-    Columns("C:C").Copy
-    Columns("F:F").Insert Shift:=xlRight
-    Rows(1).Insert
-
-End Sub
-
 Private Function getMallId(MallName As String) As String
 
 Dim MallId As String
 
 Select Case MallName
     
-    Case "ÉAÉ}É]Éì"
+    Case "Amazon"
         MallId = "A"
     
     Case "äyìV"
         MallId = "R"
     
-    Case "ÉÑÉtÅ["
+    Case "Yahoo"
         MallId = "Y"
        
     Case Else
@@ -503,7 +398,46 @@ End With
 
 End Sub
 
-Private Sub SaveAsCsv()
+Private Function HasProductCode() As Boolean
+
+Worksheets("ÉçÉSÉXñ{ì˙ï™").Activate
+
+Dim i As Long, tmp As Boolean
+i = 2
+
+'àÍíUÅAtmpÉtÉâÉOÇTrueÇ≈ÉZÉbÉgÅAEóÒÅÅïiî‘óÒÇ…ãÛóìÇ©ÉGÉâÅ[Ç™Ç†ÇÈèÍçáÇÃÇ›FalseÇ∆Ç∑ÇÈÅB
+tmp = True
+
+Do
+    If IsError(Cells(i, 5).Value) Then
+        
+        tmp = False
+        Exit Do
+        
+    ElseIf Cells(i, 5).Value = "" Then
+        
+        tmp = False
+        Exit Do
+    
+    End If
+    
+    i = i + 1
+
+Loop Until Cells(i, 2).Value = ""
+
+HasProductCode = tmp
+
+End Function
+
+Sub B2BópCSVï€ë∂()
+
+'CSVÉtÉ@ÉCÉãÇäJÇ¢ÇƒÇ¢ÇÍÇŒï¬Ç∂ÇÈ
+Application.DisplayAlerts = False
+
+Dim wb As Workbook
+For Each wb In Workbooks
+    If InStr(wb.Name, "ÉçÉSÉXî≠íçìoò^CSV") > 0 Then wb.Close
+Next
 
 Workbooks.Add
 
@@ -534,9 +468,9 @@ With ThisWorkbook.Worksheets("ÉçÉSÉXñ{ì˙ï™")
 
 End With
 
-Application.DisplayAlerts = False
+
     
-    ActiveWorkbook.SaveAs FileName:=SAVE_FOLDER & "ÉçÉSÉXî≠íçìoò^CSV" & Format(Date, "mmdd"), FileFormat:=xlCSV
+ActiveWorkbook.SaveAs FileName:=SAVE_FOLDER & "ÉçÉSÉXî≠íçìoò^CSV" & Format(Date, "mmdd"), FileFormat:=xlCSV
 
 Application.DisplayAlerts = True
 
@@ -546,13 +480,13 @@ Private Sub setItemCount(ByVal MallName As String, ByVal Count As Long)
 
 Select Case MallName
     
-    Case "ÉAÉ}É]Éì"
+    Case "Amazon"
         ItemCount(0) = Count
     
     Case "äyìV"
         ItemCount(1) = Count
     
-    Case "ÉÑÉtÅ["
+    Case "Yahoo"
         ItemCount(2) = Count
     
     End Select

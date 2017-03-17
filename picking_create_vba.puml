@@ -5,6 +5,7 @@ skinparam packageFontSize 25
 
 title ピッキングテンプレートVBA
 
+database 社内DB
 
 box "外部ファイル" #white
     entity CSV
@@ -17,72 +18,83 @@ participant Main
 activate Main
 
 note right
-  <size:16>進捗表示ダイアログを実装すること</size>
+  <size:16>進捗表示ダイアログを実装</size>
 end note
 
-Main -> FetchCsv : 呼出
-activate FetchCsv
+Main -> LoadCsv : Sub LoadCsv()
+activate LoadCsv
 
-CSV <- FetchCsv : TextStreamingOpen 
+LoadCsv -> LoadCsv : CSV指定\n日付チェック
+
+CSV <- LoadCsv : データ接続
+
+entity OrderSheet
+
+LoadCsv -> OrderSheet : 受注データ取込
+LoadCsv -> OrderSheet : フォーマット修正
 
 participant SetParser
 
-Loop 1行ずつ読み出し
-    CSV -> FetchCsv : 1Line
+note right
+    商品名変更が必要な可能性アリ
+     ≪SS≫を中身ごと削除する
+     冒頭○文字以内の[]を削除する、など
+end note
 
-    entity OrdersSheet
-    FetchCsv -> OrdersSheet : 受注データ書込
+LoadCsv -> SetParser : ○個組分解 Sub ParseScalingItem()
+|||
+activate SetParser
 
-    note right
-        商品名変更が必要な可能性アリ
-        1. 20万行のマッピングリストを使う
-        2. アドインデータを使う
-        3. 正規表現で【】≪≫を中身ごと削除する
-    end note
+SetParser <- OrderSheet : ハイフン入りコード
+SetParser -> OrderSheet : 単体数量上書
+SetParser -> OrderSheet : 単体コード上書
+deactivate SetParser
 
-    SetParser <- OrdersSheet : セット分解
-    
-    activate SetParser
-        ｾｯﾄ商品ﾘｽﾄ.xls <- SetParser : GetComponentItems()
-        ｾｯﾄ商品ﾘｽﾄ.xls --> SetParser : ItemCollection
-    
-        SetParser -> OrdersSheet : アイテム行挿入
-    
-    deactivate SetParser
+LoadCsv -> SetParser : 7777 セット分解 Sub ParseItems()
+deactivate LoadCsv
+activate SetParser
 
-    SetParser <- OrdersSheet :○個組分解
-    activate SetParser
-        SetParser -> OrdersSheet : 単体数量上書
-    deactivate SetParser
+ｾｯﾄ商品ﾘｽﾄ.xls <-- SetParser : 77777xxxxxコード 検索
+ｾｯﾄ商品ﾘｽﾄ.xls --> SetParser : 構成商品コレクション
 
-    |||
-    end loop
+Loop 構成商品 1つにつき1行挿入
+    SetParser -> OrderSheet : アイテム行挿入
+end
 
-CSV <- FetchCsv : TextStreamingClose
-deactivate FetchCsv
+deactivate SetParser
 
-... <size:28>アドインでデータ取得 手動実行</size> ...
+Main -> ConnectDB : Sub Make_List()
+activate ConnectDB
+社内DB <- ConnectDB : ロケーション問合せ
+社内DB -> ConnectDB :ロケーション取得
+OrderSheet <- ConnectDB : ロケーション書込
+deactivate ConnectDB
+
+
 
 participant DataValidate
 
-    Main -> DataValidate : LocationCutter
+Main -> DataValidate : Sub LocationCutter()
 
-    activate DataValidate
+activate DataValidate
 
-    loop 受注データFix
-        |||
-        OrdersSheet -> DataValidate :ロケ文字列取得
-        OrdersSheet <- DataValidate :無効ロケ削除
-        |||
-    end
-    deactivate DataValidate
+|||
+OrderSheet -> DataValidate :ロケ文字列取得
+OrderSheet <- DataValidate :無効ロケ削除
+deactivate DataValidate
+|||
+
+deactivate DataValidate
 
 participant SheetBuilder
 
 Main -> SheetBuilder : Sub CreatePicking()
 activate SheetBuilder
 
-loop 3モール分実行     
+loop 3モール分実行
+    
+    OrderSheet <-- SheetBuilder : モール別 受注件数チェック
+
     Group ピッキングデータ作成
 
         create entity Picking_2_3
@@ -91,9 +103,9 @@ loop 3モール分実行
         create entity Picking_a
         SheetBuilder -> Picking_a : ブック作成
 
-        OrdersSheet <- SheetBuilder : 受注データ取得
+        OrderSheet <- SheetBuilder : 受注データ取得
 
-        SheetBuilder -> SheetBuilder : 受注モール判定
+        SheetBuilder --> SheetBuilder : 受注モール判定
 
         else 棚有り
             SheetBuilder -> Picking_2_3 : 6ケタ振替 データ転記
@@ -118,7 +130,7 @@ loop 3モール分実行
         SheetBuilder -> ForSorter : シート作成
         create entity ForSorter_set
         SheetBuilder -> ForSorter_set : シート作成
-        OrdersSheet <- SheetBuilder : 受注データ取得
+        OrderSheet <-- SheetBuilder : 受注データ取得
         SheetBuilder -> SheetBuilder : 受注モール判定
 
         else 単体受注品

@@ -43,43 +43,8 @@ For Each c In CodeRange
 
 Next
 
-'Call DeleteTiedItemRecord
-
 End Sub
-Private Sub DeleteTiedItemRecord()
-'7777始まり商品コードの行削除
 
-Range("A1").AutoFilter 2, "77777*"
-
-Dim LastRow As Long
-LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
-
-Dim TiedItemCodes As Range
-Set TiedItemCodes = Intersect(Range("A1").CurrentRegion.SpecialCells(xlCellTypeVisible), Range("B2:B" & LastRow))
-
-Dim i As Long, v As Variant, dellrow As Range
-
-For Each v In TiedItemCodes
-    
-    '削除する行をDellRowに追加していく
-    If dellrow Is Nothing Then
-    
-        Set dellrow = v.EntireRow
-        
-    Else
-        
-        Set dellrow = Union(dellrow, v.EntireRow)
-    
-    End If
-
-Next
-
-'フィルター解除
-Range("A1").AutoFilter
-
-dellrow.Delete
-
-End Sub
 
 Private Sub ParseTiedItem(CodeCell As Range)
 
@@ -115,7 +80,7 @@ For i = 1 To ComponentItems.Count
     CodeCell.Offset(1, -1).Value = CodeCell.Offset(0, -1).Value
     
     '挿入後の行にE列以降の注文情報を入れる
-    CodeCell.Offset(1, 4).Resize(1, 14).Value = CodeCell.Offset(0, 4).Resize(1, 14).Value
+    CodeCell.Offset(1, 4).Resize(1, 12).Value = CodeCell.Offset(0, 4).Resize(1, 12).Value
     
 Next
 

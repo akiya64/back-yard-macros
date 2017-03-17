@@ -1,4 +1,4 @@
-@startuml /uml/recieving_orders_process
+@startuml recieving_orders_process
 
 skinparam monochrome true
 
@@ -31,29 +31,40 @@ deactivate CROSSMALL
 == 8:00 ～ 受注取込 ==
 
 Boundary ピッキングシート生成
+database 商品マスタ
 
-CROSSMALL -> ピッキングシート生成 : CSV
+Boundary 受注チェックリスト生成
+CROSSMALL -> 受注チェックリスト生成 : CSVファイル
+
+CROSSMALL -> ピッキングシート生成 : CSVファイル
+
+Note Left
+単一CSVで
+  ピッキング
+  チェック用 生成
+end note
 
 activate ピッキングシート生成
 
     ピッキングシート生成 -> ピッキングシート生成 : セット分解
 
+    ピッキングシート生成 -> 商品マスタ : ロケーション取得
+
     ピッキングシート生成 -> 電算室 : Amazonピッキング
     ピッキングシート生成 -> 電算室 : 楽天ピッキング
     ピッキングシート生成 -> 電算室 : Yahooピッキング
+
+note over Amazon,楽天
+    手配書作成
+    B2B CSV作成
+end note
+
+[<- ピッキングシート生成 : 発注 -aピッキングシート×3
 
 deactivate ピッキングシート生成
 
 電算室 -> SLIMS : DB投入
     
-Boundary 受注チェックリスト生成
-
-CROSSMALL <- 受注チェックリスト生成 : ピッキングシート用と同じCSV
-
-Note Right
-    CSV
-end note
-
 activate 受注チェックリスト生成
     
     database 出荷チェック用DB
@@ -91,7 +102,7 @@ activate 梱包
 
     ネコポス -> 梱包 : ネコポス送り状
 
-    ハンディ用DB <-- 梱包 : 出荷商品チェック
+    出荷チェック用DB <-- 梱包 : 出荷商品チェック
 
     梱包 -> 出荷 : 梱包済_商品
     
@@ -111,6 +122,3 @@ Loop APIにて実行
 end
 
 @enduml
-
-
-
