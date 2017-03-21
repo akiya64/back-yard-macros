@@ -105,14 +105,31 @@ activate 梱包
     出荷チェック用DB <-- 梱包 : 出荷商品チェック
 
     梱包 -> 出荷 : 梱包済_商品
-    
+    e飛伝 <- 梱包 : 欠品_送り状番号削除
+    ネコポス <- 梱包 : 欠品_送り状番号削除
 deactivate 梱包
+
+== 13:30～ 当日出荷分 受注発送処理 ==
 
 == 16:00～ 出荷通知 ==
 
 e飛伝 -> CROSSMALL : 送り状番号
 activate CROSSMALL
 ネコポス -> CROSSMALL : 送り状番号
+
+CROSSMALL -> 送り状番号確認 : Amazon.tsv
+activate 送り状番号確認
+CROSSMALL -> 送り状番号確認 : 楽天.csv
+CROSSMALL -> 送り状番号確認 : Yahoo.csv
+
+Entity ヤマトサーバ
+Entity 佐川サーバ
+
+送り状番号確認 --> ヤマトサーバ : 集荷問合せ
+送り状番号確認 --> 佐川サーバ : 集荷問合せ
+CROSSMALL <- 送り状番号確認 : 送り状番号確定
+
+deactivate 送り状番号確認
 
 Loop APIにて実行
     CROSSMALL -> Amazon : 送り状番号
@@ -121,4 +138,7 @@ Loop APIにて実行
     deactivate CROSSMALL
 end
 
+[<- Amazon : 出荷通知
+[<- 楽天 : 出荷通知
+[<- Yahoo :出荷通知
 @enduml
