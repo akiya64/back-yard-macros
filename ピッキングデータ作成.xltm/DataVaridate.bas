@@ -42,10 +42,3 @@ Reg.Pattern = ",|\!|\.|&"
 ValidateName = Reg.Replace(Name, "")
 
 End Function
-
-Sub test_ValidateName()
-    Dim str As String
-    
-    str = ValidateName("aa,bbb!./.o&•iABI")
-    Debug.Print str
-End Sub

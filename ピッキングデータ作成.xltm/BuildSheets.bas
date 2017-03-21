@@ -1,5 +1,6 @@
 Attribute VB_Name = "BuildSheets"
 Option Explicit
+
 Sub CreateSorterSheet(MallName As String)
 
 '単体商品の振分け用シートを用意
@@ -43,7 +44,7 @@ Do
     Order(1) = Range("C" & i).Value '商品名
     Order(2) = Range("D" & i).Value '受注数量
     Order(3) = CStr(Range("L" & i).Value) 'JAN
-    Order(4) = Range("G" & i).Value 'お届け先名
+    Order(4) = Range("K" & i).Value '有効ロケーション
     Order(5) = Range("N" & i).Value '現在庫
     
     
@@ -124,29 +125,22 @@ ForSorterSetItemSheet.Protect
 
 End Sub
 
-Sub OutputPickingData(MallName As String)
+Sub OutputPickingData(ByVal MallName As String)
 
-'モール名、クロスモール内では「アマゾン」でなく「Amazon」
-Dim MallIdentify As String
-If MallName = "アマゾン" Then
-    MallIdentify = "Amazon"
-Else
-    MallIdentify = MallName
-End If
-
-'モール毎の受注件数がゼロ件ならファイル生成しない。
-If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), CStr(MallIdentify) & "*") = 0 Then GoTo Continue
-
+'引数の名前で新規ブックを作成する
+'ファイル名はAmazon時のみカタカナのアマゾン、電算室側の処理の関係で固定
+Dim BookName As String
+BookName = IIf(MallName = "Amazon", "アマゾン", BookName)
 
 '提出用ファイルを用意
 '100番/200番棚有り -2-3、電算室提出
 Dim ForSlimsBook As Workbook, ForSlimsSheet As Worksheet
-Set ForSlimsBook = PreparePickingBook(MallName & "Pシート" & Format(Date, "MMdd") & "-2-3")
+Set ForSlimsBook = PreparePickingBook(BookName & "Pシート" & Format(Date, "MMdd") & "-2-3")
 Set ForSlimsSheet = ForSlimsBook.Worksheets(1)
 
 '登録無し、棚無し -a
 Dim NoEntryItemBook As Workbook, NoEntryItemSheet As Worksheet
-Set NoEntryItemBook = PreparePickingBook(MallName & "Pシート" & Format(Date, "MMdd") & "-a")
+Set NoEntryItemBook = PreparePickingBook(BookName & "Pシート" & Format(Date, "MMdd") & "-a")
 Set NoEntryItemSheet = NoEntryItemBook.Worksheets(1)
 
 OrderSheet.Activate
@@ -165,7 +159,7 @@ k = 2
 Do
 
     '引数で渡されたモール以外は飛ばす
-    If Not Range("F" & i).Value Like (MallIdentify & "*") Then GoTo Continue
+    If Not Range("F" & i).Value Like (MallName & "*") Then GoTo Continue
     
     '受注時コードの7777は電算提出データに含めない。
     If Range("I" & i).Value Like "7777*" Then GoTo Continue
@@ -185,7 +179,7 @@ Do
     
     '配列に提出ファイル1行分のデータを格納
     'アマゾンのみ、電算室処理でアマゾン注文番号を判定している、連番不可
-    If MallIdentify = "Amazon" Then
+    If MallName = "Amazon" Then
         Order(0) = CStr(Range("H" & i).Value) 'モール側採番の注文番号
     Else
         Order(0) = CStr(Range("A" & i).Value) 'クロスモール採番の連番
@@ -225,13 +219,13 @@ Loop Until IsEmpty(Range("A" & i))
 
 'Pシートのブック保存処理
 'Amazonのみ送料列が必要、送料列 0円 で埋める
+ForSlimsBook.Activate
 With ForSlimsSheet
-    .Activate
 
-    If MallName = "アマゾン" Then
+    If MallName = "Amazon" Then
         .Columns("G").Insert
         .Range("G1").Value = "送料"
-        .Range(Cells(2, 7), Cells(.UsedRange.Rows.Count, 7)).Value = 0
+        .Range(Cells(2, 7), Cells(ForSlimsSheet.UsedRange.Rows.Count, 7)).Value = 0
     End If
 
     '罫線引いて保存
@@ -239,11 +233,12 @@ With ForSlimsSheet
     
 End With
 ForSlimsBook.Close SaveChanges:=True
-    
+
+NoEntryItemSheet.Activate
 With NoEntryItemSheet
     .Activate
     
-    If MallName = "アマゾン" Then
+    If MallName = "Amazon" Then
         .Columns("G").Insert
         .Range("G1").Value = "送料"
         .Range(Cells(2, 7), Cells(.UsedRange.Rows.Count, 7)).Value = 0
@@ -257,42 +252,42 @@ NoEntryItemBook.Close SaveChanges:=True
 
 End Sub
 
-Private Function PreparePickingBook(BookName As String) As Workbook
+Private Function PreparePickingBook(ByVal BookName As String) As Workbook
 'ブック名を変えるために、所定の場所へ先にデータなしで保存する
 
-'引数の名前で新規ブックを作成する
+Const PICKING_FOLDER As String = "\\server02\商品部\ネット販売関連\ピッキング\" '最後、必ず\マーク
+
 ThisWorkbook.Worksheets("ピッキングシート提出用テンプレート").Copy
 ActiveSheet.Name = BookName
 
 '一旦新規作成ブックを保存することでブック名を変更する
 '新規作成ファイルの保存時はファイルフォーマットを明示する必要な模様
-    Dim SavePath As String
-    Const PICKING_FOLDER As String = "\\Server02\商品部\ネット販売関連\ピッキング\"
-    
-    If Dir(PICKING_FOLDER, vbDirectory) <> "" Then
-        '既に本日ファイルがあれば、時刻付けて保存
-        If Dir(PICKING_FOLDER & BookName & ".xlsx") = "" Then
-            SavePath = PICKING_FOLDER & BookName
-        Else
-            SavePath = PICKING_FOLDER & Format(Time, "hhmm") & BookName
-        End If
-        
-            ActiveWorkbook.SaveAs Filename:=SavePath, FileFormat:=xlWorkbookDefault
-    
+Dim SavePath As String
+
+If Dir(PICKING_FOLDER, vbDirectory) <> "" Then
+    '既に本日ファイルがあれば、時刻付けて保存
+    If Dir(PICKING_FOLDER & BookName & ".xlsx") = "" Then
+        SavePath = PICKING_FOLDER & BookName
     Else
-        
-        Dim DeskTopPath As String
-        If Dir(DeskTopPath & BookName & ".xlsx") = "" Then
-            DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & BookName
-        Else
-            DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & Format(Time, "hhmm") & BookName
-        End If
-        
-        MsgBox "ネット販売関連に繋がらないため、" & BookName & "をデスクトップに保存します。"
-            
-        ActiveWorkbook.SaveAs Filename:=DeskTopPath, FileFormat:=xlWorkbookDefault
-    
+        SavePath = PICKING_FOLDER & Format(Time, "hhmm") & BookName
     End If
+    
+        ActiveWorkbook.SaveAs Filename:=SavePath, FileFormat:=xlWorkbookDefault
+
+Else
+    
+    Dim DeskTopPath As String
+    If Dir(DeskTopPath & BookName & ".xlsx") = "" Then
+        DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & BookName
+    Else
+        DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & Format(Time, "hhmm") & BookName
+    End If
+    
+    MsgBox "ネット販売関連に繋がらないため、" & BookName & "をデスクトップに保存します。"
+        
+    ActiveWorkbook.SaveAs Filename:=DeskTopPath, FileFormat:=xlWorkbookDefault
+
+End If
 
 Set PreparePickingBook = ActiveWorkbook
 
@@ -317,8 +312,3 @@ Next
 Application.DisplayAlerts = True
 
 End Sub
-
-Sub Test_buildsheet()
-    Call BuildSheets.OutputPickingData("アマゾン")
-End Sub
-
