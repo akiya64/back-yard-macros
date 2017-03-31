@@ -34,8 +34,8 @@ For Each c In CodeRange
         
         Call ParseTiedItem(c)
     
-    '-02 -04 -120 ハイフン-数量 セットなら ハイフンを含みアルファベット始まりでない
-    ElseIf InStr(Code, "-") > 1 And Not Code Like "[a-zA-Z]*" Then
+    '-02 -04 -120 ハイフン-数量 ハイフンあれば数量再計算メソッドへ渡す
+    ElseIf InStr(Code, "-") > 1 Then
         
         Call ParseMultipleSet(c)
     
@@ -44,7 +44,6 @@ For Each c In CodeRange
 Next
 
 End Sub
-
 
 Private Sub ParseTiedItem(CodeCell As Range)
 
@@ -89,9 +88,13 @@ End Sub
 Private Sub ParseMultipleSet(CodeCell As Range)
 '012345-02など、ハイフン 数字のセットを分解します。
 
-'コード文字列をハイフンの位置で分解
+'アルファベット削除してコード文字列をハイフンの位置で分解
+Dim Reg As New RegExp
+Reg.Global = True
+Reg.Pattern = "[a-zA-Z]"
+
 Dim Code As String
-Code = CodeCell.Value
+Code = Reg.Replace(CodeCell.Value, "")
 
 Dim SeparatedCode As Variant
 SeparatedCode = Split(Code, "-")

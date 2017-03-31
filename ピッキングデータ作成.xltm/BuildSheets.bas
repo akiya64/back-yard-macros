@@ -41,7 +41,7 @@ Do
 
     '配列に行を格納
     Order(0) = CStr(Range("B" & i).Value) '受注時コード
-    Order(1) = Range("C" & i).Value '商品名
+    Order(1) = ValidateName(Range("C" & i).Value) '商品名、≪≫など削除した上で転記
     Order(2) = Range("D" & i).Value '受注数量
     Order(3) = CStr(Range("L" & i).Value) 'JAN
     Order(4) = Range("K" & i).Value '有効ロケーション
@@ -50,6 +50,16 @@ Do
     
     '現在庫が取得できてないときは、印刷レイアウトの関係のため空白1文字入れておく
     If Order(5) = "" Then Order(5) = " "
+    
+    '商魂JANが空欄かつ、受注時コードがJANならJAN項目に入れる
+    If Order(3) = "" Then
+        Dim RawCode As String
+        RawCode = Range("B" & i).Value
+        If RawCode Like String(13, "#") _
+            And Not RawCode Like "77777*" Then
+                Order(3) = RawCode
+        End If
+    End If
     
     '転記先判定
     '7777始まりセットとセット構成商品、受注時コード7777***
@@ -108,7 +118,7 @@ Continue:
 Loop Until IsEmpty(Range("A" & i))
 
 
-Call Sort.振分用シート_ソート(ForSorterSheet)
+Call SortHasLocation(ForSorterSheet)
 
 ForSorterSheet.Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
 ForSorterSetItemSheet.Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
@@ -128,19 +138,25 @@ End Sub
 Sub OutputPickingData(ByVal MallName As String)
 
 '引数の名前で新規ブックを作成する
-'ファイル名はAmazon時のみカタカナのアマゾン、電算室側の処理の関係で固定
+'ファイル名はAmazon-ピッキングシート、Yahoo=ヤフーPシート、電算室側の処理の関係で固定
 Dim BookName As String
-BookName = IIf(MallName = "Amazon", "アマゾン", BookName)
+If MallName = "Amazon" Then
+    BookName = "ピッキングシート"
+ElseIf MallName = "Yahoo" Then
+    BookName = "ヤフーPシート"
+Else
+    BookName = MallName & "Pシート"
+End If
 
 '提出用ファイルを用意
 '100番/200番棚有り -2-3、電算室提出
 Dim ForSlimsBook As Workbook, ForSlimsSheet As Worksheet
-Set ForSlimsBook = PreparePickingBook(BookName & "Pシート" & Format(Date, "MMdd") & "-2-3")
+Set ForSlimsBook = PreparePickingBook(BookName & Format(Date, "MMdd") & "-2-3")
 Set ForSlimsSheet = ForSlimsBook.Worksheets(1)
 
 '登録無し、棚無し -a
 Dim NoEntryItemBook As Workbook, NoEntryItemSheet As Worksheet
-Set NoEntryItemBook = PreparePickingBook(BookName & "Pシート" & Format(Date, "MMdd") & "-a")
+Set NoEntryItemBook = PreparePickingBook(BookName & Format(Date, "MMdd") & "-a")
 Set NoEntryItemSheet = NoEntryItemBook.Worksheets(1)
 
 OrderSheet.Activate
@@ -150,10 +166,10 @@ Dim i As Long, k As Long, j As Long, Order(6) As Variant
 i = 2
 
 '棚無しシート行カウンタ
-j = 2
+j = 3
 
 '100番シート行カウンタ
-k = 2
+k = 3
 
 '用意したブックへ1行ずつコピー
 Do
@@ -166,15 +182,18 @@ Do
 
     '提出するコードの振替
     'SLIMSに投入するのはロケーション有りの6ケタのみ
-    Dim OrderedCode As String, AddinResultCode As String, Code As String
+    Dim OrderedCode As String, ForAddinCode As String, AddinResultCode As String, Code As String
     
     OrderedCode = CStr(Range("B" & i).Value)
+    ForAddinCode = CStr(Range("I" & i).Value)
     AddinResultCode = CStr(Range("M" & i).Value)
     
-    If AddinResultCode = "" Then
-        Code = OrderedCode
-    Else
+    If AddinResultCode <> "" Then
         Code = AddinResultCode
+    ElseIf ForAddinCode <> "" Then
+        Code = ForAddinCode
+    Else
+        Code = OrderedCode
     End If
     
     '配列に提出ファイル1行分のデータを格納
@@ -186,7 +205,7 @@ Do
     End If
     
     Order(1) = CStr(Code) '商品コード
-    Order(2) = Range("C" & i).Value '商品名
+    Order(2) = ValidateName(Range("C" & i).Value)  '商品名≪≫など削除して転記
     Order(3) = Range("J" & i).Value '数量
     Order(4) = Range("E" & i).Value '販売価格
     Order(5) = Range("N" & i).Value '現在庫
@@ -224,12 +243,12 @@ With ForSlimsSheet
 
     If MallName = "Amazon" Then
         .Columns("G").Insert
-        .Range("G1").Value = "送料"
-        .Range(Cells(2, 7), Cells(ForSlimsSheet.UsedRange.Rows.Count, 7)).Value = 0
+        .Range("G2").Value = "送料"
+        .Range(Cells(3, 7), Cells(ForSlimsSheet.UsedRange.Rows.Count, 7)).Value = 0
     End If
 
     '罫線引いて保存
-    .Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
+    .Range("A2:I2").Resize(Range("B2").CurrentRegion.Rows.Count - 1, 9).Borders.LineStyle = xlContinuous
     
 End With
 ForSlimsBook.Close SaveChanges:=True
@@ -245,7 +264,7 @@ With NoEntryItemSheet
     End If
     
     '罫線引いて保存
-    .Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
+    .Range("A2:I2").Resize(Range("B2").CurrentRegion.Rows.Count - 1, 9).Borders.LineStyle = xlContinuous
     
 End With
 NoEntryItemBook.Close SaveChanges:=True
@@ -262,32 +281,60 @@ ActiveSheet.Name = BookName
 
 '一旦新規作成ブックを保存することでブック名を変更する
 '新規作成ファイルの保存時はファイルフォーマットを明示する必要な模様
-Dim SavePath As String
+Dim SavePath As String, SaveFolder As String
 
+'保存先と保存ファイル名の決定
+
+'ネット販売のフォルダに繋がるか判定
 If Dir(PICKING_FOLDER, vbDirectory) <> "" Then
-    '既に本日ファイルがあれば、時刻付けて保存
-    If Dir(PICKING_FOLDER & BookName & ".xlsx") = "" Then
-        SavePath = PICKING_FOLDER & BookName
-    Else
-        SavePath = PICKING_FOLDER & Format(Time, "hhmm") & BookName
-    End If
-    
-        ActiveWorkbook.SaveAs Filename:=SavePath, FileFormat:=xlWorkbookDefault
-
+    SaveFolder = PICKING_FOLDER
 Else
-    
-    Dim DeskTopPath As String
-    If Dir(DeskTopPath & BookName & ".xlsx") = "" Then
-        DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & BookName
-    Else
-        DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & Format(Time, "hhmm") & BookName
-    End If
-    
+    SaveFolder = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\"
     MsgBox "ネット販売関連に繋がらないため、" & BookName & "をデスクトップに保存します。"
-        
-    ActiveWorkbook.SaveAs Filename:=DeskTopPath, FileFormat:=xlWorkbookDefault
+End If
+
+'あす楽・プライム分のピッキングか？
+If Main.IsSecondPicking = True Then
+    BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "AR"))
+End If
+
+'時刻保存のフラグがあるか
+If Main.IsTimeStampMode = True Then
+    BookName = Replace(BookName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
+End If
+
+'ファイルがあって､あす楽プライム分のピッキングでない時のみ､選択ダイアログを表示
+If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" And Main.IsSecondPicking = False Then
+    
+    Dim IsAR As Integer
+    IsAR = MsgBox(prompt:="本日分のファイルが既に存在します。" & vbLf & "あす楽・プライム分として保存しますか？", _
+            Buttons:=vbExclamation + vbYesNo)
+    
+    'あす楽プライムモードのフラグを立てる
+    If IsAR = vbYes Then
+        BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "AR"))
+        Main.IsSecondPicking = True
+    
+    'あす楽プライム分でないとき、時刻を含めたファイル名保存フラグを立てる
+    Else
+        BookName = Replace(BookName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
+        Main.IsTimeStampMode = True
+    
+    End If
 
 End If
+    
+'上記条件に全てヒットしない場合は、当日1回目の生成となり、BookNameは変更されていない。
+
+If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" Then
+    '保存しようとするファイル名で、既にファイルがある場合ファイル名を日付-時刻とする
+    BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "-" & Format(Time, "hhmm")))
+End If
+
+SavePath = SaveFolder & BookName
+
+ActiveWorkbook.Sheets(1).Name = BookName
+ActiveWorkbook.SaveAs Filename:=SavePath, FileFormat:=xlWorkbookDefault
 
 Set PreparePickingBook = ActiveWorkbook
 
@@ -310,5 +357,41 @@ For k = 0 To 5
 Next
 
 Application.DisplayAlerts = True
+
+End Sub
+
+Private Sub SortHasLocation(Sheet As Worksheet)
+
+Dim SortRange As Range
+Set SortRange = Sheet.Range("A1").CurrentRegion
+
+Dim CodeRange As Range
+Set CodeRange = Sheet.Range("A2:A" & SortRange.Rows.Count)
+
+'ソート条件をセット
+With Sheet.Sort
+    
+    '一旦ソートをクリア
+    .SortFields.Clear
+    
+    'ソートキーをセット 第一キー 商品コード：色、第二キー 商品コード：昇順
+    .SortFields.Add Key:=CodeRange, SortOn:=xlSortOnCellColor, Order:=xlAscending, DataOption:=xlSortNormal
+    .SortFields.Add Key:=CodeRange, SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+
+    'ソート対象のデータが入ってる範囲を指定して
+    .SetRange SortRange
+    .Header = xlYes
+    .MatchCase = False
+    .Orientation = xlTopToBottom
+    .SortMethod = xlPinYin
+    
+    'セットした条件を適用
+    .Apply
+
+End With
+
+'カレントリージョンがセレクトされているので、選択セルをセルA1にセットし直す
+Sheet.Activate
+Range("A1").Select
 
 End Sub

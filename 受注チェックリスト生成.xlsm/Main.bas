@@ -1,7 +1,7 @@
 Attribute VB_Name = "Main"
 Option Explicit
 
-Sub 受注チェックリスト生成()
+Sub 読込_DBアップロード()
 
 'CSV読込、作業シートへコピー
 Importer.CSV読込
@@ -20,8 +20,8 @@ SetParser.セット分解
 Transfer.店舗識別番号振替
 Transfer.住所結合
 Transfer.JAN転記
-Transfer.日付フォーマット変更
-Transfer.楽天商品名修正
+Transfer.書式と型の変更
+Transfer.商品名修正
 
 Transfer.提出用シートへ転記
 
@@ -36,7 +36,7 @@ Worksheets("アップロードシート").Range("A1").Select
 '取込、作業シート込みのエクセルファイルを保存
 Application.DisplayAlerts = False
     
-    ActiveWorkbook.SaveAs FileName:=ActiveWorkbook.Path & "\受注チェックリスト_" & Format(Date, "yyyymmdd") & ".xlsm", FileFormat:=52
+    ActiveWorkbook.SaveAs FileName:=ActiveWorkbook.Path & "\受注チェックリスト_" & Format(Date, "yyyymmdd") & ".xlsx", FileFormat:=xlWorkbook
         
 Application.DisplayAlerts = True
 
@@ -44,7 +44,6 @@ Application.DisplayAlerts = True
 Call CodeI2JAN_E
 
 End Sub
-
 
 Sub CodeI2JAN_E()
 'EC変換専用（受注チェックリスト生成.xltm組込み専用ルーチン
@@ -73,7 +72,7 @@ MB_C = MsgBox("JAN変換とDBへの書き込みを開始します", vbOKCancel)
 
 If MB_C = vbOK Then
 
-    Cnn.Open "PROVIDER=SQLOLEDB;Server=itoserver3;Database=ITOSQL_REP;UID=sa;PWD=ito;"
+    Cnn.Open "PROVIDER=SQLOLEDB;Server=;Database=;UID=;PWD=;"
     Cmd.CommandTimeout = 180
     Set Cmd.ActiveConnection = Cnn
 
@@ -200,3 +199,4 @@ Application.StatusBar = Old_Status
 
 
 End Sub
+

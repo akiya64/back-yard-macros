@@ -73,6 +73,8 @@ Do
             MallId = 4
     End Select
     
+    '納品書区分はDBでは数値型
+    Cells(i, 10).NumberFormatLocal = "#"
     Cells(i, 10) = MallId
     
     i = i + 1
@@ -137,47 +139,30 @@ Loop Until IsEmpty(Cells(i, 1))
 
 End Sub
 
-Sub 楽天商品名修正()
+Sub 商品名修正()
 
 '商品名から、楽天のキャンペーン情報を削除する
-'≪≫か【】で先頭に記載されているので、今回はInstrで ≫ 】の位置を検出して前を削除
+'≪≫か【】で先頭に記載されているので、正規表現で検出して括弧ごと削除、複数括弧対応
+'また、DBのフィールドサイズが50文字なので、45文字でカットする。
 
 Worksheets("作業シート").Activate
 
-'キャンペーン情報を囲っている閉じカッコ配列を定義
-'2次元配列を組む。括弧一種類につき1組の配列として、その配列を括弧の種類分の数束ねる。
-'Brackets配列をイテレートして処理できる。
-'今回は正規表現使わずに実装してみた。
-
-Dim Brackets() As Variant
-Brackets = Array( _
-                Array("【", "】"), _
-                Array("≪", "≫") _
-            )
-
-'行カウンタ
+'ループ内で使う行カウンタ
 Dim i As Long
 i = 2
 
+'正規表現オブジェクトと、パターンをセット
+Dim Reg As New RegExp
+Reg.Global = True
+Reg.Pattern = "^((≪|【).*?(】|≫))*"
+
 Do
     Dim ProductName As String
+    
     ProductName = Cells(i, 4).Value
-    
-    '閉じ括弧が何文字目に出てくるか調べる
-    Dim k As Integer
-    For k = 0 To UBound(Brackets)
-    
-        'キャンペーン情報の括弧が冒頭にあるかチェック
-        If InStr(1, ProductName, Brackets(k)(0)) = 1 Then
+    ProductName = Reg.Replace(ProductName, "")
             
-            Dim CampaignInfoCharEnd As Integer
-            CampaignInfoCharEnd = InStr(1, ProductName, Brackets(k)(1)) + 1
-            
-            Cells(i, 4) = Mid(ProductName, CampaignInfoCharEnd)
-            
-        End If
-        
-    Next
+    Cells(i, 4) = Left(ProductName, 45)
         
     i = i + 1
 
@@ -185,13 +170,17 @@ Loop Until IsEmpty(Cells(i, 1))
 
 End Sub
 
-Sub 日付フォーマット変更()
+Sub 書式と型の変更()
 
 Dim i As Long
 i = 2
 
 Do
-
+    '受注番号の修正
+    Cells(i, 1).NumberFormatLocal = "#"
+    Cells(i, 1).Value = CDbl(Cells(i, 1).Value)
+    
+    '日付の表示を修正
     Cells(i, 7).NumberFormatLocal = "yyyy/M/dd"
     Cells(i, 7).Value = Format(Cells(i, 7).Value, "yyyy/M/dd")
     
@@ -236,3 +225,16 @@ Loop Until IsEmpty(Cells(i, 1))
 Worksheets("アップロードシート").Activate
 
 End Sub
+
+Function ValidateName(Name As String) As String
+
+Dim Reg As New RegExp
+
+Reg.Global = True
+Reg.Pattern = "^((≪|【).*?(】|≫))*"
+Name = Reg.Replace(Name, "")
+
+ValidateName = Name
+
+End Function
+

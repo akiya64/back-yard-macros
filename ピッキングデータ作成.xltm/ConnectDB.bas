@@ -12,7 +12,7 @@ Dim SQL_W1 As String
 Dim Target_RowEnd As Integer
 Dim Loop_Count As Integer
 Dim A As Integer
-Dim Target_Code As Single
+Dim Target_Code As String
 Dim Loc_Text As String
 
 '定数セット
@@ -104,6 +104,27 @@ For Loop_Count = Target_RowBase To Target_RowEnd
         Loop
         
         Cells(Loop_Count, OutPut_ColBase + 3).Value = Loc_Text
+        
+    Else
+        '在庫マスターに登録がない場合、商品マスタから商品コードとJANのみ取得する
+        
+        'コード判別（インストア・JAN）-> WHERE句セット DBでコードは数値型、JANはテキスト型
+        Dim Clause_WHERE As String
+        Clause_WHERE = IIf(Len(Target_Code) <= 6, "商品マスタ.商品コード = " & Target_Code, "商品マスタ.JANコード = '" & Target_Code & "'")
+    
+        SQL_W1 = "SELECT 商品マスタ.商品コード, 商品マスタ.JANコード "
+        SQL_W1 = SQL_W1 & "FROM 商品マスタ "
+        SQL_W1 = SQL_W1 & "WHERE " & Clause_WHERE
+        
+        'SQL実行して出力
+        Set DB_Rs = DB_Cnn.Execute(SQL_W1)
+        
+        If Not DB_Rs.EOF Then
+            Cells(Loop_Count, OutPut_ColBase).Value = DB_Rs("JANコード")
+            
+            Cells(Loop_Count, OutPut_ColBase + 1).NumberFormatLocal = "@"
+            Cells(Loop_Count, OutPut_ColBase + 1).Value = Format(DB_Rs("商品コード"), "000000")
+        End If
         
     End If
 Next Loop_Count

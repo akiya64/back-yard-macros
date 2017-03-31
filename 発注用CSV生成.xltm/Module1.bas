@@ -155,7 +155,7 @@ Do Until IsEmpty(Cells(i, 2))
         
         On Error Resume Next
             Dim CurRow As Double
-            CurRow = WorksheetFunction.Match(pc.Value, Worksheets("メーカー在庫表").Range("B1:B6000"), 0)
+            CurRow = WorksheetFunction.Match(pc.Value, Worksheets("メーカー在庫表").Range("B1:B8000"), 0)
             
             pc.Value = CStr(Worksheets("メーカー在庫表").Cells(CurRow, 1))
         
@@ -206,7 +206,7 @@ ProductListRange.AutoFilter Field:=col, Criteria1:=RGB(255, 255, 0), Operator:=x
 
 'フィルターした後の行数をカウント＝依頼商品数
 Dim CountItem As Long
-CountItem = WorksheetFunction.Subtotal(3, Cells(3, col).Resize(Cells(3, col).SpecialCells(xlCellTypeLastCell).Row, 1))
+CountItem = WorksheetFunction.Subtotal(3, Range("C:C")) - 1
 
 Call setItemCount(PickingSheetName, CountItem)
 
@@ -249,7 +249,7 @@ End Sub
 
 Private Sub CopySheet(Mall As String)
 
-Workbooks.Open FileName:=RetrievePickingFilePath(Mall), ReadOnly:=True
+Workbooks.Open FileName:=GetPickingFilePath(Mall), ReadOnly:=True
 
 Dim BookName As String
 BookName = ActiveWorkbook.Name 'ファイルを開いたら開いたブックがActiveになっている
@@ -262,8 +262,17 @@ Workbooks(BookName).Close SaveChanges:=False
 
 End Sub
 
-Private Function RetrievePickingFilePath(FileName As String) As String
-'ピッキングシートの-a＝棚無のセット分解前ファイルを探してフルパスをセット
+Private Function GetPickingFilePath(MallName As String) As String
+'ピッキングシートの-a＝棚無のファイルを探してフルパスをセット
+
+Dim FileName As String
+If MallName = "Amazon" Then
+    FileName = "ピッキング"
+ElseIf MallName = "楽天" Then
+    FileName = "楽天"
+ElseIf MallName = "Yahoo" Then
+    FileName = "ヤフー"
+End If
 
 Const PICKING_FILE_FOLDER As String = "\\Server02\商品部\ネット販売関連\ピッキング\" '末尾\マーク必須
 
@@ -287,8 +296,7 @@ For Each f In FSO.GetFolder(PICKING_FILE_FOLDER).Files
 
 Next
 
-
-RetrievePickingFilePath = PICKING_FILE_FOLDER & Target.Name
+GetPickingFilePath = PICKING_FILE_FOLDER & Target.Name
 
 End Function
 

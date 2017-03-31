@@ -18,7 +18,7 @@ End If
 
 If DateDiff("D", FileDateTime(FilePath), Date) <> 0 Then
     Dim IsContinue As Integer
-    IsContinue = MsgBox(Prompt:="本日のダウンロードファイルではありません。" & vbLf & "ピッキングシートを生成しますか？", Buttons:=vbYesNo + vbQuestion)
+    IsContinue = MsgBox(prompt:="本日のダウンロードファイルではありません。" & vbLf & "ピッキングシートを生成しますか？", Buttons:=vbYesNo + vbQuestion)
 
     If IsContinue = vbNo Then
         MsgBox "処理を終了します。"
@@ -62,7 +62,7 @@ End With
 
 'クロスモールのCSVが読み込まれたかチェック クロスモール側で採番する連番は数字8ケタ
 If Not Range("A2").Value Like String(8, "#") Then
-    MsgBox Prompt:="読込んだファイルにクロスモールの連番がありません。" & vbLf & "処理を終了します。", Buttons:=vbCritical, Title:="正しくないファイル"
+    MsgBox prompt:="読込んだファイルにクロスモールの連番がありません。" & vbLf & "処理を終了します。", Buttons:=vbCritical, Title:="正しくないファイル"
     End
 End If
 

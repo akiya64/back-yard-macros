@@ -189,7 +189,12 @@ End Function
 Sub ParseScalingSet(r As Variant)
 
 Dim Code As String, FixedCode As String
-Code = r.Value
+Dim Reg As New RegExp
+
+Reg.Global = True
+Reg.Pattern = "[a-zA-Z]"
+
+Code = Reg.Replace(r.Value, "")
 
 Dim SeparatedCode As Variant
 SeparatedCode = Split(Code, "-", 2)
@@ -212,6 +217,6 @@ If Not IsNumeric(SeparatedCode(1)) Then
 End If
 
 'セットなら、必要数量はセット数量×受注数量に書き換え
-Range("J" & r.Row).Value = Range("J" & r.Row).Value * CLng(Val(SeparatedCode(1)))
+Range("J" & r.Row).Value = Range("D" & r.Row).Value * CLng(SeparatedCode(1))
 
 End Sub
