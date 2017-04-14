@@ -2,6 +2,9 @@ Attribute VB_Name = "BuildSheets"
 Option Explicit
 
 Sub CreateSorterSheet(MallName As String)
+'振分用シートへ商品情報を転記する。
+'テンプレートシートを2回コピー、単体商品とセット商品用を用意する。
+'受注データのシートを2～最終行まで、受注モール・受注時コードを判定しつつシートへコピー
 
 '単体商品の振分け用シートを用意
 Worksheets("振分用テンプレート").Copy after:=Worksheets(Worksheets.Count)
@@ -136,6 +139,11 @@ ForSorterSetItemSheet.Protect
 End Sub
 
 Sub OutputPickingData(ByVal MallName As String)
+'電算室提出の棚有りピッキングシート、棚なしピッキングシートを作成する。
+'ピッキング用のブックを二つ用意する 棚有り-2-3と -a
+'モール名・有効ロケーションを判定しつつ、受注データシートを1行ずつコピー。
+'全行終わったら、-2-3と -aの二つのブックは閉じる。
+
 
 '引数の名前で新規ブックを作成する
 'ファイル名はAmazon-ピッキングシート、Yahoo=ヤフーPシート、電算室側の処理の関係で固定
@@ -272,7 +280,10 @@ NoEntryItemBook.Close SaveChanges:=True
 End Sub
 
 Private Function PreparePickingBook(ByVal BookName As String) As Workbook
-'ブック名を変えるために、所定の場所へ先にデータなしで保存する
+'ピッキングシート用のブックを用意する。
+'VBAでブック名でブックオブジェクトを呼び出せるよう、最初に引数のブック名で保存して、そのワークブックオブジェクトを返す。
+'ピッキングシートファイルの重複判定もここで行う。
+'既に同じファイル名があれば、ファイル名AR入りの楽天・プライム分のピッキングシートかダイアログでユーザーに決めてもらう。
 
 Const PICKING_FOLDER As String = "\\server02\商品部\ネット販売関連\ピッキング\" '最後、必ず\マーク
 
@@ -343,6 +354,8 @@ ThisWorkbook.ActiveSheet.Activate
 End Function
 
 Private Sub AdjustWidth(TargetSheet As Worksheet)
+'A4横の一枚に収まるように振分シートの列幅を再調整する。
+
 '列幅 調整時にアラートが出るのを抑止
 Application.DisplayAlerts = False
 
@@ -361,6 +374,7 @@ Application.DisplayAlerts = True
 End Sub
 
 Private Sub SortHasLocation(Sheet As Worksheet)
+'振分シートで、棚無しを下に集めて商品コード昇順に並び替える。
 
 Dim SortRange As Range
 Set SortRange = Sheet.Range("A1").CurrentRegion

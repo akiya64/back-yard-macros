@@ -72,7 +72,7 @@ MB_C = MsgBox("JAN•ÏŠ·‚ÆDB‚Ö‚Ì‘‚«‚İ‚ğŠJn‚µ‚Ü‚·", vbOKCancel)
 
 If MB_C = vbOK Then
 
-    Cnn.Open "PROVIDER=SQLOLEDB;Server=;Database=;UID=;PWD=;"
+    Cnn.Open "PROVIDER=SQLOLEDB;Server=itoserver3;Database=ITOSQL_REP;UID=sa;PWD=ito;"
     Cmd.CommandTimeout = 180
     Set Cmd.ActiveConnection = Cnn
 

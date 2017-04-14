@@ -1,6 +1,9 @@
 Attribute VB_Name = "ConnectDB"
 Sub Make_List(Optional ByVal arg As Boolean)
-'作成：商品部
+'DBへ接続して、商品マスタ・在庫マスタからロケーション・現在庫を取得
+'在庫マスタがない場合は、商品マスタより社内コードとJANのみ取得
+'ベース作成：商品部
+
 
 'SQL系変数
 Dim DB_Cnn As New ADODB.Connection

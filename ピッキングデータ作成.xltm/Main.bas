@@ -6,6 +6,7 @@ Public IsSecondPicking As Boolean
 Public IsTimeStampMode As Boolean
 
 Sub ピッキング_振分作成()
+'ボタンから起動するプロシージャ
 
 OrderSheet.Activate
 
@@ -17,7 +18,7 @@ End If
 'プログレスバーの準備
 With ShowProgress
     .ProgressBar.Min = 1
-    .ProgressBar.Max = 8
+    .ProgressBar.Max = 15
 
     .Show vbModeless
 End With
@@ -27,6 +28,10 @@ ShowProgress.StepMessageLabel = "CSV読込中"
 
 Call LoadCsv
 
+'アドイン用にコード修正、セット分解
+Call DataValidate.FixForAddin
+Call SetParser.SetParse7777
+
 ShowProgress.ProgressBar.Value = 3
 ShowProgress.StepMessageLabel = "ロケーションデータ取得中"
 Application.Wait Now + TimeValue("00:00:02")
@@ -35,9 +40,6 @@ Application.Wait Now + TimeValue("00:00:02")
 'DB接続、ロケーション取得、受注データの修正
 Call ConnectDB.Make_List
 Call DataValidate.FilterLocation
-
-'受注データシートでの処理終了、シート保護をかける
-OrderSheet.Protect
 
 'モール毎の電算室提出データ保存、振分けシート作成
 
@@ -53,20 +55,44 @@ For Each Mall In Malls
         
     ProgressStep = ProgressStep + 1
     ShowProgress.ProgressBar.Value = ProgressStep
-    ShowProgress.StepMessageLabel = Mall & "データ処理中"
+    ShowProgress.StepMessageLabel = Mall & "ピッキング作成中"
     
     'モール毎の受注件数がゼロ件ならファイル生成しない。
-    If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), Mall & "*") = 0 Then GoTo Continue
+    If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), Mall & "*") = 0 Then GoTo Continue1
     
     'ピッキングシート作成・保存
     Call BuildSheets.OutputPickingData(CStr(Mall))
+
+
+Continue1:
+
+Next
+
+'振分用セット商品リストをコード昇順にするために、ソート
+Call OrderSheet.SortAscend("受注時商品コード")
+
+For Each Mall In Malls
+        
+    ProgressStep = ProgressStep + 1
+    ShowProgress.ProgressBar.Value = ProgressStep
+    ShowProgress.StepMessageLabel = Mall & "振分シート作成中"
+    
+    'モール毎の受注件数がゼロ件ならファイル生成しない。
+    If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), Mall & "*") = 0 Then GoTo Continue2
     
     '振分け用シート作成
     Call BuildSheets.CreateSorterSheet(CStr(Mall))
 
-Continue:
+Continue2:
 
 Next
+
+Call OrderSheet.SortAscend("管理番号")
+
+'受注データシートでの処理終了、シート保護をかける
+OrderSheet.Activate
+OrderSheet.Range("A1").Select
+OrderSheet.Protect
 
 'シート削除、保存時のアラートダイアログを抑止
 Application.DisplayAlerts = False
@@ -75,7 +101,7 @@ Application.DisplayAlerts = False
 Worksheets("ピッキングシート提出用テンプレート").Delete
 Worksheets("振分用テンプレート").Delete
 
-ShowProgress.ProgressBar.Value = 7
+ShowProgress.ProgressBar.Value = 14
 ShowProgress.StepMessageLabel = Mall & "保存処理中"
 
 Dim DeskTop As String, SaveFileName As String, SavePath As String
@@ -109,7 +135,7 @@ Else
 
 End If
 
-ShowProgress.ProgressBar.Value = 8
+ShowProgress.ProgressBar.Value = 15
 ShowProgress.StepMessageLabel = Mall & "振分シート プリント"
 
 '実行PCデフォルトのプリンタでプリントアウト

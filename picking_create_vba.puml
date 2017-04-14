@@ -31,17 +31,18 @@ CSV <- LoadCsv : データ接続
 entity OrderSheet
 
 LoadCsv -> OrderSheet : 受注データ取込
-LoadCsv -> OrderSheet : フォーマット修正
+deactivate LoadCsv
+
+Main -> DataValidate : FixForAddin() 社内DBと照合のためにコード修正
+activate DataValidate
+DataValidate -> OrderSheet : 照合用コード書込
 
 participant SetParser
 
-note right
-    商品名変更が必要な可能性アリ
-     ≪SS≫を中身ごと削除する
-     冒頭○文字以内の[]を削除する、など
-end note
+DataValidate -> SetParser : ○個組分解 Sub ParseScalingItem()
 
-LoadCsv -> SetParser : ○個組分解 Sub ParseScalingItem()
+deactivate DataValidate
+
 |||
 activate SetParser
 
@@ -50,16 +51,14 @@ SetParser -> OrderSheet : 単体数量上書
 SetParser -> OrderSheet : 単体コード上書
 deactivate SetParser
 
-LoadCsv -> SetParser : 7777 セット分解 Sub ParseItems()
-deactivate LoadCsv
+Main -> SetParser : 7777 セット分解 Sub ParseItems()
+
 activate SetParser
 
 ｾｯﾄ商品ﾘｽﾄ.xls <-- SetParser : 77777xxxxxコード 検索
 ｾｯﾄ商品ﾘｽﾄ.xls --> SetParser : 構成商品コレクション
 
-Loop 構成商品 1つにつき1行挿入
-    SetParser -> OrderSheet : アイテム行挿入
-end
+SetParser -> OrderSheet : アイテム行挿入
 
 deactivate SetParser
 
@@ -88,14 +87,12 @@ deactivate DataValidate
 
 participant SheetBuilder
 
+
+loop 3モール分 ピッキングシート作成
 Main -> SheetBuilder : Sub CreatePicking()
 activate SheetBuilder
-
-loop 3モール分実行
     
     OrderSheet <-- SheetBuilder : モール別 受注件数チェック
-
-    Group ピッキングデータ作成
 
         create entity Picking_2_3
         SheetBuilder -> Picking_2_3 : ブック作成
@@ -107,12 +104,16 @@ loop 3モール分実行
 
         SheetBuilder --> SheetBuilder : 受注モール判定
 
+        DataValidate <- SheetBuilder : ValidateName()
+        DataValidate -> SheetBuilder : キャンペーン文言削除 
+ 
+        group 棚有り・なし 判定
         else 棚有り
-            SheetBuilder -> Picking_2_3 : 6ケタ振替 データ転記
+            SheetBuilder -> Picking_2_3 : データ転記
 
         else 棚無し
             SheetBuilder -> Picking_a : データ転記
-    end
+        end 
 
     SheetBuilder -> Picking_2_3 : ファイル保存
     destroy Picking_2_3
@@ -121,33 +122,41 @@ loop 3モール分実行
 
     destroy Picking_a
     deactivate SheetBuilder
+end
 
+Main -> OrderSheet : 受注時商品コード昇順にソート
 
+loop 3モール分 振分シート作成
     Main -> SheetBuilder : Sub CreateForSorterSheet()
-        Group 振分シート作成
+
         activate SheetBuilder
         create entity ForSorter
         SheetBuilder -> ForSorter : シート作成
         create entity ForSorter_set
         SheetBuilder -> ForSorter_set : シート作成
         OrderSheet <-- SheetBuilder : 受注データ取得
+
+        DataValidate <- SheetBuilder : ValidateName()
+        DataValidate -> SheetBuilder : キャンペーン文言削除 
+
         SheetBuilder -> SheetBuilder : 受注モール判定
 
-        else 単体受注品
+        group 単体・セット判定
+            else 単体受注品
 
-            SheetBuilder -> ForSorter : 受注データ転記
+                SheetBuilder -> ForSorter : 受注データ転記
         
-        else セット商品
+            else セット商品
 
             SheetBuilder -> ForSorter_set : 受注データ転記
-        else
+    
+        end 
 
-            SheetBuilder -> ForSorter : 商品コードでソート
-
-    end
+            SheetBuilder -> ForSorter : 背景色・商品コードでソート
+            deactivate SheetBuilder
 end
 
-deactivate SheetBuilder
+Main -> OrderSheet : 管理コード 昇順にソート
 
 Main --> ForSorter : VBA:PrintOut 
 Main --> ForSorter_set : VBA:PrintOut

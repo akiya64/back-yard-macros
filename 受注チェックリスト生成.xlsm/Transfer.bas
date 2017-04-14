@@ -161,7 +161,8 @@ Do
     
     ProductName = Cells(i, 4).Value
     ProductName = Reg.Replace(ProductName, "")
-            
+    ProductName = Replace(ProductName, "'", "")
+    
     Cells(i, 4) = Left(ProductName, 45)
         
     i = i + 1
@@ -233,6 +234,8 @@ Dim Reg As New RegExp
 Reg.Global = True
 Reg.Pattern = "^((Å·|Åy).*?(Åz|Å‚))*"
 Name = Reg.Replace(Name, "")
+
+Name = Replace(Name, "'", "")
 
 ValidateName = Name
 
