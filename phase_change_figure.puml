@@ -1,0 +1,98 @@
+@startuml phase_change_figure
+
+skinparam monochrome true
+skinparam packageFontSize 25
+
+title フェーズ遷移図
+
+box "梱包室PC内" #white
+entity ヤマトB2アプリ
+entity e飛伝アプリ
+end box
+
+box "CROSS MALL" #white
+participant 注文確認
+participant リスト出力待ち
+participant 発送待ち
+participant 発送済
+participant 削除
+participant 完了
+end box
+
+== 8:00～ 朝の受注取込 ==
+
+activate 注文確認
+[<- 注文確認 :納品書出力
+ヤマトB2アプリ <- 注文確認 :ヤマトB2 CSVダウンロード
+e飛伝アプリ <- 注文確認 :e飛伝用CSVダウンロード
+
+注文確認 -> リスト出力待ち
+deactivate 注文確認
+
+activate リスト出力待ち
+[<- リスト出力待ち : ピッキングCSVダウンロード
+[<- リスト出力待ち : Thanksメール送信
+
+リスト出力待ち -> 発送待ち
+deactivate リスト出力待ち
+
+activate 発送待ち
+
+発送待ち -> 削除 :注文キャンセル時 随時移動
+
+== 13:30～ あす楽・プライム取込 ==
+
+activate 注文確認
+[<- 注文確認 :納品書出力
+ヤマトB2アプリ <- 注文確認 :ヤマトB2 CSVダウンロード
+e飛伝アプリ <- 注文確認 :e飛伝用CSVダウンロード
+
+注文確認 -> リスト出力待ち
+deactivate 注文確認
+
+activate リスト出力待ち
+[<- リスト出力待ち : ピッキングCSVダウンロード
+[<- リスト出力待ち : Thanksメール送信
+
+リスト出力待ち -> 発送待ち :あす楽・プライム 付箋フィルター
+deactivate リスト出力待ち
+
+== 16:30～ 出荷〆処理 ==
+
+発送待ち -> 発送済
+
+deactivate 発送待ち
+
+activate 発送済
+
+ヤマトB2アプリ -> 発送済 :ヤマトB2 送り状番号
+e飛伝アプリ -> 発送済 :e飛伝 送り状番号
+
+[<- 発送済 : ○件中△件 処理件数通知メール
+
+boundary 出荷確認.xlsm
+
+発送済 -> 出荷確認.xlsm :Amazonアップロード用CSV
+発送済 -> 出荷確認.xlsm :楽天アップロード用CSV
+発送済 -> 出荷確認.xlsm :Yahoo!アップロード用CSV
+
+出荷確認.xlsm -> 配送でPON : ヤマト運輸 送り状番号
+出荷確認.xlsm -> 配送でPON : 佐川急便 送り状番号
+
+box "運送会社 Web照会サーバ" #white
+    database ヤマト運輸
+    database 佐川急便
+end box
+
+配送でPON -> ヤマト運輸 : 集荷確認
+配送でPON -> 佐川急便 : 集荷確認
+
+出荷確認.xlsm -> 発送済 : 未集荷削除
+
+発送済 -> 完了
+
+deactivate 発送済
+
+activate 完了
+
+@enduml

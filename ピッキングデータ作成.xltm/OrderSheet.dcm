@@ -1,0 +1,33 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "OrderSheet"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Option Explicit
+
+Sub SortAscend(ByVal FieldName As String)
+
+    Dim KeyRange As Range
+    Select Case FieldName
+        Case "管理番号"
+            Set KeyRange = Range("A1")
+        Case "受注時商品コード"
+            Set KeyRange = Range("B1")
+    End Select
+    
+    With Me.Sort
+        .SortFields.Clear
+        .SortFields.Add Key:=KeyRange, SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+        .SetRange Me.Range("A1").CurrentRegion
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+
+End Sub

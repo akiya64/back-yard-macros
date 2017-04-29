@@ -64,8 +64,8 @@ deactivate SetParser
 
 Main -> ConnectDB : Sub Make_List()
 activate ConnectDB
-社内DB <- ConnectDB : ロケーション問合せ
-社内DB -> ConnectDB :ロケーション取得
+社内DB <- ConnectDB : ロケーション・6ケタ問合せ
+社内DB -> ConnectDB :ロケーション・6ケタ取得
 OrderSheet <- ConnectDB : ロケーション書込
 deactivate ConnectDB
 
@@ -79,7 +79,7 @@ activate DataValidate
 
 |||
 OrderSheet -> DataValidate :ロケ文字列取得
-OrderSheet <- DataValidate :無効ロケ削除
+OrderSheet <- DataValidate :無効ロケ削除して転記
 deactivate DataValidate
 |||
 
@@ -136,10 +136,10 @@ loop 3モール分 振分シート作成
         SheetBuilder -> ForSorter_set : シート作成
         OrderSheet <-- SheetBuilder : 受注データ取得
 
+        SheetBuilder -> SheetBuilder : 受注モール判定
+
         DataValidate <- SheetBuilder : ValidateName()
         DataValidate -> SheetBuilder : キャンペーン文言削除 
-
-        SheetBuilder -> SheetBuilder : 受注モール判定
 
         group 単体・セット判定
             else 単体受注品

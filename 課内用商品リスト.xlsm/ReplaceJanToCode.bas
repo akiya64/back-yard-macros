@@ -26,7 +26,7 @@ For Each r In Rng
     ir.Code = r.Value
     ir.Jan = r.Offset(0, 2)
 
-    '09始まりコードは資材のためとばす、05始まりは先頭0を落とす
+    '09始まりコードはとばす、05始まりは先頭0を落とす
     
     If ir.Code Like "09#####" Then
         

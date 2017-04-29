@@ -1,0 +1,69 @@
+@startuml purchase_flow
+
+skinparam monochrome true
+skinparam packageFontSize 25
+
+title 商品発注、入荷検品
+
+entity AmazonPシート
+entity 楽天Pシート
+entity ヤフーPシート
+
+boundary 手配書作成.xlsm
+
+AmazonPシート -> 手配書作成.xlsm
+楽天Pシート -> 手配書作成.xlsm
+ヤフーPシート -> 手配書作成.xlsm
+
+entity FAX用手配書
+entity センター用手配書
+
+手配書作成.xlsm -> FAX用手配書 : プリントアウト
+手配書作成.xlsm -> センター用手配書 : プリントアウト
+
+box "電算室" #white
+    participant 在庫マスター確認
+end box
+
+database 在庫マスター
+
+box "商品部" #white
+    participant 発注入力
+    database 商魂
+    entity 当社伝
+end box
+
+database 入庫マスター
+
+box "管理部" #white
+    participant 引取
+    participant 荷受
+    participant 検品
+end box
+
+participant 仕入先
+
+FAX用手配書 -> 仕入先
+センター用手配書 -> 在庫マスター確認 :電算室 提出
+
+在庫マスター確認 --> 在庫マスター : 在庫マスター確認
+在庫マスター確認 -> 在庫マスター :マスターにない場合登録
+
+在庫マスター確認 -> 発注入力 : 発注担当へ手配書渡す
+発注入力 -> 商魂 : 発注履歴登録
+発注入力 -> 当社伝 : 起票
+商魂 -> 入庫マスター : 入庫待ちデータ作成 
+
+発注入力 -> 引取 : 引取依頼、当社伝
+
+引取 -> 荷受 : 商品引取
+荷受 <- 仕入先 : 商品出荷
+
+荷受 -> 検品 : 商品
+入庫マスター <- 検品 : 商品、数量確認
+
+検品 ->] :格納＆棚積み
+
+商魂 <- 入庫マスター : 仕入計上
+
+@enduml
