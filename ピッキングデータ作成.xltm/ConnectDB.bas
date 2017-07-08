@@ -75,12 +75,12 @@ For Loop_Count = Target_RowBase To Target_RowEnd
     'コード判別（インストア・JAN）
     If Len(Target_Code) <= 6 Then
         SQL_W1 = "SELECT 商品マスタ.商品コード, 商品マスタ.JANコード, Sum(在庫マスタ.現在庫数) AS 現在庫数計 "
-        SQL_W1 = SQL_W1 & "FROM 商品マスタ INNER JOIN 在庫マスタ ON 商品マスタ.商品コード = 在庫マスタ.商品コード "
+        SQL_W1 = SQL_W1 & "FROM 商品マスタ LEFT JOIN 在庫マスタ ON 商品マスタ.商品コード = 在庫マスタ.商品コード "
         SQL_W1 = SQL_W1 & "GROUP BY 商品マスタ.商品コード, 商品マスタ.JANコード "
         SQL_W1 = SQL_W1 & "HAVING (((商品マスタ.商品コード)=" & Target_Code & "));"
     Else
         SQL_W1 = "SELECT 商品マスタ.商品コード, 商品マスタ.JANコード, Sum(在庫マスタ.現在庫数) AS 現在庫数計 "
-        SQL_W1 = SQL_W1 & "FROM 商品マスタ INNER JOIN 在庫マスタ ON 商品マスタ.商品コード = 在庫マスタ.商品コード "
+        SQL_W1 = SQL_W1 & "FROM 商品マスタ LEFT JOIN 在庫マスタ ON 商品マスタ.商品コード = 在庫マスタ.商品コード "
         SQL_W1 = SQL_W1 & "GROUP BY 商品マスタ.商品コード, 商品マスタ.JANコード "
         SQL_W1 = SQL_W1 & "HAVING (((商品マスタ.JANコード)='" & Target_Code & "'));"
     End If
@@ -107,36 +107,13 @@ For Loop_Count = Target_RowBase To Target_RowEnd
         Loop
         
         Cells(Loop_Count, OutPut_ColBase + 3).Value = Loc_Text
-        
-    Else
-        '在庫マスターに登録がない場合、商品マスタから商品コードとJANのみ取得する
-        
-        'コード判別（インストア・JAN）-> WHERE句セット DBでコードは数値型、JANはテキスト型
-        Dim Clause_WHERE As String
-        Clause_WHERE = IIf(Len(Target_Code) <= 6, "商品マスタ.商品コード = " & Target_Code, "商品マスタ.JANコード = '" & Target_Code & "'")
-    
-        SQL_W1 = "SELECT 商品マスタ.商品コード, 商品マスタ.JANコード "
-        SQL_W1 = SQL_W1 & "FROM 商品マスタ "
-        SQL_W1 = SQL_W1 & "WHERE " & Clause_WHERE
-        
-        'SQL実行して出力
-        Set DB_Rs = DB_Cnn.Execute(SQL_W1)
-        
-        If Not DB_Rs.EOF Then
-            Cells(Loop_Count, OutPut_ColBase).Value = DB_Rs("JANコード")
-            
-            Cells(Loop_Count, OutPut_ColBase + 1).NumberFormatLocal = "@"
-            Cells(Loop_Count, OutPut_ColBase + 1).Value = Format(DB_Rs("商品コード"), "000000")
-        End If
-        
     End If
+    
 Next Loop_Count
     
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
 
-    'Cells.Select
-    'Cells.EntireColumn.AutoFit
     Range("A1").Select
 
 DB_Cnn.Close

@@ -1,0 +1,46 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "ThisWorkbook"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Option Explicit
+
+Private Sub Workbook_AddinInstall()
+
+Dim PurchaseAssist As CommandBarPopup
+Set PurchaseAssist = Application.CommandBars("Worksheet Menu Bar").Controls.Add(Type:=msoControlPopup)
+    PurchaseAssist.Caption = "手配サポート"
+
+Dim ButtonPrintAll As CommandBarControl
+Set ButtonPrintAll = PurchaseAssist.Controls.Add(Type:=msoControlButton)
+
+With ButtonPrintAll
+    .Caption = "全ての手配書を印刷"
+    .Style = msoButtonIconAndCaption
+    .FaceId = 4
+    .OnAction = "PrintAllPo"
+End With
+
+Dim ButtonCloseAll As CommandBarControl
+Set ButtonCloseAll = PurchaseAssist.Controls.Add(Type:=msoControlButton)
+
+With ButtonCloseAll
+    .Caption = "全て閉じる"
+    .Style = msoButtonIconAndCaption
+    .FaceId = 1019
+    .OnAction = "CloseAllPo"
+End With
+
+
+End Sub
+
+Private Sub Workbook_AddinUninstall()
+
+On Error Resume Next
+CommandBars.FindControl(Type:=msoControlButton, Tag:="PrintAllBook").Delete
+
+End Sub

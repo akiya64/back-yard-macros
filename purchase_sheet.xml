@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- SQL XML created by WWW SQL Designer, https://github.com/ondras/wwwsqldesigner/ -->
+<!-- Active URL: http://ondras.zarovi.cz/sql/demo/?keyword=default -->
+<sql>
+<datatypes db="mysql">
+<group color="rgb(238,238,170)" label="Numeric">
+<type label="Integer" quote="" sql="INTEGER" length="0"/>
+<type label="TINYINT" quote="" sql="TINYINT" length="0"/>
+<type label="SMALLINT" quote="" sql="SMALLINT" length="0"/>
+<type label="MEDIUMINT" quote="" sql="MEDIUMINT" length="0"/>
+<type label="INT" quote="" sql="INT" length="0"/>
+<type label="BIGINT" quote="" sql="BIGINT" length="0"/>
+<type label="Decimal" quote="" sql="DECIMAL" length="1" re="DEC"/>
+<type label="Single precision" quote="" sql="FLOAT" length="0"/>
+<type label="Double precision" quote="" sql="DOUBLE" length="0" re="DOUBLE"/>
+</group>
+
+<group color="rgb(255,200,200)" label="Character">
+<type label="Char" quote="'" sql="CHAR" length="1"/>
+<type label="Varchar" quote="'" sql="VARCHAR" length="1"/>
+<type label="Text" quote="'" sql="MEDIUMTEXT" length="0" re="TEXT"/>
+<type label="Binary" quote="'" sql="BINARY" length="1"/>
+<type label="Varbinary" quote="'" sql="VARBINARY" length="1"/>
+<type label="BLOB" quote="'" sql="BLOB" length="0" re="BLOB"/>
+</group>
+
+<group color="rgb(200,255,200)" label="Date &amp; Time">
+<type label="Date" quote="'" sql="DATE" length="0"/>
+<type label="Time" quote="'" sql="TIME" length="0"/>
+<type label="Datetime" quote="'" sql="DATETIME" length="0"/>
+<type label="Year" quote="" sql="YEAR" length="0"/>
+<type label="Timestamp" quote="'" sql="TIMESTAMP" length="0"/>
+</group>
+
+<group color="rgb(200,200,255)" label="Miscellaneous">
+<type label="ENUM" quote="" sql="ENUM" length="1"/>
+<type label="SET" quote="" sql="SET" length="1"/>
+<type label="Bit" quote="" sql="bit" length="0"/>
+</group>
+</datatypes><table x="53" y="12" name="Amazon棚なし">
+<row name="OrderID" null="0" autoincrement="0">
+<datatype>MEDIUMTEXT</datatype>
+<default>'NULL'</default></row>
+<row name="SKU" null="0" autoincrement="0">
+<datatype>MEDIUMTEXT</datatype>
+<default>'NULL'</default><comment>商品コード、6ケタかJAN</comment>
+</row>
+<key type="PRIMARY" name="">
+<part>OrderID</part>
+<part>SKU</part>
+</key>
+</table>
+<table x="52" y="102" name="楽天棚なし">
+<row name="受注番号" null="1" autoincrement="1">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="商品番号" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>受注番号</part>
+<part>商品番号</part>
+</key>
+</table>
+<table x="52" y="202" name="ヤフー棚なし">
+<row name="OrderID" null="1" autoincrement="1">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="商品コード" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>OrderID</part>
+<part>商品コード</part>
+</key>
+</table>
+<table x="52" y="290" name="Amazon卸_棚なし">
+<row name="PO" null="1" autoincrement="1">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="JAN" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>PO</part>
+<part>JAN</part>
+</key>
+</table>
+<table x="362" y="90" name="手配が必要な注文">
+<row name="モール注文番号" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default><relation table="Amazon棚なし" row="OrderID" />
+<relation table="楽天棚なし" row="受注番号" />
+<relation table="ヤフー棚なし" row="OrderID" />
+<relation table="Amazon卸_棚なし" row="PO" />
+</row>
+<row name="モール識別記号" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="商品コード" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="数量" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>商品コード</part>
+</key>
+</table>
+<table x="363" y="303" name="商魂 商品マスター">
+<row name="商品コード" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="商品名" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="JAN" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="仕入先コード" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default><relation table="商魂 仕入先マスター" row="仕入先" />
+</row>
+<row name="区分" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="原価" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="ロット" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>商品コード</part>
+</key>
+</table>
+<table x="728" y="140" name="手配数量決定シート">
+<row name="商品コード_手配が必要な注文" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default><relation table="手配が必要な注文" row="商品コード" />
+<relation table="商魂 商品マスター" row="商品コード" />
+<relation table="発注用商品情報" row="JAN" />
+<relation table="発注用商品情報" row="商品コード" />
+<relation table="Magic流し込み用データ" row="6ケタ" />
+<relation table="保留リスト" row="JAN/6ケタ" />
+</row>
+<row name="数量" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="仕入先コード" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="発注時 備考" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="商品名" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="仕入先名称" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="原価" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+</table>
+<table x="1101" y="133" name="Magic流し込み用データ">
+<row name="倉庫番号" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="6ケタ" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="数量" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>6ケタ</part>
+</key>
+</table>
+<table x="1102" y="249" name="Magic手入力用リスト">
+<row name="仕入先コード" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default><relation table="手配数量決定シート" row="仕入先コード" />
+</row>
+<row name="JAN" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="商品名" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="数量" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="原価" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>仕入先コード</part>
+</key>
+</table>
+<table x="54" y="525" name="商魂 仕入先マスター">
+<row name="仕入先" null="1" autoincrement="1">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="仕入先名称" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="new field" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>仕入先</part>
+</key>
+</table>
+<table x="1104" y="466" name="保留リスト">
+<row name="日付" null="1" autoincrement="1">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="モール識別子" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="JAN/6ケタ" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="商品名" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="仕入先" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="手配時備考" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>JAN/6ケタ</part>
+</key>
+</table>
+<table x="365" y="621" name="発注用商品情報">
+<row name="JAN" null="1" autoincrement="1">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="商品コード" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="原価" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="仕入先名称" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="手配時備考" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="商品名" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>JAN</part>
+<part>商品コード</part>
+</key>
+</table>
+</sql>

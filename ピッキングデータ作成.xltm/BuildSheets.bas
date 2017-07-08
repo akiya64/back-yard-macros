@@ -360,7 +360,7 @@ Private Sub AdjustWidth(TargetSheet As Worksheet)
 Application.DisplayAlerts = False
 
 Dim WidthArr As Variant
-WidthArr = Array(14.75, 84.13, 4.25, 15.88, 14.88, 6.63)
+WidthArr = Array(19, 82, 4, 16, 14, 6)
 
 TargetSheet.Activate
 
