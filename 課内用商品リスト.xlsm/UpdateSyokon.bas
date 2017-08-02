@@ -9,12 +9,12 @@ Type Syokon
     
 End Type
 
-Sub SKUがJANを6ケタで置き換え()
+Sub SKUがJANを商魂6ケタで置き換え()
 
 '元のエクセルブック名、元シートの範囲は毎回指定のこと
 'イミディエイトで、Workbooks(1).nameでワークブック名が確認できる。
 Dim Rng As Range
-Set Rng = Workbooks("JANリスト.xlsx").Sheets(1).Range("A2:A50200")
+Set Rng = Workbooks("商品マスタA.xlsx").Sheets(1).Range("A2:A112378")
 
 Dim r As Range
 For Each r In Rng
@@ -26,22 +26,22 @@ For Each r In Rng
     'ToDo 5始まりコードは、先頭0を落とす
     
     sy.Code = r.Value
-    sy.Jan = r.Offset(0, 2)
+    sy.Jan = r.Offset(0, 3)
     
-    '9始まり、1始まり6ケタは飛ばす
-    If sy.Code Like "09#####" Or sy.Code Like "01#####" Then
+    '9始まり、1始まり6ケタは資材・什器のため飛ばす
+    If sy.Code Like "9#####" Or sy.Code Like "1#####" Then
         
-        GoTo continue
+        GoTo Continue
             
     End If
 
     Call UpdateJan(sy)
     
-continue:
+Continue:
 
 Next
 
-ThisWorkbook.Close SaveChanges:=True
+ThisWorkbook.Close savechanges:=True
 
 End Sub
 
@@ -51,7 +51,7 @@ Private Sub UpdateJan(Syokon As Syokon)
 Dim c As Range
 
 'A列の該当JANを探す
-With Workbooks("商品リスト.xlsm").Worksheets("商品情報").Columns(1)
+With Workbooks("発注用商品情報.xlsm").Worksheets("商品情報").Columns(1)
 
 '完全一致で
 Set c = .Find(what:=Syokon.Jan, LookIn:=xlValues, LookAt:=xlWhole)
@@ -75,12 +75,12 @@ Do
     
     'B列にハイフンがなく、6ケタでもなければ、6ケタで上書き
     If Not Sku = Syokon.Code And InStr(Sku, "-") < 1 Then
-         c.Offset(0, 1).Value = Syokon.Code
+         c.Offset(0, 1).Value = IIf(Len(Syokon.Code) = 5, "0" & Syokon.Code, Syokon.Code)
     End If
     
     'F列は全て上書き
     If KijunSku.Value <> Syokon.Code Then
-        KijunSku.Value = Syokon.Code
+        KijunSku.Value = IIf(Len(Syokon.Code) = 5, "0" & Syokon.Code, Syokon.Code)
     End If
     
     '次の検索をセット
@@ -93,17 +93,19 @@ End With
 
 End Sub
 
-Sub 社内マスターの仕入先に合わせる()
+Sub 商魂の仕入先に合わせる()
 
 Dim FinalRow As Long, i As Long
 FinalRow = Worksheets("商品情報").UsedRange.Rows.Count
 
-For i = 2 To FinalRow
-
+For i = 110000 To FinalRow
+    
     Call UpdateVendor(i)
 
 Next
 
+
+ThisWorkbook.Close savechanges:=True
 
 End Sub
 
@@ -115,7 +117,7 @@ CurrentVendor = Cells(Row, 4).Value
 Dim CurrentCode As String
 CurrentCode = Cells(Row, 2).Value
 
-'仕入先名が空なら、商品マスタに基づいた仕入先名を入れる
+'仕入先名が空なら、商品マスタ-仕入先コード-手配書作成「仕入先」の名称に基づいた仕入先名を入れる
 If CurrentVendor = "" Then
     Dim NewVendorName
     NewVendorName = GetVendorName(GetSyokonVendor(CurrentCode))
@@ -140,7 +142,7 @@ If SyokonVendorCode = "" Then Exit Sub
 
 '商品マスタの仕入先コードと一致するかチェック
 '不一致ならば、仕入先シートの名称で上書きする
-If CurrentVendorCode <> SyokonVendorCode Then
+If CurrentVendorCode <> "" And CurrentVendorCode <> SyokonVendorCode Then
     Cells(Row, 4).Value = GetVendorName(SyokonVendorCode)
 End If
 
@@ -156,13 +158,13 @@ End Function
 Private Function GetSyokonVendor(ByVal Code As String) As String
 On Error Resume Next
 
-GetSyokonVendor = WorksheetFunction.VLookup(Code, Workbooks("商品マスタ.xlsx").Worksheets(1).Range("A2:C11384"), 3, False)
+GetSyokonVendor = Workbooks("商品マスタA.xlsx").Worksheets(1).Range("A:A").Find(CDbl(Code)).Offset(0, 4).Value
 
 End Function
 
 Private Function GetVendorName(ByVal VendorCode As String) As String
 On Error Resume Next
 
-GetVendorName = WorksheetFunction.VLookup(VendorCode, Worksheets("仕入先").Range("AA2:AB490"), 2, False)
+GetVendorName = WorksheetFunction.VLookup(VendorCode, Worksheets("仕入先").Range("AA2:AB550"), 2, False)
 
 End Function

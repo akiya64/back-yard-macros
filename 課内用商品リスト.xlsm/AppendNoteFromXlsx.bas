@@ -3,11 +3,11 @@ Sub InsertCaution()
 
 '元のエクセルブック名、元シートの範囲は毎回指定のこと
 'イミディエイトで、Workbooks(1).nameでワークブック名が確認できる。
-Set Rng = Workbooks("発注ストップ分.xlsx").Sheets(1).Range("D2:D76")
+Set Rng = Workbooks("発注停止分.xlsx").Sheets(1).Range("D2:D76")
 
 '追記したい文字列を指定
 Dim AdditionalNote As String
-AdditionalNote = "発注ストップ"
+AdditionalNote = "ロケ無し在庫有 16年4月"
 
 For Each r In Rng
 
@@ -16,13 +16,13 @@ For Each r In Rng
     
     Dim c As Range
     
-    'B列を検索して、該当コードがあれば、仕入先列に追記する
-    With Workbooks("商品リスト.xlsm").Worksheets("商品情報").Columns(2)
+    'B列を検索して、該当六ケタがあれば、仕入先に追記する
+    With Workbooks("発注用商品情報.xlsm").Worksheets("商品情報").Columns(2)
     
         Set c = .Find(what:=Code, LookIn:=xlValues, LookAt:=xlWhole)
 
         If Not c Is Nothing Then
-           '最初のセルのアドレスを記録
+           '最初のセルのアドレスを覚える
            FirstAddress = c.Address
            
            '繰返し検索し、条件を満たすすべてのセルを検索する
