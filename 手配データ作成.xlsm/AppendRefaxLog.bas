@@ -2,6 +2,7 @@ Attribute VB_Name = "AppendRefaxLog"
 Option Explicit
 
 Sub AppendRefaxList()
+'FAX納期回答リストに本日の発注商品・発注保留を追記する
 
 'FAX納期回答リストを開く
 Dim RefaxBook As Workbook, RefaxSheet As Worksheet, WriteCell As Range

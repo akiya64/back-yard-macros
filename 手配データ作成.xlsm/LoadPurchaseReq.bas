@@ -7,9 +7,6 @@ Sub LoadAllPicking()
 '手配依頼チェック済のピッキングファイルを一括して読込
 '手配依頼として背景色が変えてある行をコピーします。
 
-Application.ScreenUpdating = False
-Application.DisplayAlerts = False
-
 'セラー分ピッキングファイル読み込み
 Dim PickingFiles As Variant, File As Variant
 

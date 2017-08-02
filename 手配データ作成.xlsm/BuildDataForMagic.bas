@@ -29,6 +29,7 @@ End Type
 
 Sub BuildPurcahseData()
 '発注数量決定シートを元に、ファイルを書き出す
+'「発注システム用データ出力」ボタンで呼び出される
 
 '各シートが空かチェック
 Dim Sh As Variant
@@ -120,6 +121,9 @@ End If
 
 ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
 ActiveWorkbook.Close
+
+'ファイル出力完了、このブックを保存
+ThisWorkbook.Save
 
 Application.DisplayAlerts = True
 
@@ -270,11 +274,5 @@ Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
     
     TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
     TargetSheet.Cells(WriteRow, 1).Resize(1, 9).Value = Record
-
-End Sub
-
-Sub test()
-
-Call AppendHoldPurWokbook(ActiveWorkbook)
 
 End Sub
