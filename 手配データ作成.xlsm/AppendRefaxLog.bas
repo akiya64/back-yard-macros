@@ -11,7 +11,8 @@ Set RefaxSheet = RefaxBook.Worksheets("納期リスト")
 
 RefaxSheet.Activate
 
-If Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value = Format(Date, "Mdd") Then
+'最終行の日付が当日以前かチェック
+If Not DateDiff("d", Date, Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value) < 0 Then
     RefaxBook.Close
     Exit Sub
 End If
@@ -22,7 +23,13 @@ Set WriteCell = Cells(Range("A1").CurrentRegion.Rows.Count, 1).Offset(1, 0)
 Dim DataCol As Range
 ThisWorkbook.Worksheets("発注商品リスト").Activate
 Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
-Set DataCol = Range(Cells(2, 1), Cells(2, 1).End(xlDown))
+
+If Range("A2").Value = "" Then
+    RefaxBook.Close SaveChanges:=True
+    Exit Sub
+Else
+    Set DataCol = Range(Cells(2, 1), Cells(2, 1).End(xlDown))
+End If
 
 'DataColレンジとWriteCellを右へオフセットしながらデータをコピーしていく。
 
@@ -63,6 +70,12 @@ DataCol.Offset(0, 7).Copy Destination:=WriteCell.Offset(0, 10) '商品名
 
 DataCol.Offset(0, 0).Copy
 WriteCell.Offset(0, 22).PasteSpecial Paste:=xlPasteValues   '保留理由
+
+On Error Resume Next
+    Application.Run RefaxBook.Name & "!一ヶ月以前転記"
+    Application.Run RefaxBook.Name & "!入荷日の算出式を入力"
+    Application.Run RefaxBook.Name & "!条件付き書式範囲修正"
+On Error GoTo 0
 
 RefaxBook.Close SaveChanges:=True
 

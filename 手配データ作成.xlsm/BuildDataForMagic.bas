@@ -107,8 +107,10 @@ ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
 
 'c保留へ追記してから閉じる
 Call AppendHoldPurWokbook(ActiveWorkbook)
-
 ActiveWorkbook.Close
+
+'返信FAXリストへ追記
+'Call AppendRefaxList
 
 'Magic入力用Excelファイルを保存
 Sheets(Array("Magic一括登録", "Magic手入力用")).Copy
@@ -188,14 +190,14 @@ Private Sub WriteMagicTxt(ByRef Purchase As Purchase)
                     )
     End With
     
-    Set TargetSheet = Worksheets("Magic一括登録")
-    WriteRow = TargetSheet.Range("A1").SpecialCells(xlLastCell).Row + 1
-    
-    With TargetSheet
+    With Worksheets("Magic一括登録")
+        
+        WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
+        
         .Cells(WriteRow, 2).NumberFormatLocal = String(9, "0")
         .Cells(WriteRow, 3).NumberFormatLocal = String(8, "0")
     
-        .Cells(WriteRow, 1).Resize(1, 5).Value = Record
+        .Cells(WriteRow, 1).Resize(1, UBound(Record) + 1).Value = Record
     End With
     
 End Sub
@@ -218,11 +220,13 @@ Private Sub WriteMagicManualInput(ByRef Purchase As Purchase)
                     )
     End With
     
-    Set TargetSheet = Worksheets("Magic手入力用")
-    WriteRow = TargetSheet.Range("A1").SpecialCells(xlLastCell).Row + 1
+    With Worksheets("Magic手入力用")
+        WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
     
-    TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
-    TargetSheet.Cells(WriteRow, 1).Resize(1, 9).Value = Record
+        .Cells(WriteRow, 4).NumberFormatLocal = "@"
+        
+        .Cells(WriteRow, 1).Resize(1, UBound(Record) + 1).Value = Record
+    End With
     
 End Sub
 
@@ -236,18 +240,18 @@ Private Sub WriteHoldList(ByRef Purchase As Purchase)
                     .WarehouseNumber, _
                     .VendorName, _
                     .RequireMallCount, _
-                    Format(Date, "Mdd"), _
+                    Date, _
                     .Code, _
                     .RequireQuantity, _
-                    .ProductName _
-                    )
+                    .ProductName)
     End With
     
-    Set TargetSheet = Worksheets("保留")
-    WriteRow = TargetSheet.Range("A1").SpecialCells(xlLastCell).Row + 1
+    With Worksheets("保留")
+        WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
     
-    TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
-    TargetSheet.Cells(WriteRow, 1).Resize(1, 8).Value = Record
+        .Cells(WriteRow, 5).NumberFormatLocal = "Mdd"
+        .Cells(WriteRow, 1).Resize(1, UBound(Record) + 1).Value = Record
+    End With
     
 End Sub
 
@@ -260,7 +264,7 @@ Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
                     .WarehouseNumber, _
                     .VendorName, _
                     .RequireMallCount, _
-                    Format(Date, "Mdd"), _
+                    Date, _
                     .Code, _
                     .Code, _
                     .ProductName, _
@@ -269,10 +273,12 @@ Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
                     )
     End With
     
-    Set TargetSheet = Worksheets("発注商品リスト")
-    WriteRow = TargetSheet.Range("A1").SpecialCells(xlLastCell).Row + 1
+    With Worksheets("発注商品リスト")
+        WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
     
-    TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
-    TargetSheet.Cells(WriteRow, 1).Resize(1, 9).Value = Record
-
+        .Cells(WriteRow, 4).NumberFormatLocal = "Mdd"
+        
+        .Cells(WriteRow, 1).Resize(1, UBound(Record) + 1).Value = Record
+    End With
+    
 End Sub

@@ -24,7 +24,7 @@ Sub CheckNonArrival()
 'On Error Resume Next
 
 Dim CodeRange As Range, r As Range
-Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown))
+Set CodeRange = Worksheets("手配数量入力シート").Range(Cells(2, 7), Cells(2, 7).End(xlDown))
 
 For Each r In CodeRange
     
@@ -37,8 +37,13 @@ For Each r In CodeRange
     LastPur = InitPur
     LastPur = FetchRecentPurchase(Code)
     
-    If LastPur.NonArrivalQty > 0 Then
-        Cells(r.Row, 2).Value = Cells(r.Row, 2).Value & IIf(Cells(r.Row, 2).Value = "", "", " ") & "未入荷" & LastPur.NonArrivalQty & "個 " & Format(LastPur.PurchaseDate, "M月d日") & "手配分"
+    If LastPur.NonArrivalQty > 1 Then
+        
+        Dim CautionCell As Range
+        Set CautionCell = r.Offset(0, -5)
+        
+        CautionCell.Value = CautionCell.Value & IIf(CautionCell.Value = "", "", " ") & "未入荷" & LastPur.NonArrivalQty & "個 " & Format(LastPur.PurchaseDate, "M月d日") & "手配分"
+    
     End If
 
 Continue:
@@ -100,7 +105,7 @@ Private Sub untilReady(objIE As Object, Optional ByVal WaitTime As Integer = 20)
         End If
     Loop
     
-    'ローディング画面の表示後に、詳細データが動的に再描画されるので1秒待機
+    'ローディング画面の表示後に、詳細データが動的に再描画されるので2秒待機
     Dim WaitEnd As Date
     WaitEnd = DateAdd("S", 2, Now())
     Do While Now() < WaitEnd

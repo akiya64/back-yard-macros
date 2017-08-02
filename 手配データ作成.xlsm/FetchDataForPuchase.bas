@@ -67,6 +67,8 @@ End With
 ActiveWindow.ScrollColumn = 1
 ActiveWindow.ScrollRow = 1
 
+ThisWorkbook.Save
+
 MsgBox Prompt:="手配数量入力シート、データ入力完了" & vbLf & "保留チェック、手配数量の修正を行ってください。", Buttons:=vbInformation
 
 End Sub
@@ -89,14 +91,14 @@ Dim CodeRange As Range, r As Range
 Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown))
 
 For Each r In CodeRange
-    Dim sql As String, Code As String
+    Dim Sql As String, Code As String
     Code = r.Value
         
-    sql = "SELECT 商品コード, 取扱区分, ロット数, 仕入原価, 仕入先, 仕入先マスタ.仕入先略称, 仕入先マスタ.発注区分 " & _
+    Sql = "SELECT 商品コード, 取扱区分, ロット数, 仕入原価, 仕入先, 仕入先マスタ.仕入先略称, 仕入先マスタ.発注区分 " & _
           "FROM 商品マスタ JOIN 仕入先マスタ ON 商品マスタ.仕入先 = 仕入先マスタ.仕入先コード " & _
           "WHERE 商品コード = " & Code & "OR JANコード = '" & Code & "'"
     
-    Set DbRs = DbCnn.Execute(sql)
+    Set DbRs = DbCnn.Execute(Sql)
 
     If Not DbRs.EOF Then
         Cells(r.Row, 3).Value = DbRs("ロット数")

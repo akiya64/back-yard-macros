@@ -31,6 +31,7 @@ For Each File In PickingFiles
 Next
 
 Call ApendSpToPurchseReq
+Call VerifySyokonRegist
 
 End Sub
 
@@ -83,7 +84,6 @@ End With
 
 ActiveWorkbook.Close SaveChanges:=False
 
-
 End Sub
 Private Sub LoadPoFile(ByVal FileName As String)
 'Amazon卸のピッキングファイル読み込み
@@ -128,7 +128,9 @@ ActiveWorkbook.Close SaveChanges:=False
 
 End Sub
 
-Sub ApendSpToPurchseReq()
+Private Sub ApendSpToPurchseReq()
+'手入力分を卸分シート、セラー分シートへ振り分けてコピー
+'180番、187番で商品別に数量を合算するた
 
 With Worksheets("手入力分")
 
@@ -167,4 +169,50 @@ For Each r In CodeRange
 Next
 
 End Sub
+
+Private Sub VerifySyokonRegist()
+'DBに接続して最終行から上へ調べていく
+
+'接続のためのオブジェクトを定義、DB接続設定をセット
+Dim DbCnn As New ADODB.Connection
+Dim DbCmd  As New ADODB.Command
+Dim DbRs As New ADODB.Recordset
+
+DbCnn.ConnectionTimeout = 0
+DbCnn.Open "PROVIDER=SQLOLEDB;Server=Server02;Database=ITOSQL_REP;UID=sa;PWD=;"
+DbCmd.CommandTimeout = 180
+Set DbCmd.ActiveConnection = DbCnn
+
+With PurchaseReqSeller
+    Dim EndRow As Long
+    EndRow = PurchaseReqSeller.Range("A1").End(xlDown).Row
+    
+    Dim i As Long
+    For i = EndRow To 2 Step -1
+        
+        If .Cells(i, 1).Value <> "SP" Then Exit Sub
+        
+        Dim Code As String
+        Code = .Cells(i, 3).Value
+        
+        If Not .Cells(i, 3).Value Like String(13, "#") Then GoTo Continue
+    
+        'クエリで6ケタ取得
+        Dim Sql As String
+            
+        Sql = "SELECT 商品コード FROM 商品マスタ WHERE JANコード = '" & Code & "'"
+        
+        Set DbRs = DbCnn.Execute(Sql)
+    
+        If Not DbRs.EOF Then
+            .Cells(i, 3).Value = CStr(DbRs("商品コード"))
+        End If
+    
+Continue:
+    Next
+
+End With
+
+End Sub
+
 
