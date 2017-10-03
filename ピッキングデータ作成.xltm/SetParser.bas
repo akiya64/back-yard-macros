@@ -225,7 +225,7 @@ Reg.Pattern = "[a-zA-Z]"
 Code = Reg.Replace(r.Value, "")
 
 Dim SeparatedCode As Variant
-SeparatedCode = Split(Code, "-", 2)
+SeparatedCode = Split(Code, "-")
 
 If SeparatedCode(0) Like String(5, "#") Then
     FixedCode = "0" & SeparatedCode(0)

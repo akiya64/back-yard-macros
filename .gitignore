@@ -1,3 +1,6 @@
 *~
-*swp
+*.swp
+*.frx
 /.vscode
+
+区分.txt

@@ -267,7 +267,7 @@ With NoEntryItemSheet
     
     If MallName = "Amazon" Then
         .Columns("G").Insert
-        .Range("G1").Value = "送料"
+        .Range("G2").Value = "送料"
         .Range(Cells(2, 7), Cells(.UsedRange.Rows.Count, 7)).Value = 0
     End If
     
@@ -318,7 +318,7 @@ End If
 If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" And Main.IsSecondPicking = False Then
     
     Dim IsAR As Integer
-    IsAR = MsgBox(prompt:="本日分のファイルが既に存在します。" & vbLf & "あす楽・プライム分として保存しますか？", _
+    IsAR = MsgBox(prompt:="本日分のファイルが既に存在します。" & vbLf & "あす楽・プライム分として保存しますか？" & vbLf & "「いいえ」を選ぶと作成時刻を含んだファイル名で保存します。", _
             Buttons:=vbExclamation + vbYesNo)
     
     'あす楽プライムモードのフラグを立てる

@@ -8,7 +8,7 @@ Arr = Array("廃番", "不可", "不明")
 'JANで、不可事由が空欄をまずフィルター
 With Worksheets("商品情報").Range("A1").CurrentRegion
     '.AutoFilter Field:=2, Criteria1:="???????*"
-    .AutoFilter Field:=35, Criteria1:="="
+    .AutoFilter Field:=16, Criteria1:="="
 End With
 
 '設定した文言それぞれで、フィルターして手配不可事由へ記入を実行
@@ -29,7 +29,7 @@ Attribute InputReason.VB_ProcData.VB_Invoke_Func = " \n14"
 Worksheets("商品情報").Range("A1").CurrentRegion.AutoFilter Field:=4, Criteria1:="*" & Str & "*"
 
 Dim r As Range, TargetRange As Range
-Set TargetRange = Intersect(Range("A1").CurrentRegion.SpecialCells(xlCellTypeVisible), Range("AI2:AI300000"))
+Set TargetRange = Intersect(Range("A1").CurrentRegion.SpecialCells(xlCellTypeVisible), Range("P2:P300000"))
 
 If TargetRange Is Nothing Then Exit Sub
 

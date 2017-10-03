@@ -6,6 +6,8 @@ Type Syokon
     Code As String
     Jan As String
     VendorCode As String
+    ProductName As String
+    UnitCost As Double
     
 End Type
 
@@ -14,7 +16,7 @@ Sub SKUがJANを商魂6ケタで置き換え()
 '元のエクセルブック名、元シートの範囲は毎回指定のこと
 'イミディエイトで、Workbooks(1).nameでワークブック名が確認できる。
 Dim Rng As Range
-Set Rng = Workbooks("商品マスタA.xlsx").Sheets(1).Range("A2:A112378")
+Set Rng = Workbooks("dbo_商品マスタ.xlsx").Sheets(2).Range("A2:A89953")
 
 Dim r As Range
 For Each r In Rng
@@ -22,11 +24,11 @@ For Each r In Rng
     'Debug.Assert r.Row < 1000
 
     Dim sy As Syokon
-    
-    'ToDo 5始まりコードは、先頭0を落とす
-    
+        
     sy.Code = r.Value
-    sy.Jan = r.Offset(0, 3)
+    sy.Jan = r.Offset(0, 5).Value
+    sy.ProductName = Trim(r.Offset(0, 1).Value) & " " & Trim(r.Offset(0, 2).Value)
+    sy.VendorCode = r.Offset(0, 6).Value
     
     '9始まり、1始まり6ケタは資材・什器のため飛ばす
     If sy.Code Like "9#####" Or sy.Code Like "1#####" Then
@@ -56,7 +58,19 @@ With Workbooks("発注用商品情報.xlsm").Worksheets("商品情報").Columns(1)
 '完全一致で
 Set c = .Find(what:=Syokon.Jan, LookIn:=xlValues, LookAt:=xlWhole)
 
-If c Is Nothing Then Exit Sub
+If c Is Nothing Then
+    '6ケタ、JAN、商品名、原価、仕入先コードを追加
+    Dim WriteRow As Long
+    WriteRow = Worksheets("商品情報").UsedRange.Rows.Count + 1
+    Cells(WriteRow, 1) = Syokon.Jan
+    Cells(WriteRow, 2) = Syokon.Code
+    Cells(WriteRow, 3) = Syokon.ProductName
+    Cells(WriteRow, 13) = Syokon.VendorCode
+    
+    Exit Sub
+End If
+
+
 If Cells(c.Row, 2).Value Like "######" Then Exit Sub
 '最初のセルのアドレスを控える
 Dim FirstAddress As String
@@ -69,18 +83,9 @@ Do
     Set SkuCell = c.Offset(0, 1)
     Sku = SkuCell.Value
     
-    'あえてローマ字変数にする、F列見出しの元の意図が不明なので
-    Dim KijunSku As Range
-    Set KijunSku = Cells(c.Row, 6)
-    
     'B列にハイフンがなく、6ケタでもなければ、6ケタで上書き
     If Not Sku = Syokon.Code And InStr(Sku, "-") < 1 Then
          c.Offset(0, 1).Value = IIf(Len(Syokon.Code) = 5, "0" & Syokon.Code, Syokon.Code)
-    End If
-    
-    'F列は全て上書き
-    If KijunSku.Value <> Syokon.Code Then
-        KijunSku.Value = IIf(Len(Syokon.Code) = 5, "0" & Syokon.Code, Syokon.Code)
     End If
     
     '次の検索をセット

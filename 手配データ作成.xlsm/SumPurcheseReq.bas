@@ -15,7 +15,7 @@ Range("A1").CurrentRegion.RemoveDuplicates Columns:=7, Header:=xlYes
 '手配件数の合計略号と、手配依頼数の合計を入れる
 Dim r As Range, CodeRange As Range
 
-Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown))
+Set CodeRange = Range(Cells(2, 7), Cells(1, 7).End(xlDown))
 
 For Each r In CodeRange
     r.Offset(0, -1).Value = CountMallOrder(r.Value)

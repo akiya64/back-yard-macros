@@ -3,11 +3,11 @@ Sub InsertCaution()
 
 '元のエクセルブック名、元シートの範囲は毎回指定のこと
 'イミディエイトで、Workbooks(1).nameでワークブック名が確認できる。
-Set Rng = Workbooks("発注停止分.xlsx").Sheets(1).Range("D2:D76")
+Set Rng = Workbooks("藤井電工発注ストップ分.xlsx").Sheets(1).Range("D2:D76")
 
 '追記したい文字列を指定
 Dim AdditionalNote As String
-AdditionalNote = "ロケ無し在庫有 16年4月"
+AdditionalNote = "卸分在庫有 16年4月"
 
 For Each r In Rng
 

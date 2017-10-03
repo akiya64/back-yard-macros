@@ -76,7 +76,7 @@ Reg.Pattern = ",|\!|\.|&"
 Name = Reg.Replace(Name, "")
 
 
-Reg.Pattern = "^((≪|【).*?(】|≫))*"
+Reg.Pattern = "^((≪|【|\().*?(】|≫|\)))*"
 Name = Reg.Replace(Name, "")
 
 ValidateName = Name
@@ -91,27 +91,27 @@ Dim FixedCode As String
 'アルファベットを削除
 Dim Reg As New RegExp
 Reg.Global = True
-Reg.Pattern = "[a-zA-Z]"
-Code = Reg.Replace(Code, "")
+Reg.Pattern = "[a-zA-Z\s]"
+FixedCode = Reg.Replace(Code, "")
 
 '6ケタならそのまま入れる
 If Code Like String(6, "#") Then
-    FixedCode = Code
-
+    FixedCode = FixedCode
+    
 '数字5ケタは頭にゼロを追記
 ElseIf Code Like String(5, "#") Then
     
-    FixedCode = "0" & Code
+    FixedCode = "0" & FixedCode
 
 'JANもそのまま入れる
 ElseIf Code Like String(13, "#") Then
     
-    FixedCode = Code
+    FixedCode = FixedCode
     
 '数字7ケタ以上12ケタなら、13ケタになるよう先頭に0を追記
 ElseIf Code Like (String(7, "#") & "*") And Len(Code) <= 12 Then
 
-    FixedCode = String(13 - Len(Code), "0") & Code
+    FixedCode = String(13 - Len(Code), "0") & FixedCode
     
 Else
 'どの条件にも一致しない場合でも、値は返す
@@ -177,3 +177,17 @@ End If
 
 End Sub
 
+Sub テスト_セール文言削除()
+
+Dim OrderedProduct As String, ValidName As String
+OrderedProduct = "(期間限定 ポイント10倍)38735操法用ゼッケン3 オレンジ"
+
+ValidName = ValidateName(OrderedProduct)
+
+If ValidName Like "*ポイント#*倍*" Then
+    Debug.Print "RED:Did not cut salecopy"
+Else
+    Debug.Print "Green:Success cut SaleCopy"
+End If
+
+End Sub

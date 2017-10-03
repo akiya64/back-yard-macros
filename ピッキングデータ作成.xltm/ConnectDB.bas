@@ -72,6 +72,9 @@ Cells(Target_RowBase, Target_ColBase).Select
 For Loop_Count = Target_RowBase To Target_RowEnd
     Target_Code = Cells(Loop_Count, Target_ColBase).Value
     
+    On Error Resume Next
+    '商魂DBとの照合に失敗しても処理は続行
+    
     'コード判別（インストア・JAN）
     If Len(Target_Code) <= 6 Then
         SQL_W1 = "SELECT 商品マスタ.商品コード, 商品マスタ.JANコード, Sum(在庫マスタ.現在庫数) AS 現在庫数計 "
@@ -108,6 +111,8 @@ For Loop_Count = Target_RowBase To Target_RowEnd
         
         Cells(Loop_Count, OutPut_ColBase + 3).Value = Loc_Text
     End If
+    
+    On Error GoTo 0
     
 Next Loop_Count
     

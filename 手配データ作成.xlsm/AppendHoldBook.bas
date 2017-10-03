@@ -4,7 +4,9 @@ Option Explicit
 Sub AppendHoldPurWokbook(ByVal HoldBook As Workbook)
 '発注保留リストに、本日の手配保留商品を追記
 
-With Worksheets(1)
+If HoldBook.Worksheets(1).Range("A2").Value = "" Then Exit Sub
+
+With HoldBook.Worksheets(1)
     .Activate
 
     '列数を合わせる

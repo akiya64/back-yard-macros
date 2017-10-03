@@ -26,3 +26,24 @@ If Not Cell.Value Like String(13, "#") And Cell.Value <> "" Then
 End If
 
 End Sub
+Sub FillJan()
+
+For i = 2 To 182338
+
+If IsEmpty(Cells(i, 1).Value) Then
+
+    Sku = Cells(i, 2).Value
+
+    If Len(Sku) = 13 And Not Sku Like "77777*" And Not Sku Like "88888*" Then
+    
+        Cells(i, 1).NumberFormatLocal = "@"
+        Cells(i, 1).Value = Sku
+    
+    End If
+
+End If
+
+Next
+
+End Sub
+

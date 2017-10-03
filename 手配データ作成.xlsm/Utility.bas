@@ -15,12 +15,12 @@ End If
 
 End Sub
 
-Function FetchWorkBook(path As String) As Workbook
+Function FetchWorkBook(Path As String) As Workbook
 
 '引数で渡されたパスのブックを開きます。引数のブックを開いていれば、そのブックを戻り値にします。
 
 Dim WorkBookName As String
-WorkBookName = Dir(path)
+WorkBookName = Dir(Path)
 
 Dim wb As Workbook
 
@@ -34,7 +34,7 @@ For Each wb In Workbooks
 
 Next
 
-Set wb = Workbooks.Open(path)
+Set wb = Workbooks.Open(Path)
 
 ret:
 Set FetchWorkBook = wb

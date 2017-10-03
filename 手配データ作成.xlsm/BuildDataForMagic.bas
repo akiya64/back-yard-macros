@@ -1,6 +1,8 @@
 Attribute VB_Name = "BuildDataForMagic"
 Option Explicit
-Const OPERATOR_CODE As Integer = 329
+Const DEFAULT_OPERATOR_CODE As Integer = 329
+
+Dim CurrentOperator As Integer
 
 Type Purchase
 '手配数量入力シート1行分に相当するユーザー定義型
@@ -37,6 +39,17 @@ For Each Sh In Array(Worksheets("Magic一括登録"), Worksheets("Magic手入力用"), W
     Call PrepareSheet(Sh)
 Next
 
+'担当者コード欄が空か数字3ケタでなければ、担当者コード329でデータ作成
+Dim InputOpCode As Variant
+InputOpCode = InputSp.Range("G3").Value
+
+If Not InputOpCode Like "###" Then
+    MsgBox Prompt:="手入力シートで設定された担当者コードの形式が合いません。" & vbCrLf & "担当者コード329でデータ作成します。", _
+            Buttons:=vbExclamation
+Else
+    CurrentOperator = InputOpCode
+End If
+
 'データ出力用のシートに、1行ずつコピー
 Worksheets("手配数量入力シート").Activate
 
@@ -66,21 +79,8 @@ Worksheets("Magic一括登録").Columns("A:E").AutoFit
 Worksheets("Magic手入力用").Columns("A:I").AutoFit
 
 '出力用シートをファイルとして保存していく
-
-'Magic一括登録シートを新規ブックにコピー、拡張子.txt、カンマ区切り、ヘッダー無しで保存
-Worksheets("Magic一括登録").Copy
-ActiveSheet.Rows(1).Delete
-
-Dim FileName As String
-FileName = "\Magic登録用" & Format(Date, "MMdd") & ".txt"
-
-If Dir(ThisWorkbook.path & FileName) <> "" Then
-    FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
-End If
-
-Application.DisplayAlerts = False
-    ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName, FileFormat:=xlCSV
-    ActiveWorkbook.Close
+'発注システム用テキストファイルを出力
+Call PutTxtFileForMagic
 
 'バックアップを保存
 ThisWorkbook.Worksheets("発注商品リスト").Copy
@@ -97,31 +97,29 @@ ActiveWorkbook.Close
 '保留を保存
 Worksheets("保留").Copy
 
+Dim FileName As String
 FileName = "\保留" & Format(Date, "MMdd") & ".xlsx"
 
-If Dir(ThisWorkbook.path & FileName) <> "" Then
+If Dir(ThisWorkbook.Path & FileName) <> "" Then
     FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
 End If
 
-ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
+ActiveWorkbook.SaveAs FileName:=ThisWorkbook.Path & FileName
 
 'c保留へ追記してから閉じる
 Call AppendHoldPurWokbook(ActiveWorkbook)
 ActiveWorkbook.Close
-
-'返信FAXリストへ追記
-'Call AppendRefaxList
 
 'Magic入力用Excelファイルを保存
 Sheets(Array("Magic一括登録", "Magic手入力用")).Copy
 
 FileName = "\Magic入力データ" & Format(Date, "MMdd") & ".xlsx"
 
-If Dir(ThisWorkbook.path & FileName) <> "" Then
+If Dir(ThisWorkbook.Path & FileName) <> "" Then
     FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
 End If
 
-ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
+ActiveWorkbook.SaveAs FileName:=ThisWorkbook.Path & FileName
 ActiveWorkbook.Close
 
 'ファイル出力完了、このブックを保存
@@ -129,7 +127,12 @@ ThisWorkbook.Save
 
 Application.DisplayAlerts = True
 
-MsgBox Prompt:="ファイル保存が完了しました。", Buttons:=vbInformation
+MsgBox Prompt:="ファイル保存が完了しました。" & vbLf & "続けて返信FAXリスト転記を行います。", Buttons:=vbInformation
+
+'返信FAXリストへ追記
+Call AppendRefaxList
+
+MsgBox Prompt:="処理が完了しました。", Buttons:=vbInformation
 
 End Sub
 
@@ -186,7 +189,7 @@ Private Sub WriteMagicTxt(ByRef Purchase As Purchase)
                     .Code, _
                     .PurchaseQuantity, _
                     .IsPickup, _
-                    OPERATOR_CODE _
+                    CurrentOperator _
                     )
     End With
     
@@ -216,7 +219,7 @@ Private Sub WriteMagicManualInput(ByRef Purchase As Purchase)
                     .PurchaseQuantity, _
                     .UnitCost, _
                     .IsPickup, _
-                    OPERATOR_CODE _
+                    CurrentOperator _
                     )
     End With
     
@@ -266,9 +269,7 @@ Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
                     .RequireMallCount, _
                     Date, _
                     .Code, _
-                    .Code, _
                     .ProductName, _
-                    .Code, _
                     .PurchaseQuantity _
                     )
     End With
@@ -282,3 +283,24 @@ Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
     End With
     
 End Sub
+
+Sub PutTxtFileForMagic()
+
+'Magic一括登録シートを新規ブックにコピー、拡張子.txt、カンマ区切り、ヘッダー無しで保存
+
+Worksheets("Magic一括登録").Copy
+ActiveSheet.Rows(1).Delete
+
+Dim FileName As String
+FileName = "\Magic登録用" & Format(Date, "MMdd") & ".txt"
+
+If Dir(ThisWorkbook.Path & FileName) <> "" Then
+    FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
+End If
+
+Application.DisplayAlerts = False
+    ActiveWorkbook.SaveAs FileName:=ThisWorkbook.Path & FileName, FileFormat:=xlCSV
+    ActiveWorkbook.Close
+
+End Sub
+

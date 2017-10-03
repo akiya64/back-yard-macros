@@ -1,9 +1,12 @@
 Attribute VB_Name = "FetchDataForPuchase"
 Option Explicit
 
-Sub CreateQuantitySheet()
+Const PICKING_FOLDER As String = "\\server02\¤•i•”\ƒlƒbƒg”Ì”„ŠÖ˜A\ƒsƒbƒLƒ“ƒO\"
+
+Sub CreateQuantitySheet(Optional ByRef SelectFolder As Integer)
 'ƒsƒbƒLƒ“ƒOƒV[ƒg‚©‚çè”zˆË—Š•ª‚ğ“Ç‚İ‚ñ‚ÅA¤•i•Ê‚ÉWŒvAd“üæƒf[ƒ^‚È‚Ç‚ğ¤°‚©‚ç“Ç
-'uè”z”“ü—ÍƒV[ƒgì¬vƒ{ƒ^ƒ“‚ÅŒÄ‚Ño‚³‚ê‚é
+'uè”z”“ü—ÍƒV[ƒgì¬vƒ{ƒ^ƒ“‚ÅŒÄ‚Ño‚³‚ê‚éAuƒtƒHƒ‹ƒ_w’è‚µ‚Äè”z”“ü—ÍƒV[ƒgì¬v‚Íˆø” 1 ‚ª“n‚³‚ê‚éB
+'SelectFolderˆø”‚ª1‚È‚çAƒtƒHƒ‹ƒ_w’è‚µ‚Ä‚Ìƒtƒ@ƒCƒ‹“Ç‚İ‚İ‚É‚È‚è‚Ü‚·B
 
 Application.ScreenUpdating = False
 Application.DisplayAlerts = False
@@ -14,10 +17,32 @@ For Each Sh In Array(Worksheets("ƒZƒ‰[•ª"), Worksheets("‰µ•ª"), Worksheets("è”
     Call PrepareSheet(Sh)
 Next
 
-'ƒAƒ}ƒ]ƒ“EŠy“VEƒ„ƒt[‚ÌŠe’I‚È‚µƒsƒbƒLƒ“ƒOƒV[ƒgAƒAƒ}ƒ]ƒ“‰µ‚Ìè”zˆË—Š“Ç
-Call LoadPurchaseReq.LoadAllPicking
+'ƒsƒbƒLƒ“ƒOƒtƒ@ƒCƒ‹‚Ì‚ ‚éƒtƒHƒ‹ƒ_[ƒpƒX‚Ìw’è
+Dim TargetFolder As String
 
-ThisWorkbook.SaveAs FileName:=ThisWorkbook.path & "\" & "è”zƒf[ƒ^" & Format(Date, "MMdd") & ".xlsm"
+If SelectFolder = 1 Then
+    
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        
+        If .Show = True Then
+            TargetFolder = .SelectedItems(1)
+        Else
+            MsgBox Prompt:="ƒtƒHƒ‹ƒ_w’è‚ªƒLƒƒƒ“ƒZƒ‹‚³‚ê‚Ü‚µ‚½B" & vbLf & "ƒ}ƒNƒ‚ğI—¹‚µ‚Ü‚·B"
+            Exit Sub
+        End If
+    
+    End With
+    
+Else
+    
+    TargetFolder = PICKING_FOLDER
+
+End If
+
+'ƒAƒ}ƒ]ƒ“EŠy“VEƒ„ƒt[‚ÌŠe’I‚È‚µƒsƒbƒLƒ“ƒOƒV[ƒgAƒAƒ}ƒ]ƒ“‰µ‚Ìè”zˆË—Š“Ç
+Call LoadPurchaseReq.LoadAllPicking(TargetFolder)
+
+ThisWorkbook.SaveAs FileName:=ThisWorkbook.Path & "\" & "è”zƒf[ƒ^" & Format(Date, "MMdd") & ".xlsm"
 
 Worksheets("è”z”—Ê“ü—ÍƒV[ƒg").Activate
 
@@ -94,6 +119,8 @@ For Each r In CodeRange
     Dim Sql As String, Code As String
     Code = r.Value
         
+    If Not (Code Like String(6, "#") Or Code Like String(13, "#")) Then GoTo Continue
+        
     Sql = "SELECT ¤•iƒR[ƒh, æˆµ‹æ•ª, ƒƒbƒg”, d“üŒ´‰¿, d“üæ, d“üæƒ}ƒXƒ^.d“üæ—ªÌ, d“üæƒ}ƒXƒ^.”­’‹æ•ª " & _
           "FROM ¤•iƒ}ƒXƒ^ JOIN d“üæƒ}ƒXƒ^ ON ¤•iƒ}ƒXƒ^.d“üæ = d“üæƒ}ƒXƒ^.d“üæƒR[ƒh " & _
           "WHERE ¤•iƒR[ƒh = " & Code & "OR JANƒR[ƒh = '" & Code & "'"
@@ -101,20 +128,17 @@ For Each r In CodeRange
     Set DbRs = DbCnn.Execute(Sql)
 
     If Not DbRs.EOF Then
+    
         Cells(r.Row, 3).Value = DbRs("ƒƒbƒg”")
         Cells(r.Row, 4).Value = DbRs("d“üæ")
         Cells(r.Row, 5).Value = DbRs("d“üæ—ªÌ")
         Cells(r.Row, 10).Value = DbRs("d“üŒ´‰¿")
         Cells(r.Row, 2).Value = GetKubunLabel(DbRs("æˆµ‹æ•ª"))
         Cells(r.Row, 11).Value = DbRs("”­’‹æ•ª")
-        
-        'JANó’•ª‚Ì¤•iƒR[ƒh’uŠ·Aå‚ÉAmazon‰µ—p
-        If Len(Code) > 6 Then
-            r.NumberFormatLocal = "@"
-            r.Value = IIf(Len(DbRs("¤•iƒR[ƒh")) = 5, "0" & DbRs("¤•iƒR[ƒh"), DbRs("¤•iƒR[ƒh"))
-        End If
     
     End If
+    
+Continue:
 
 Next
 
@@ -160,16 +184,16 @@ For Each r In CodeRange
         End If
             
     'è”z’ˆÓAƒ[ƒJ[ƒƒbƒgAd“üæ–¼
-    Cells(r.Row, 2).Value = Cells(r.Row, 2).Value & DataSheet.Cells(HitRow, 35).Value 'è”z’ˆÓ
+    Cells(r.Row, 2).Value = Cells(r.Row, 2).Value & DataSheet.Cells(HitRow, 11).Value 'è”z’ˆÓ
     Cells(r.Row, 12).Value = DataSheet.Cells(HitRow, 5).Value '”­’—p¤•iî•ñ‚Ìƒƒbƒg”
     Cells(r.Row, 13).Value = DataSheet.Cells(HitRow, 4).Value 'd“üæ–¼
     
     'd“üæƒR[ƒhAŒ´‰¿Ad“üæ–¼‚Í6ƒPƒ^‚É‚È‚¢‚Ì‚İ“ü‚ê‚é
     If IsEmpty(Cells(r.Row, 4).Value) Then
     
-        Cells(r.Row, 4).Value = DataSheet.Cells(HitRow, 32).Value 'd“üæƒR[ƒh
+        Cells(r.Row, 4).Value = DataSheet.Cells(HitRow, 8).Value 'd“üæƒR[ƒh
         Cells(r.Row, 5).Value = DataSheet.Cells(HitRow, 4).Value 'd“üæ–¼
-        Cells(r.Row, 10).Value = DataSheet.Cells(HitRow, 13).Value 'Œ´‰¿
+        Cells(r.Row, 10).Value = DataSheet.Cells(HitRow, 6).Value 'Œ´‰¿
 
     End If
 
