@@ -1,0 +1,91 @@
+@startuml order_management
+
+skinparam monochrome true
+
+title 取り寄せ状況 管理
+
+Partition "梱包室" {
+    "クロスモール受注データ" --> "棚有り棚なし分離"
+    --> "棚なし提出データ"
+    --> "手配依頼"
+    
+    note right
+        手配依頼はピッキングデータを使うので、
+        Amazon：クロスモールの受注番号
+        楽天、ヤフー：モール注番あり
+    end note
+
+    "クロスモール受注データ" --> "受注データベース アップロード"
+
+}
+
+Partition "EC課データベース" { 
+    "受注データベース アップロード" --> "受注ベーステーブル"
+}
+
+
+
+
+Partition "管理部" {
+
+    "入荷検品" -right-> "仕入計上"
+
+}
+
+Partition "第三倉庫"
+    "手配依頼" --> "発注データ作成"
+    
+    note left
+        手配した注文番号のフラグをUpdateする
+    end note
+
+}
+
+Partition "商魂" {
+    "発注データ作成" --> "発注登録"
+    note left
+        商品別に数量集計するため、
+        各モール別の注文番号は消える
+    end note
+
+
+    "仕入計上" --> "本日の入荷"
+}
+
+
+Partition "EC課データベース" { 
+
+    "受注ベーステーブル" --> "受注チェックリスト"
+
+    "発注データ作成" --> "受注ベーステーブル"
+    note left
+        取寄ステータスフラグのフィールドを追加する
+        フィールド
+            受注番号＝クロスモール発番の番号
+            受注明細＝各モールの注番
+    end note
+
+}
+
+"本日の入荷" --> "HTMLパース ＆ ChatBot"
+
+"HTMLパース ＆ ChatBot" --> "受注ベーステーブル"
+--> "HTMLパース ＆ ChatBot"
+note left
+    取り寄せステータス確認
+end note
+
+"HTMLパース ＆ ChatBot" --> "ChatWork"
+
+note left
+    注文番号と商品入荷を一定間隔でAPIからポスト
+end note
+
+Partition SLIMS {
+    "棚有り棚なし分離" --> "棚有り提出データ"
+    --> "ピッキングデータ"
+}
+
+
+
+@enduml
